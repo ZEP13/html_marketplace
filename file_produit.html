@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <title>File produit</title>
+    <style>
+      /* Initial state of the navbar */
+      #navbar {
+        position: fixed; /* Position fixe pour glisser par-dessus le contenu */
+        z-index: 100; /* S'assurer qu'il est au-dessus des autres éléments */
+        width: 250px;
+        height: 100%; /* Prend toute la hauteur de la page */
+        top: 0;
+        left: 0;
+        transition: width 0.3s ease; /* Transition pour l'ouverture/fermeture */
+        background-color: #343a40; /* Couleur de fond de la navbar */
+      }
+
+      /* State of navbar when closed */
+      #navbar.closed {
+        width: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      /* Button to toggle navbar visibility */
+      #toggle-btn {
+        position: fixed;
+        top: 50%;
+        left: 250px;
+        transform: translateY(-50%);
+        z-index: 101; /* S'assurer que le bouton est au-dessus de la navbar */
+        background-color: #5a65a5ce;
+        color: white;
+        border: none;
+        border-radius: 0px 7px 7px 0; /* Coins arrondis */
+        padding: 10px 15px;
+        width: 15px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s ease;
+      }
+      /* Effet de hover sur la carte */
+      .product-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .product-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .product-card img {
+        width: 100%;
+        height: auto;
+        transition: transform 0.3s ease;
+      }
+
+      .product-card:hover img {
+        transform: scale(1.1);
+      }
+
+      .card-body {
+        padding: 1.5rem;
+      }
+
+      .card-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+      }
+
+      .card-text {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .rating {
+        margin-top: 0.5rem;
+      }
+
+      .star {
+        color: gold;
+      }
+
+      .star-empty {
+        color: lightgray;
+      }
+
+      /* Conteneur des boutons qui glissent depuis la droite */
+      .btn-container {
+        position: absolute;
+        top: 50%;
+        right: -60px;
+        /* Masqué à droite */
+        transform: translateY(-50%);
+        /* Centré verticalement */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        transition: right 0.3s ease;
+        /* Transition fluide pour glisser */
+      }
+
+      .product-card:hover .btn-container {
+        right: 20px;
+        /* Remonte à droite de la carte */
+      }
+
+      .btn-container .btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 20px;
+        /* Réduire la taille des icônes */
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0.1);
+        border: none;
+        transition: background-color 0.3s ease;
+      }
+
+      .btn-container .btn:hover {
+        background-color: rgba(0, 0, 0, 0.2);
+        /* Changer la couleur de fond au survol */
+      }
+
+      .btn-container .btn:focus {
+        outline: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div
+          id="navbar"
+          class="col-md-3 col-lg-2 p-0 bg-dark text-white vh-100"
+        >
+          <div class="d-flex flex-column align-items-start p-4">
+            <h4 class="mb-4">Filtre de recherche</h4>
+            <nav class="nav flex-column w-100">
+              <!-- Plage de prix -->
+              <div class="mt-4">
+                <label for="priceRange" class="form-label"
+                  >Plage de prix:</label
+                >
+                <input
+                  type="range"
+                  class="form-range"
+                  id="priceRange"
+                  name="prix"
+                  min="0"
+                  max="1000"
+                  value="0"
+                />
+                <div id="priceValue" class="mt-2">
+                  <strong>Prix maximum sélectionné: </strong
+                  ><span id="priceValueText">0</span>
+                </div>
+              </div>
+
+              <!-- Autres options -->
+              <div class="mt-4">
+                <select class="form-select" name="like">
+                  <option value="">Autres options</option>
+                  <option value="1">Produits les plus aimés</option>
+                  <option value="2">Les mieux notées</option>
+                </select>
+              </div>
+
+              <!-- Catégorie -->
+              <div class="mt-4">
+                <select class="form-select" name="categorie">
+                  <option value="">Catégorie</option>
+                  <option value="1">Produits enfants</option>
+                  <option value="2">Produit femme</option>
+                </select>
+              </div>
+
+              <!-- Produit en stock -->
+              <div class="mt-4">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    value=""
+                    id="flexCheckDefault"
+                  />
+                  <label class="form-check-label" for="flexCheckDefault">
+                    Produit en stock
+                  </label>
+                </div>
+                <div class="form-check mt-2">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    value=""
+                    id="flexCheckChecked"
+                    checked
+                  />
+                  <label class="form-check-label" for="flexCheckChecked">
+                    Les plus vendu
+                  </label>
+                </div>
+              </div>
+            </nav>
+            <hr />
+            <a href="#" class="btn btn-danger btn-sm mt-4"
+              >Filtrer ma recherche</a
+            >
+          </div>
+        </div>
+        <!-- Bouton pour ouvrir/fermer la navbar -->
+        <button id="toggle-btn" onclick="toggleNav()">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+      </div>
+    </div>
+    <section>
+      <div>
+        <main class="container my-5 col-md-6">
+          <div class="card-container mt-5">
+            <div class="col-md-4 mb-4">
+              <div class="product-card card">
+                <img
+                  src="https://www.horse-stop.com/wp-content/uploads/2020/01/hors-port-chariot-manuel.jpg"
+                  alt=""
+                  width="100px"
+                />
+                <div class="card-body">
+                  <h5 class="card-title">chario de beu</h5>
+
+                  <div class="col">
+                    <div class="col-md-6">
+                      <p class="card-text">50 €</p>
+                    </div>
+                    <div class="col-md-6">
+                      <p class="card-text">super produit</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Conteneur des boutons avec icônes -->
+                <div class="btn-container">
+                  <a
+                    href="./detail_product.php?id=<?= $product['id_produit'] ?>"
+                    class="btn btn-primary"
+                  >
+                    <i class="fas fa-heart"></i>
+                    <!-- Icône de loupe -->
+                  </a>
+                  <a
+                    href="./detail_product.php?id=<?= $product['id_produit'] ?>"
+                    class="btn btn-secondary"
+                  >
+                    <i class="fas fa-cart-plus"></i>
+                    <!-- Icône de panier -->
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <nav
+        aria-label="Page navigation example"
+        style="
+          position: fixed;
+          bottom: 25px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 150;
+        "
+      >
+        <ul class="pagination">
+          <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+          <li class="page-item"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          <li class="page-item"><a class="page-link" href="#">Next</a></li>
+        </ul>
+      </nav>
+    </section>
+    <script>
+      function toggleNav() {
+        const navbar = document.getElementById("navbar");
+        const toggleBtn = document.getElementById("toggle-btn");
+
+        // Toggle the navbar open/close state
+        navbar.classList.toggle("closed");
+
+        // Change button icon depending on the navbar state
+        if (navbar.classList.contains("closed")) {
+          toggleBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+          toggleBtn.style.left = "0";
+        } else {
+          toggleBtn.innerHTML = '<i class="bi bi-chevron-left"></i>';
+          toggleBtn.style.left = "250px";
+        }
+      }
+    </script>
+  </body>
+</html>

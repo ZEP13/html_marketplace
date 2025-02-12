@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vendre produit</title>
+  </head>
+  <body>
+    <!-- Formulaire pour ajouter un produit -->
+    <div class="mb-5">
+      <h3>Ajouter un produit</h3>
+      <form>
+        <div class="mb-3">
+          <label for="productName" class="form-label">Nom du produit</label>
+          <input
+            type="text"
+            class="form-control"
+            id="productName"
+            placeholder="Nom du produit"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="productDescription" class="form-label">Description</label>
+          <textarea
+            class="form-control"
+            id="productDescription"
+            rows="3"
+            placeholder="Description du produit"
+          ></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="productPrice" class="form-label">Prix</label>
+          <input
+            type="number"
+            class="form-control"
+            id="productPrice"
+            placeholder="Prix en €"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="productImage" class="form-label">Image du produit</label>
+          <input type="file" class="form-control" id="productImage" />
+        </div>
+        <button type="submit" class="btn btn-primary">
+          Ajouter le produit
+        </button>
+      </form>
+    </div>
+  </body>
+</html>
