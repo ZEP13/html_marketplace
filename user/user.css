@@ -1,6 +1,6 @@
 /* Style général */
 body {
-    background-color: #000000;
+    background-color: #ffffff;
     font-family: "Arial", sans-serif;
   }
   
@@ -76,3 +76,26 @@ body {
   }
 
   
+/* css page de commande user*/
+.mb-5{
+  margin: 3rem 0 !important;
+}
+tbody,td,th{
+  border: none;
+}
+th{
+  color: rgb(119, 119, 119);
+}
+.td_btn{
+  display: flex;
+  justify-content: center;
+}
+.btn-primary{
+  background-color: rgb(177, 26, 34);
+  border: none;
+}
+.btn-primary:hover{
+  transition: 2sec;
+  background-color: rgb(227, 121, 121);
+  color: black;
+}
