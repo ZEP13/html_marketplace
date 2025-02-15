@@ -107,3 +107,12 @@
       h2{
         margin: 15px 0;
       }
+      /* page détail vente */
+      .link_vend{
+        color: rgb(189, 35, 35);
+      }
+      .link_vend:hover{
+        color:crimson;
+      }
+    
+      
