@@ -14,55 +14,11 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
     />
-    <style>
-      /* CSS additionnel pour centrer la recherche sur grands écrans */
-      .search-container {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        flex-grow: 1; /* Prend toute la largeur disponible */
-      }
-      .offcanvas-body {
-        display: flex;
-        flex-direction: column;
-        height: 100vh; /* Take full height of the viewport */
-      }
-      .buy {
-        margin-top: auto; /* Push this section to the bottom */
-        position: sticky;
-        bottom: 0; /* Stick to the bottom of the sidebar */
-      }
-      .nav-item {
-        margin-right: 10px;
-      }
-      .nav-item a {
-        text-decoration: none;
-        color: black;
-      }
-
-      @media screen and (max-width: 799px) {
-        /* Icône de recherche et hamburger sur petit écran */
-        .navbar .d-flex {
-          display: flex;
-          justify-content: flex-start;
-          align-items: center;
-        }
-
-        .navbar .btn-outline-secondary {
-          margin-right: 10px;
-        }
-      }
-
-      @media screen and (min-width: 800px) {
-        /* Cacher l'icône de recherche et hamburger sur grand écran */
-        .navbar .navbar-toggler {
-          display: none;
-        }
-        .navbar .btn-outline-secondary {
-          display: none;
-        }
-      }
-    </style>
+    <link 
+    rel="stylesheet" 
+    href="nav.css"
+    >
+    
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -104,7 +60,7 @@
               placeholder="Search"
               aria-label="Search"
             />
-            <button class="btn btn-outline-success" type="submit">
+            <button class="btn btn-outline-primary" type="submit">
               Search
             </button>
           </form>
@@ -127,9 +83,10 @@
               class="nav-item"
               data-bs-toggle="offcanvas"
               data-bs-target="#offcanvasRight"
-              aria-controls="offcanvasRight"
-            >
-              <a href=""><i class="bi bi-cart3"></i> Mon panier</a>
+              aria-controls="offcanvasRight">
+              <a class="nav-link" href="#" >
+              <i class="bi bi-cart3"></i> Mon panier
+              </a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#"
@@ -199,7 +156,7 @@
             placeholder="Search"
             aria-label="Search"
           />
-          <button class="btn btn-outline-success" type="submit">Search</button>
+          <button class="btn btn-primary" type="submit">Search</button>
         </form>
       </div>
     </div>
