@@ -114,5 +114,9 @@
       .link_vend:hover{
         color:crimson;
       }
-    
+    /*page ajout produit vente */
+    textarea{
+      height: 195px;
+      resize: none;
+    }
       
