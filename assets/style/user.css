@@ -82,26 +82,3 @@ body {
   }
 
   
-/* css page de commande user*/
-.mb-5{
-  margin: 3rem 0 !important;
-}
-tbody,td,th{
-  border: none;
-}
-th{
-  color: rgb(119, 119, 119);
-}
-.td_btn{
-  display: flex;
-  justify-content: center;
-}
-.btn-primary,.btn-outline-primary{
-  background-color: #09234a;
-  border: none;
-  color: white;
-}
-.btn-primary:hover,.btn-outline-primary:hover{
-  transition: 2sec;
-  background-color: #36afeb;
-}

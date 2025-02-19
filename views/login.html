@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login/Signup Form</title>
-    <link rel="stylesheet" href="../assets/login.css" />
+    <link rel="stylesheet" href="../assets/style/login.css" />
     <link
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
@@ -18,12 +18,29 @@
         <form action="#">
           <h1>Login</h1>
           <div class="input-box">
-            <input type="text" placeholder="Username" required />
+            <input
+              type="text"
+              placeholder="Usermail"
+              id="logmail"
+              autocomplete="current-password"
+              required
+            />
             <i class="bx bxs-user"></i>
           </div>
           <div class="input-box">
-            <input type="password" placeholder="Password" required />
-            <i class="bx bxs-lock-alt"></i>
+            <input
+              type="password"
+              placeholder="Password"
+              autocomplete="current-password"
+              id="loginPassword"
+              required
+            />
+            <i
+              style="cursor: pointer"
+              onclick="togglePassword('loginPassword', 'loginShowPassword')"
+              id="loginShowPassword"
+              class="bx bxs-lock-alt"
+            ></i>
           </div>
           <div class="forgot-link">
             <a href="#">Forgot Password?</a>
@@ -37,16 +54,37 @@
         <form action="#">
           <h1>Registration</h1>
           <div class="input-box">
-            <input type="text" placeholder="Username" required />
+            <input type="text" placeholder="Nom" id="Nom" required />
             <i class="bx bxs-user"></i>
           </div>
           <div class="input-box">
-            <input type="email" placeholder="Email" required />
+            <input type="text" placeholder="Prenom" id="Prenom" required />
+            <i class="bx bxs-user"></i>
+          </div>
+          <div class="input-box">
+            <input
+              type="email"
+              placeholder="Email"
+              autocomplete="current-password"
+              id="registermail"
+              required
+            />
             <i class="bx bxs-envelope"></i>
           </div>
           <div class="input-box">
-            <input type="password" placeholder="Password" required />
-            <i class="bx bxs-lock-alt"></i>
+            <input
+              type="password"
+              placeholder="Password"
+              id="registerPassword"
+              autocomplete="current-password"
+              required
+            />
+            <i
+              style="cursor: pointer"
+              onclick="togglePassword('registerPassword', 'registerShowPassword')"
+              id="registerShowPassword"
+              class="bx bxs-lock-alt"
+            ></i>
           </div>
           <button type="submit" class="btn">Register</button>
         </form>
