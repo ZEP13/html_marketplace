@@ -1,11 +1,11 @@
 /* Style général */
 body {
-    background-color: #000000;
+    background-color: #ffffff;
     font-family: "Arial", sans-serif;
   }
   
   .profile-card {
-    background: white;
+    background: linear-gradient(282deg, white 44.96%, #70ccf9);
     border-radius: 15px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 20px;
@@ -27,12 +27,12 @@ body {
   
   .profile-card .info a {
     text-decoration: none;
-    color: #007bff;
+    color: #36afeb;
     margin-left: 10px;
   }
   
   .profile-card .info a:hover {
-    color: #0056b3;
+    color: #09234a;
   }
   
   .actions a {
@@ -44,7 +44,7 @@ body {
   }
   
   .actions a:hover {
-    color: #007bff;
+    color: #36afeb;
   }
   
   .actions a i {
@@ -53,6 +53,12 @@ body {
   
   .actions {
     margin-top: 30px;
+  }
+
+  input{
+    border: solid  #09234a 1px;
+    border-radius: 5px;
+    padding: 5px;
   }
   
   /* Responsivité pour les petits écrans */
@@ -76,3 +82,26 @@ body {
   }
 
   
+/* css page de commande user*/
+.mb-5{
+  margin: 3rem 0 !important;
+}
+tbody,td,th{
+  border: none;
+}
+th{
+  color: rgb(119, 119, 119);
+}
+.td_btn{
+  display: flex;
+  justify-content: center;
+}
+.btn-primary,.btn-outline-primary{
+  background-color: #09234a;
+  border: none;
+  color: white;
+}
+.btn-primary:hover,.btn-outline-primary:hover{
+  transition: 2sec;
+  background-color: #36afeb;
+}
