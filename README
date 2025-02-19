@@ -1,0 +1,242 @@
+user:
+
+    info personnel
+        modifier nom
+
+        mettre a jour mdp
+
+
+
+        photo profil
+
+    mon panier
+
+    mes commandes
+
+    mes ventes
+
+chat:
+
+    users
+
+        photo profil + nom
+
+    chat
+
+        info si message vu
+
+        pop up pour voir si message a lire
+
+fil product:
+
+    produit:
+        photo
+
+        prix
+
+        description
+
+        action:
+            voir detail -> clique sur la card
+
+            like
+
+            ajoute au panier
+
+    limite a 20 produit part page
+
+    systeme switch page 1 - 2 - 3 ...
+
+
+
+    filtre:
+        recherche
+
+        range de prix
+
+        les plus like
+
+        best seller
+
+        categorie
+
+nav bar
+
+    logo
+
+    bar de recherche    ->  passe en icon loop quand sur mobil et ouvre un side bar qui prend tt l'ecran.
+
+    besoin d'aide
+
+    mon compte
+
+    mon panier  -> s'ouvre en side bar
+
+$page = isset($\_GET['page']) ? (int)$_GET['page'] : 1;
+$perPage = 10;
+$offset = ($page - 1) \* $perPage;
+
+$sql = "SELECT p.\*, AVG(r.rating) AS avg_rating
+FROM `products` p
+LEFT JOIN liked_produit l ON p.id_produit = l.id_produit_like
+LEFT JOIN reviews_produit r ON p.id_produit = r.id_produit
+GROUP BY p.id_produit
+LIMIT $perPage OFFSET $offset";
+
+<div class="pagination">
+    <a href="?page=<?= $page - 1 ?>" class="btn btn-light <?= $page == 1 ? 'disabled' : '' ?>">Précédent</a>
+    <a href="?page=<?= $page + 1 ?>" class="btn btn-light">Suivant</a>
+</div>
+
+Gestion des utilisateurs
+
+a) Inscription/Connexion des utilisateurs :
+-- Permettre aux utilisateurs de créer un compte et de se connecter.
+-- Profils utilisateurs : Chaque utilisateur aura un profil avec ses informations (nom, adresse, historique des achats, etc.).
+-- Gestion des rôles : Les utilisateurs peuvent être des acheteurs, des vendeurs, ou des administrateurs avec des permissions différentes.
+
+b) Gestion des produits
+-- Création de produits : Les vendeurs pourront ajouter leurs produits avec des descriptions, des images, des prix, etc.
+-- Catalogue de produits : Affichage des produits avec filtres (par catégorie, prix, vendeur, etc.).
+-- Gestion des stocks : Les vendeurs doivent pouvoir gérer leur inventaire (quantité disponible pour chaque produit).
+
+c) Panier et gestion des commandes
+-- Ajout au panier : Les acheteurs ajoutent des produits au panier.
+-- Gestion des commandes : Après avoir passé commande, le système doit gérer l'état de la commande (en attente, expédiée, livrée, annulée).
+-- Historique des commandes : Les utilisateurs peuvent consulter leurs précédentes commandes.
+
+e) Gestion des avis et évaluations
+Les utilisateurs peuvent laisser des avis et des évaluations sur les produits et les vendeurs.
+Système de gestion des disputes en cas de problèmes avec les produits ou commandes.
+
+f) Messagerie interne
+Les acheteurs et les vendeurs peuvent communiquer via un système de messagerie interne à propos des produits ou des commandes.
+
+/project-root
+│
+├── /assets
+│ └── /js
+│ └── main.js
+│
+├── /controllers
+│ └── ProductController.php
+│ └── UserController.php
+│
+├── /models
+│ └── Product.php
+│ └── User.php
+│
+├── /views
+│ └── index.php
+│ └── register.php
+│ └── login.php
+│ └── user_dashboard.php
+│
+├── /public
+│ └── index.php
+│
+├── /config
+│ └── database.php
+│
+└── /api
+└── get_products.php
+└── register_user.php
+└── login_user.php
+
+1. public/index.php (Point d'entrée)
+   Rôle : C'est le point d'entrée principal de l'application, souvent accessible via http://tonsite.com/.
+   Interaction :
+   Ce fichier appelle le contrôleur approprié (ex : ProductController.php) pour récupérer les données et afficher la vue correspondante (par exemple, views/index.php).
+   Cela sert à initialiser l'application et à préparer les données nécessaires à l'affichage.
+2. controllers/ (Logique métier)
+   ProductController.php :
+   Rôle : Ce contrôleur récupère les informations des produits depuis le modèle et les envoie à la vue.
+   Interaction :
+   Appelle les méthodes du modèle Product.php pour récupérer les produits.
+   Passe ces données à la vue correspondante (views/index.php) pour l'affichage.
+   UserController.php :
+   Rôle : Ce contrôleur gère l'inscription, la connexion et la gestion des utilisateurs.
+   Interaction :
+   register() et login() : Appelle les méthodes du modèle User.php pour gérer l'inscription et l'authentification.
+   Lors de la connexion, il redirige l'utilisateur vers le tableau de bord (views/user_dashboard.php) si l'authentification est réussie.
+   Utilise session_start() pour gérer la session de l'utilisateur une fois connecté.
+3. models/ (Gestion des données)
+   Product.php :
+   Rôle : Ce modèle récupère les informations sur les produits depuis la base de données.
+   Interaction :
+   Utilisé par ProductController.php pour obtenir les produits et les envoyer à la vue views/index.php.
+   User.php :
+   Rôle : Ce modèle gère les opérations liées aux utilisateurs (création, connexion, récupération des informations).
+   Interaction :
+   Appelé par UserController.php pour inscrire un nouvel utilisateur, vérifier les identifiants de connexion ou récupérer des informations d'un utilisateur spécifique.
+   Effectue des actions de base de données via PDO pour gérer les utilisateurs.
+4. views/ (Affichage)
+   index.php :
+   Rôle : La vue principale qui affiche la liste des produits.
+   Interaction :
+   Récupère les produits via ProductController.php et les affiche dans le HTML.
+   Intègre main.js pour la gestion des interactions dynamiques sur la page (par exemple, chargement des produits via AJAX).
+   register.php :
+   Rôle : Formulaire d'inscription de l'utilisateur.
+   Interaction :
+   Lors de la soumission, main.js envoie les données via AJAX à api/register_user.php pour enregistrer un nouvel utilisateur dans la base de données.
+   login.php :
+   Rôle : Formulaire de connexion de l'utilisateur.
+   Interaction :
+   Lors de la soumission, main.js envoie les données via AJAX à api/login_user.php pour authentifier l'utilisateur.
+   Si la connexion réussit, l'utilisateur est redirigé vers user_dashboard.php.
+   user_dashboard.php :
+   Rôle : Affiche le tableau de bord de l'utilisateur connecté.
+   Interaction :
+   main.js récupère les données de l'utilisateur depuis l'API via api/user_dashboard.php (API non spécifiée dans l'exemple, mais à créer si nécessaire).
+   Affiche les informations utilisateur après la connexion réussie.
+5. public/ (Accès public)
+   index.php :
+   Rôle : Sert de point d'entrée principal pour le site.
+   Interaction :
+   Ce fichier route les requêtes HTTP vers les contrôleurs correspondants pour les actions demandées.
+   En général, il redirige la logique métier vers controllers/ProductController.php pour afficher la liste des produits ou vers controllers/UserController.php pour gérer l'inscription/connexion des utilisateurs.
+6. assets/js/ (Interactions front-end)
+   main.js :
+   Rôle : Gère les interactions JavaScript côté client, comme l'envoi de données des formulaires d'inscription et de connexion via AJAX.
+   Interaction :
+   Formulaire d'inscription (register.php) : Envoie les données à api/register_user.php pour créer un utilisateur.
+   Formulaire de connexion (login.php) : Envoie les données à api/login_user.php pour authentifier un utilisateur.
+   Peut interagir avec views/index.php pour afficher des produits dynamiquement en utilisant AJAX pour appeler api/get_products.php.
+7. config/ (Configuration)
+   database.php :
+   Rôle : Gère la connexion à la base de données.
+   Interaction :
+   Est inclus dans controllers/ProductController.php, controllers/UserController.php, et models/Product.php et models/User.php pour accéder à la base de données.
+8. api/ (API Backend)
+   get_products.php :
+   Rôle : Fournit une API pour récupérer les produits au format JSON.
+   Interaction :
+   Appelé via AJAX dans main.js pour obtenir les produits dynamiquement depuis views/index.php.
+   Envoie une réponse JSON avec les produits à afficher.
+   register_user.php :
+   Rôle : Gère l'inscription de l'utilisateur via API.
+   Interaction :
+   Recevoir les données du formulaire d'inscription via AJAX (en provenance de main.js dans register.php).
+   Appelle le modèle User.php pour enregistrer un utilisateur dans la base de données.
+   login_user.php :
+   Rôle : Gère la connexion de l'utilisateur via API.
+   Interaction :
+   Recevoir les données de connexion via AJAX (en provenance de main.js dans login.php).
+   Appelle le modèle User.php pour vérifier les informations de connexion et établir la session de l'utilisateur.
+   Flot de travail résumé :
+   Inscription de l'utilisateur :
+
+L'utilisateur remplit le formulaire sur register.php.
+main.js capte l'événement du formulaire et envoie les données via AJAX à api/register_user.php.
+register_user.php enregistre l'utilisateur dans la base de données via le modèle User.php.
+Connexion de l'utilisateur :
+
+L'utilisateur remplit le formulaire sur login.php.
+main.js envoie les données de connexion via AJAX à api/login_user.php.
+login_user.php vérifie les informations et, si valides, crée une session utilisateur.
+Si connecté avec succès, l'utilisateur est redirigé vers user_dashboard.php.
+Affichage des produits :
+
+views/index.php affiche les produits à partir des données reçues de ProductController.php.
+main.js peut envoyer une requête AJAX à api/get_products.php pour récupérer les produits sans recharger la page.
