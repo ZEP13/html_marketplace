@@ -21,6 +21,7 @@
         <div class="title text-center mb-4">
           <h1>User Profile</h1>
         </div>
+        <div id="alertContainerProfil"></div>
         <div
           class="profile-card d-flex flex-column flex-sm-row justify-content-around align-items-center align-items-sm-start"
         >
@@ -32,18 +33,10 @@
             /></a>
             <div class="info mt-3">
               <p>
-                <strong>Username:</strong> John Doe
-                <!-- Ajout du data-bs-toggle et data-bs-target pour modifier le nom -->
-                <a
-                  href="#"
-                  data-bs-toggle="modal"
-                  data-bs-target="#exampleModal"
-                >
-                  <i class="bi bi-pencil"></i>
-                </a>
+                <strong>Username:</strong> <span id="usernameprofil"></span>
               </p>
               <p>
-                <strong>Email:</strong> johndoe@example.com
+                <strong>Email:</strong> <span id="usermailprofil"></span>
                 <!-- Ajout du data-bs-toggle et data-bs-target pour modifier l'email -->
                 <a
                   href="#"
@@ -66,37 +59,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Modal pour modifier le nom -->
-    <div
-      class="modal fade"
-      id="exampleModal"
-      tabindex="-1"
-      aria-labelledby="exampleModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Modifier Nom</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body nom">
-            <label for="nameInput" class="mb-3">Votre nom actuel: </label>
-            <p><input type="text" id="nameInput" value="  John Doe" /></p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Modal pour modifier l'email ou le mot de passe -->
     <div
       class="modal fade"
@@ -118,19 +80,19 @@
               aria-label="Close"
             ></button>
           </div>
-          <div class="modal-body mail">
-            <label for="emailInput" class="mb-3">Votre email actuel: </label>
-            <p>
-              <input
-                type="text"
-                id="emailInput"
-                value="  johndoe@example.com"
-              />
-            </p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div>
+          <form action="POST" id="formEditModalMail">
+            <div class="modal-body mail">
+              <label for="emailInput" class="mb-3">Votre email actuel: </label>
+              <p>
+                <input type="text" id="emailInputEditModal" value="" />
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">
+                Save changes
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -171,7 +133,7 @@
         </div>
       </div>
     </div>
-
+    <script src="../assets/profil.js"></script>
     <!-- Script Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   </body>
