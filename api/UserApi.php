@@ -50,18 +50,20 @@ class ApiUser
 
     private function handlePostRequest()
     {
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        if (isset($data['action']) && $data['action'] === 'login') {
-            $this->handleLoginRequest($data);
-        } else if ($data['action'] === 'EditMail') {
-            $this->handleEdditMailRequest($data);
-        } else if ($data['action'] === 'logout') {
-            $this->handleLogoutRequest();
-        } else if ($data['action'] === 'addImgProfil') {
-            $this->handleaddImgProfilRequest($data);
+        if (isset($_POST['action']) && $_POST['action'] === 'addImgProfil') {
+            $this->handleaddImgProfilRequest($_POST);
         } else {
-            $this->handleRegisterRequest($data);
+            $data = json_decode(file_get_contents('php://input'), true);
+
+            if (isset($data['action']) && $data['action'] === 'login') {
+                $this->handleLoginRequest($data);
+            } else if ($data['action'] === 'EditMail') {
+                $this->handleEdditMailRequest($data);
+            } else if ($data['action'] === 'logout') {
+                $this->handleLogoutRequest();
+            } else {
+                $this->handleRegisterRequest($data);
+            }
         }
     }
 
