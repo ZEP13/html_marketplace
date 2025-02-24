@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
               console.error(data.error);
               return;
             }
+            document.getElementById("imgPhotoProfil").src = data.img;
 
             // Mettre à jour le profil avec les données de l'utilisateur
             document.getElementById("usernameprofil").textContent =
