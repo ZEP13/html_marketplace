@@ -95,3 +95,72 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+// Fonction pour déconnecter l'utilisateur
+function logout() {
+  const logout = {
+    action: "logout",
+  };
+  // Appel à l'API de déconnexion
+  fetch("../public/index.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(logout),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      const alertContainer = document.getElementById("alertContainerProfil");
+      if (data.success) {
+        alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+        // Rediriger l'utilisateur vers la page d'accueil ou la page de connexion
+        window.location.href = "../views/login.html";
+      } else {
+        alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+      }
+    })
+    .catch((error) => {
+      console.error("Erreur de déconnexion:", error);
+    });
+}
+// Attacher cette fonction au bouton de déconnexion
+document.getElementById("deconnection").addEventListener("click", logout);
+
+document
+  .getElementById("formImgProfil")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+    const imgInput = document.getElementById("imgInput");
+    const formData = new FormData(); // Créer une nouvelle instance de FormData
+
+    // Vérifiez si une image a été sélectionnée
+    if (imgInput.files.length > 0) {
+      // Ajoutez l'image à FormData
+      formData.append("profileImage", imgInput.files[0]);
+      formData.append("action", "addImgProfil"); // Ajouter l'action pour l'API
+
+      // Envoi de la photo via fetch
+      fetch("../public/index.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            // Afficher un message de succès et mettre à jour l'image
+            alert("Photo de profil mise à jour avec succès!");
+            document.querySelector(".profile-card img").src =
+              data.newProfileImageUrl;
+          } else {
+            // Gérer les erreurs
+            alert("Erreur lors de la mise à jour de la photo de profil");
+          }
+        })
+        .catch((error) => {
+          console.error("Erreur:", error);
+          alert("Une erreur est survenue lors du téléchargement.");
+        });
+    } else {
+      alert("Veuillez sélectionner une image.");
+    }
+  });

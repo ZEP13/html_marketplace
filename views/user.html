@@ -22,6 +22,11 @@
           <h1>User Profile</h1>
         </div>
         <div id="alertContainerProfil"></div>
+        <i
+          class="bi bi-gear settings-icon"
+          data-bs-toggle="modal"
+          data-bs-target="#settingsModal"
+        ></i>
         <div
           class="profile-card d-flex flex-column flex-sm-row justify-content-around align-items-center align-items-sm-start"
         >
@@ -96,7 +101,37 @@
         </div>
       </div>
     </div>
-
+    <!-- modal setting -->
+    <div
+      class="modal fade"
+      id="settingsModal"
+      tabindex="-1"
+      aria-labelledby="settingsModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="settingsModalLabel">Paramètres</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <button id="deconnection" class="btn btn-primary w-100 mb-3">
+              Déconnexion
+            </button>
+            <button id="delete" class="btn btn-danger w-100">
+              Supprimer le compte
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal pour modifier la photo de profil -->
     <!-- Modal pour modifier la photo de profil -->
     <div
       class="modal fade"
@@ -118,18 +153,22 @@
               aria-label="Close"
             ></button>
           </div>
-          <div class="modal-body">
-            <label for="imgInput" class="mb-3">
-              Votre photo de profil actuelle:
-            </label>
-            <p>
-              <!-- Ajout de l'attribut accept pour limiter les fichiers aux images -->
-              <input type="file" id="imgInput" accept="image/*" />
-            </p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div>
+          <form action="POST" id="formImgProfil" enctype="multipart/form-data">
+            <div class="modal-body">
+              <label for="imgInput" class="mb-3">
+                Votre photo de profil actuelle:
+              </label>
+              <p>
+                <!-- Ajout de l'attribut accept pour limiter les fichiers aux images -->
+                <input type="file" id="imgInput" accept="image/*" />
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">
+                Save changes
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

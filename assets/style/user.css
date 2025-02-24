@@ -61,6 +61,14 @@ body {
     padding: 5px;
   }
   
+  .settings-icon {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #333;
+  }
   /* Responsivité pour les petits écrans */
   @media (max-width: 576px) {
     .profile-card {

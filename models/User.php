@@ -111,4 +111,20 @@ class User
             return false;
         }
     }
+
+    public function addImgProfil($img, $id)
+    {
+        try {
+            // Requête de mise à jour
+            $sql = 'UPDATE `users` SET `user_img` = :user_img WHERE `id_user` = :id';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':user_img', $img);
+            $stmt->bindValue(':id', $id);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // Log l'erreur et retour
+            error_log("Erreur lors de la mise à jour : " . $e->getMessage());
+            return false;
+        }
+    }
 }

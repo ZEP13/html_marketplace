@@ -36,8 +36,6 @@ class UserController
         $userData = $user->checkLogin($mail, $password);
 
         if ($userData) {
-            // Créer une session utilisateur
-            session_start();
             $_SESSION['user_id'] = $userData['id_user'];
             $_SESSION['user_mail'] = $userData['user_mail'];
             return true;
@@ -50,6 +48,12 @@ class UserController
     {
         $user = new User($this->db);
         return $user->createUser($nom, $prenom, $mail, $password);
+    }
+
+    public function addImgProfil($img, $id)
+    {
+        $user = new User($this->db);
+        return $user->addImgProfil($img, $id);
     }
 
     public function validateUserData($data)
