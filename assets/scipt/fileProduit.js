@@ -17,12 +17,21 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error(data.error);
         return;
       }
-      document.getElementById("img").src = data.img;
 
-      // Mettre à jour le profil avec les données de l'utilisateur
-      document.getElementById("title").textContent = data.title;
-      document.getElementById("Price").textContent = data.prix;
-      document.getElementById("Decription").value = data.descritpion;
+      const container = document.querySelector(".card-container");
+      data.forEach((produit) => {
+        const card = document.createElement("div");
+        card.className = "card mb-4";
+        card.innerHTML = `
+          <img src="${produit.image}" class="card-img-top" alt="${produit.title}">
+          <div class="card-body">
+            <h5 class="card-title">${produit.title}</h5>
+            <p class="card-text">${produit.description}</p>
+            <p class="card-text"><strong>Prix: </strong>${produit.price} €</p>
+          </div>
+        `;
+        container.appendChild(card);
+      });
     })
     .catch((error) => {
       console.error("Erreur lors de la requête:", error);

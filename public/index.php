@@ -12,7 +12,10 @@ use ApiP\ApiProduit;
 header('Content-Type: application/json');
 
 $apiUser = new ApiUser();
-$apiUser->handleRequest();
-
 $apiProduit = new ApiProduit();
-$apiProduit->handleRequest();
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $apiProduit->handleRequest();
+} else {
+    $apiUser->handleRequest();
+}
