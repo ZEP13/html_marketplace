@@ -41,6 +41,7 @@ class User
                 $user->prenom = $row['user_prenom'];
                 $user->mail = $row['user_mail'];
                 $user->phone = $row['user_phone'];
+                $user->img = $row['user_img'];
                 $user->role = $row['role'];
                 return $user;
             }
@@ -119,6 +120,36 @@ class User
             $sql = 'UPDATE `users` SET `user_img` = :user_img WHERE `id_user` = :id';
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':user_img', $img);
+            $stmt->bindValue(':id', $id);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // Log l'erreur et retour
+            error_log("Erreur lors de la mise à jour : " . $e->getMessage());
+            return false;
+        }
+    }
+    public function addPhoneUser($phone, $id)
+    {
+        try {
+            // Requête de mise à jour
+            $sql = 'UPDATE `users` SET `user_phone` = :user_phone WHERE `id_user` = :id';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':user_phone', $phone);
+            $stmt->bindValue(':id', $id);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // Log l'erreur et retour
+            error_log("Erreur lors de la mise à jour : " . $e->getMessage());
+            return false;
+        }
+    }
+    public function changeRoleUser($role, $id)
+    {
+        try {
+            // Requête de mise à jour
+            $sql = 'UPDATE `users` SET `role` = :role WHERE `id_user` = :id';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':role', $role);
             $stmt->bindValue(':id', $id);
             return $stmt->execute();
         } catch (PDOException $e) {

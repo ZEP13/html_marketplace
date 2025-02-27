@@ -24,7 +24,7 @@
               </div>
             </div>
             <div class="card-body">
-              <ul class="contact-list">
+              <ul class="contact-list" id="userContact">
                 <li onclick="showChat('user1')">user1</li>
                 <li onclick="showChat('user2')">user2</li>
                 <li onclick="showChat('user3')">user3</li>
@@ -40,59 +40,23 @@
               Retour
             </button>
           </div>
-          <h2 id="chat-header">Chat avec user1</h2>
+          <h2 id="chat-header"></h2>
           <div class="card">
-            <div class="card-header" id="chat-header">user1</div>
-            <div class="card-body">
+            <div class="card-header" id="chat-headerText"></div>
+            <div class="card-body" id="zoneMessage">
               <div class="message user1">user1: Salut</div>
               <div class="message user2">user2: Salut</div>
               <div class="message user1">user1: Ça va ?</div>
               <div class="message user2">user2: Oui, et toi ?</div>
             </div>
             <div class="card-footer">
-              <input type="text" placeholder="Message" />
-              <button>Envoyer</button>
+              <input type="text" id="messageValue" placeholder="Message" />
+              <button type="submit" id="sendMessage">Envoyer</button>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <script>
-      // Fonction pour afficher la conversation d'un utilisateur
-      function showChat(user) {
-        document.getElementById("chat-container").style.display = "block";
-        document.getElementById("chat-header").innerText = "Chat avec " + user;
-        // Masquer la liste des contacts sur les petits écrans
-        if (window.innerWidth <= 767) {
-          document.querySelector(".contact-list-container").style.display =
-            "none";
-        }
-      }
-
-      // Fonction pour revenir à la liste des contacts
-      function showContacts() {
-        document.getElementById("chat-container").style.display = "none";
-        // Afficher à nouveau la liste des contacts sur les petits écrans
-        if (window.innerWidth <= 767) {
-          document.querySelector(".contact-list-container").style.display =
-            "block";
-        }
-      }
-      window.addEventListener("resize", function () {
-        if (window.innerWidth > 767) {
-          document.querySelector(".contact-list-container").style.display =
-            "block";
-          document.querySelector(".chat-container").style.display = "block";
-        } else if (window.innerWidth <= 767) {
-          if (
-            document.getElementById("chat-container").style.display === "block"
-          ) {
-            document.querySelector(".contact-list-container").style.display =
-              "none";
-          }
-        }
-      });
-    </script>
+    <script src="../assets/scipt/message.js"></script>
   </body>
 </html>

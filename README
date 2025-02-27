@@ -240,3 +240,5 @@ Affichage des produits :
 
 views/index.php affiche les produits à partir des données reçues de ProductController.php.
 main.js peut envoyer une requête AJAX à api/get_products.php pour récupérer les produits sans recharger la page.
+
+
