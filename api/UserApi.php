@@ -98,11 +98,7 @@ class ApiUser
                 // Déplacer le fichier vers le répertoire cible
                 if (move_uploaded_file($_FILES['profileImage']['tmp_name'], $uploadFile)) {
                     // Ajouter l'URL du fichier dans la base de données
-<<<<<<< HEAD
                     $result = $this->UserController->addImgProfil($fileName, $_SESSION['user_id']);  // Utiliser l'ID utilisateur de la session
-=======
-                    $result = $this->UserController->addImgProfil($uploadFile, $_SESSION['user_id']);  // Stocker uniquement le nom de fichier
->>>>>>> 38ce78f789c5e38642c09d3368209bc50fff18d5
                     if ($result) {
                         $this->sendResponse([
                             'success' => true,
