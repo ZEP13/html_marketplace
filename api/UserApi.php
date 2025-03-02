@@ -47,7 +47,6 @@ class ApiUser
         }
     }
 
-
     private function handlePostRequest()
     {
         if (isset($_POST['action']) && $_POST['action'] === 'addImgProfil') {
@@ -118,7 +117,6 @@ class ApiUser
         }
     }
 
-
     private function handleLogoutRequest()
     {
         if (isset($_SESSION['user_id'])) {
@@ -131,7 +129,6 @@ class ApiUser
             $this->sendResponse(['success' => true, 'message' => 'erreur de deconnexion']);
         }
     }
-
 
     private function handleEdditMailRequest($data)
     {

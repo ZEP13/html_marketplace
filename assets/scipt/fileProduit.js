@@ -5,10 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
       "Content-Type": "application/json",
     },
   })
-    .then((response) => {
-      // Affichez la réponse brute pour diagnostiquer le problème
-      return response.text(); // Récupérez d'abord la réponse en texte
-    })
+    .then((response) => response.text())
     .then((text) => {
       try {
         const data = JSON.parse(text); // Essayez de convertir le texte en JSON
@@ -23,16 +20,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         data.forEach((produit) => {
           const cardCol = document.createElement("div");
-          cardCol.className = "col-md-4 mb-4";
+          cardCol.className = "col-12 col-md-4 pb-3";
 
           const card = document.createElement("div");
           card.className = "product-card card";
 
           const img = document.createElement("img");
           img.className = "card-img-top";
-          img.src = produit.image || ""; // Assurez-vous que produit.img est défini, sinon mettez une image par défaut
+          img.src = produit.image || "../img/imgProduct/default.jpg";
           img.alt = produit.title || "Image produit";
-          img.width = "100";
+          img.width = "70";
 
           const cardBody = document.createElement("div");
           cardBody.className = "card-body";
@@ -45,18 +42,17 @@ document.addEventListener("DOMContentLoaded", function () {
           row.className = "col";
 
           const priceCol = document.createElement("div");
-          priceCol.className = "col-md-6";
+          priceCol.className = "col-md-12 pb-2";
           const priceText = document.createElement("p");
           priceText.className = "card-text";
           priceText.innerHTML = `<strong>Prix: </strong>${produit.price} €`;
 
           const descriptionCol = document.createElement("div");
-          descriptionCol.className = "col-md-6";
+          descriptionCol.className = "col-md-12";
           const descriptionText = document.createElement("p");
           descriptionText.className = "card-text";
           descriptionText.textContent = produit.description;
 
-          // Ajoutez les éléments à la structure
           row.appendChild(priceCol);
           row.appendChild(descriptionCol);
 
@@ -77,11 +73,44 @@ document.addEventListener("DOMContentLoaded", function () {
           heartButton.appendChild(heartIcon);
 
           const cartButton = document.createElement("a");
-          cartButton.href = `./detail_product.php?id=${produit.id}`;
-          cartButton.className = "btn btn-secondary";
+          cartButton.href = "#"; 
+          cartButton.className = "btn btn-secondary panier";
+          cartButton.id = "panier";
           const cartIcon = document.createElement("i");
           cartIcon.className = "fas fa-cart-plus";
           cartButton.appendChild(cartIcon);
+
+          if (cartButton) {
+            cartButton.addEventListener("click", function (event) {
+              event.preventDefault();
+              // Appel de la fonction d'ajout au panier
+              fetch("../public/index.php", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  action: "addPanier",
+                  id_user: ,
+                  id_produit: data.id,
+                  quantite: 1,
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    alert("Produit ajouté au panier!");
+                  } else {
+                    alert("Erreur lors de l'ajout au panier");
+                  }
+                })
+                .catch((error) => {
+                  console.error("Erreur lors de l'ajout au panier :", error);
+                });
+            });
+          } else {
+            console.error("L'élément  n'a pas été trouvé.");
+          }
 
           btnContainer.appendChild(heartButton);
           btnContainer.appendChild(cartButton);

@@ -47,8 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
           });
       } else {
         console.error("Aucune session active");
-        // Rediriger l'utilisateur vers la page de connexion s'il n'est pas connecté
-        window.location.href = "../views/login.html";
+        // Rediriger l'utilisateur vers la page de connexion s'il n'est pas
       }
     })
     .catch((error) => {
