@@ -35,45 +35,65 @@ class ApiPanier
 
         if (isset($data['action']) && $data['action'] === 'addPanier') {
             $this->handleAddPanierRequest($data);
-        } else if ($data['action'] === 'update') {
-            $this->handleUpdatePanierRequest($data);
+        } else if ($data['action'] === 'delete') {
+            $this->handleClearPanierRequest($data);
         }
     }
     private function handleGetPanierRequest()
     {
+        // Vérifier si l'utilisateur est connecté (id utilisateur dans la session)
         if (isset($_SESSION['user_id'])) {
-            $id = $_SESSION['user_id'];  // Récupérer l'ID de l'utilisateur depuis la session
-            $panier = $this->PanierController->getPanierByUser($id);  // Utiliser le contrôleur pour récupérer l'utilisateur
+            $id_user = $_SESSION['user_id']; // Récupérer l'ID de l'utilisateur depuis la session
 
+            // Si l'ID utilisateur est invalide ou inexistant, retourner une erreur
+            if (!$id_user) {
+                $this->sendResponse(['success' => false, 'message' => 'Aucun utilisateur trouvé dans la session'], 500);
+                return;
+            }
+
+            // Utiliser le contrôleur pour récupérer les articles du panier de cet utilisateur
+            $panier = $this->PanierController->getPanierByUser($id_user);
+
+            // Si des articles sont trouvés dans le panier
             if ($panier) {
-                $this->sendResponse($panier);  // Retourner les données utilisateur
+                $this->sendResponse(['success' => true, 'message' => 'Panier récupéré avec succès', 'panier' => $panier]);
             } else {
-                $this->sendResponse(['error' => 'Aucun panier trouvé'], 404);
+                $this->sendResponse(['success' => false, 'message' => 'Panier vide ou erreur lors de la récupération des articles']);
+            }
+        } else {
+            // Si la session utilisateur n'est pas trouvée, retourner une erreur
+            $this->sendResponse(['success' => false, 'message' => 'Aucune session utilisateur active']);
+        }
+    }
+
+    private function handleAddPanierRequest($data)
+    {
+        if (isset($_SESSION['user_id'])) {
+            $id_user = $_SESSION['user_id'];
+            $result = $this->PanierController->addToPanier($id_user, $data['id_produit'], $data['quantite']);
+
+            if ($result) {
+                $this->sendResponse(['success' => true, 'message' => 'Produit ajoute au panier']);
+            } else {
+                $this->sendResponse(['success' => false, 'message' => 'Échec de l\'ajout au panier'], 500);
             }
         } else {
             $this->sendResponse(['error' => 'Connectez vous pour ajoute au panier'], 401);
         }
     }
-    private function handleAddPanierRequest($data)
+    private function handleClearPanierRequest($data)
     {
+        if (isset($_SESSION['user_id'])) {
+            $id_user = $_SESSION['user_id'];
+            $result = $this->PanierController->clearPanier($id_user, $data['id_produit']);
 
-        $result = $this->PanierController->addToPanier($data['id_user'], $data['id_produit'], $data['quantite']);
-
-        if ($result) {
-            $this->sendResponse(['success' => true, 'message' => 'Produit ajoute au panier']);
+            if ($result) {
+                $this->sendResponse(['success' => true, 'message' => 'Produit suprime du panier']);
+            } else {
+                $this->sendResponse(['success' => false, 'message' => 'Échec de la suppresion du produit au panier'], 500);
+            }
         } else {
-            $this->sendResponse(['success' => false, 'message' => 'Échec de l\'ajout au panier'], 500);
-        }
-    }
-    private function handleUpdatePanierRequest($data)
-    {
-
-        $result = $this->PanierController->clearPanier($data['id_user'], $data['id_produit'], $data['quantite']);
-
-        if ($result) {
-            $this->sendResponse(['success' => true, 'message' => 'Produit suprime du panier']);
-        } else {
-            $this->sendResponse(['success' => false, 'message' => 'Échec de la suppresion du produit au panier'], 500);
+            $this->sendResponse(['error' => 'Connectez vous pour ajoute au panier'], 401);
         }
     }
 

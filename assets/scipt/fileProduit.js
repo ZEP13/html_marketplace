@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", function () {
         data.forEach((produit) => {
           const cardCol = document.createElement("div");
           cardCol.className = "col-12 col-md-4 pb-3";
-
           const card = document.createElement("div");
           card.className = "product-card card";
 
@@ -73,16 +72,22 @@ document.addEventListener("DOMContentLoaded", function () {
           heartButton.appendChild(heartIcon);
 
           const cartButton = document.createElement("a");
-          cartButton.href = "#"; 
+          cartButton.href = "#";
           cartButton.className = "btn btn-secondary panier";
           cartButton.id = "panier";
           const cartIcon = document.createElement("i");
           cartIcon.className = "fas fa-cart-plus";
           cartButton.appendChild(cartIcon);
-
+          const alertContainer = document.getElementById(
+            "alertContainerfilproduit"
+          );
           if (cartButton) {
             cartButton.addEventListener("click", function (event) {
               event.preventDefault();
+
+              // Récupérer l'ID du produit spécifique pour cet élément
+              const produitId = produit.id_produit; // Utiliser l'id_produit de l'élément actuel
+
               // Appel de la fonction d'ajout au panier
               fetch("../public/index.php", {
                 method: "POST",
@@ -91,17 +96,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 body: JSON.stringify({
                   action: "addPanier",
-                  id_user: ,
-                  id_produit: data.id,
+                  id_produit: produitId, // Utiliser l'id du produit spécifique
                   quantite: 1,
                 }),
               })
                 .then((response) => response.json())
                 .then((data) => {
                   if (data.success) {
-                    alert("Produit ajouté au panier!");
+                    alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
                   } else {
-                    alert("Erreur lors de l'ajout au panier");
+                    alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
                   }
                 })
                 .catch((error) => {

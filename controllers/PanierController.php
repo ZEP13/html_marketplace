@@ -30,9 +30,9 @@ class PanierController
         return $panier->addToPanier($id_user, $id_produit, $quantite);
     }
 
-    public function clearPanier($id_user, $id_produit, $quantite)
+    public function clearPanier($id_user, $id_produit)
     {
         $panier = new Panier($this->db);
-        return $panier->clearPanier($id_user, $id_produit, $quantite);
+        return $panier->clearPanier($id_user, $id_produit);
     }
 }

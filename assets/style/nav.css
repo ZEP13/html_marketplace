@@ -122,3 +122,18 @@
   resize: none;
   }
   
+  .delete-btn {
+    position: absolute;  /* Positionnement absolu dans le conteneur card-body */
+    top: 50%;            /* Centré verticalement */
+    right: 10px;         /* À 10px du côté droit */
+    transform: translateY(-50%);  /* Ajuste pour centrer précisément */
+    background: none;    /* Enlever le fond du bouton */
+    border: none;        /* Enlever les bordures du bouton */
+    color: #dc3545;       /* Rouge pour le bouton de suppression */
+    font-size: 1.5rem;    /* Taille de l'icône */
+  }
+  
+  .delete-btn i {
+    font-size: 1.5rem;   /* Taille de l'icône */
+  }
+  
