@@ -30,7 +30,38 @@ class ApiProduit
         }
     }
 
-    private function handlePostRequest() {}
+    public function handlePostRequest()
+    {
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (isset($data['action']) && $data['action'] === 'addProduit') {
+            $this->handleAddProduitToSell($data);
+        } else if ($data['action'] === 'editProduit') {
+            $this->handleEditProduit($data);
+        }
+    }
+
+    private function handleAddProduitToSell($data)
+    {
+        if (isset($_SESSION['user_id'])) {
+            $id_user = $_SESSION['user_id']; // Récupérer l'ID de 
+            if (!$id_user) {
+                $this->sendResponse(['success' => false, 'message' => 'Aucun utilisateur trouvé dans la session'], 500);
+                return;
+            }
+
+            $addProduit = $this->ProduitController->addProduitToSell($id_user, $data['nom'], $data['description'], $data['prix'], $data['quantite'], $data['img'], $data['category'], $data['actif']);
+
+            if ($addProduit) {
+                $this->sendResponse(['success' => true, 'message' => 'Produit ajoute a la vente']);
+            } else {
+                $this->sendResponse(['success' => false, 'message' => 'impossible d ajoute produit a la vente']);
+            }
+        }
+    }
+
+    //afaire pour eddit produit en vente
+    private function handleEditProduit() {}
 
     private function handleGetRequest()
     {

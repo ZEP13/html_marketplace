@@ -36,7 +36,8 @@
           <h1>Ajouter un produit</h1>
         </div>
       </div>
-      <form>
+      <div id="alertContainerAdd"></div>
+      <form id="addProduitForm" method="POST">
         <div class="m-3">
           <label for="productName" class="form-label">Nom du produit</label>
           <input
@@ -53,7 +54,6 @@
             min="1"
             class="form-control"
             id="productQuantite"
-            placeholder="1"
           />
         </div>
         <div class="m-3">
@@ -64,6 +64,18 @@
             rows="3"
             placeholder="Description du produit"
           ></textarea>
+        </div>
+        <div class="m-3">
+          <select
+            class="form-select"
+            aria-label="Default select example"
+            id="selectCategory"
+          >
+            <option selected>Open this select menu</option>
+            <option value="1">One</option>
+            <option value="2">Two</option>
+            <option value="3">Three</option>
+          </select>
         </div>
         <div class="m-3">
           <label for="productPrice" class="form-label">Prix</label>
@@ -78,11 +90,16 @@
           <label for="productImage" class="form-label">Image du produit</label>
           <input type="file" class="form-control" id="productImage" />
         </div>
+        <div class="m-3">
+          <input type="checkbox" name="actif" id="actifProduit" />
+          <label for="actif">Rendre le produit disponnible à l'achat</label>
+        </div>
         <button type="submit" class="btn btn-primary m-3">
           Ajouter le produit
         </button>
       </form>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/scipt/addProduit..js"></script>
   </body>
 </html>

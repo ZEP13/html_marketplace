@@ -126,6 +126,7 @@ function logout() {
 // Attacher cette fonction au bouton de déconnexion
 document.getElementById("deconnection").addEventListener("click", logout);
 
+//pense modifie les alerts pour un container moin intrussif
 document
   .getElementById("formImgProfil")
   .addEventListener("submit", function (event) {

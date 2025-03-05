@@ -52,4 +52,24 @@ class Produit
             return false;
         }
     }
+
+    public function addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif)
+    {
+        try {
+            $query = "INSERT INTO products (user_id,title, description, price,quantite, image, category, actif) VALUES (:id_user,:nom,:description,:price,:quantite,:img,:category,:actif)";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':id_user', $id_user);
+            $stmt->bindValue(':nom', $nom);
+            $stmt->bindValue(':description', $description);
+            $stmt->bindValue(':price', $price);
+            $stmt->bindValue(':quantite', $quantite);
+            $stmt->bindValue(':img', $img);
+            $stmt->bindValue(':category', $category);
+            $stmt->bindValue(':actif', $actif);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
+    }
 }

@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Handle delete button clicks
   cardPanier.addEventListener("click", function (event) {
-    if (event.target && event.target.classList.contains("delete-btn")) {
+    if (event.target && event.target.classList.contains("bi-trash")) {
       const deleteButton = event.target;
       const id_produit = deleteButton.getAttribute("data-id");
 

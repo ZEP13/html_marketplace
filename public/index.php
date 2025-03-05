@@ -20,11 +20,11 @@ $apiProduit = new ApiProduit();
 $apiPanier = new ApiPanier();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $apiPanier->handleRequest();
+    $apiUser->handleRequest();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $apiPanier->handleRequest();
+    $apiProduit->handleRequest();
 } else {
-    $apiUser->handleRequest();
+    $apiProduit->handleRequest();
 }

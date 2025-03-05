@@ -18,6 +18,11 @@ class ProduitController
         $this->db = $database->getConnection();
     }
 
+    public function addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif)
+    {
+        $produit = new Produit($this->db);
+        return $produit->addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif);
+    }
 
     public function getAllProduit()
     {
