@@ -1,3 +1,4 @@
+const alertContainer = document.getElementById("alertContainerProfil");
 document.addEventListener("DOMContentLoaded", function () {
   let userId; // Variable globale pour stocker l'ID utilisateur
 
@@ -34,7 +35,11 @@ document.addEventListener("DOMContentLoaded", function () {
               console.error(data.error);
               return;
             }
-            document.getElementById("imgPhotoProfil").src = data.img;
+            const imageSrc = data.img
+              ? data.img
+              : "../img/imgUserProfil/defaultPP.png";
+
+            document.getElementById("imgPhotoProfil").src = imageSrc;
 
             // Mettre à jour le profil avec les données de l'utilisateur
             document.getElementById("usernameprofil").textContent =
@@ -76,9 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((response) => response.json())
         .then((data) => {
           console.log("Réponse du serveur:", data); // Affiche la réponse brute du serveur
-          const alertContainer = document.getElementById(
-            "alertContainerProfil"
-          );
+
           if (data.success) {
             alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
             window.location.href = "../views/user.html";
@@ -134,34 +137,29 @@ document
     const imgInput = document.getElementById("imgInput");
     const formData = new FormData(); // Créer une nouvelle instance de FormData
 
-    // Vérifiez si une image a été sélectionnée
-    if (imgInput.files.length > 0) {
-      // Ajoutez l'image à FormData
-      formData.append("profileImage", imgInput.files[0]);
-      formData.append("action", "addImgProfil"); // Ajouter l'action pour l'API
+    // Ajoutez l'image à FormData
+    formData.append("profileImage", imgInput.files[0]);
+    formData.append("action", "addImgProfil"); // Ajouter l'action pour l'API
 
-      // Envoi de la photo via fetch
-      fetch("../public/index.php", {
-        method: "POST",
-        body: formData,
+    // Envoi de la photo via fetch
+    fetch("../public/index.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          location.reload();
+
+          // Afficher un message de succès et mettre à jour l'image
+          alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+          document.querySelector(".profile-card img").src =
+            data.newProfileImageUrl;
+        } else {
+          alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+        }
       })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            // Afficher un message de succès et mettre à jour l'image
-            alert("Photo de profil mise à jour avec succès!");
-            document.querySelector(".profile-card img").src =
-              data.newProfileImageUrl;
-          } else {
-            // Gérer les erreurs
-            alert("Erreur lors de la mise à jour de la photo de profil");
-          }
-        })
-        .catch((error) => {
-          console.error("Erreur:", error);
-          alert("Une erreur est survenue lors du téléchargement.");
-        });
-    } else {
-      alert("Veuillez sélectionner une image.");
-    }
+      .catch((error) => {
+        console.error("Erreur:", error);
+      });
   });

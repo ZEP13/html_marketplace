@@ -28,7 +28,7 @@ class Produit
     public function getAllProduit()
     {
         try {
-            $sql = 'SELECT * FROM products';
+            $sql = 'SELECT products.*, categorie.* FROM products JOIN categorie ON products.category = categorie.id';
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             $produits = $stmt->fetchAll(PDO::FETCH_ASSOC);

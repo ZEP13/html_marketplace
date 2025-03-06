@@ -69,19 +69,19 @@ class ApiUser
     private function handleaddImgProfilRequest($data)
     {
         // Chemin du dossier où les images sont stockées
-        $uploadDir = '../img/imgUserProfil/';
+        $uploadDir = '../img/imgUserProfil/defaultPP.png';
 
         // Vérifier si le dossier existe et le créer si nécessaire
         if (!file_exists($uploadDir)) {
             mkdir($uploadDir, 0777, true);  // Créer le dossier s'il n'existe pas
         }
 
-        // Sécurisation du nom de fichier (générer un nom unique)
-        $fileName = uniqid(time(), true) . '.' . pathinfo($_FILES['profileImage']['name'], PATHINFO_EXTENSION);
-        $uploadFile = $uploadDir . $fileName;
-
         // Vérifier si le fichier est bien une image
         if (isset($_FILES['profileImage']) && $_FILES['profileImage']['error'] == 0) {
+
+            // Sécurisation du nom de fichier (générer un nom unique)
+            $fileName = uniqid(time(), true) . '.' . pathinfo($_FILES['profileImage']['name'], PATHINFO_EXTENSION);
+            $uploadFile = $uploadDir . $fileName;
 
             // Vérifier le type MIME du fichier
             $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
@@ -94,14 +94,24 @@ class ApiUser
                     return;
                 }
 
+                // Récupérer l'ancienne image depuis la base de données ou la session
+                // Supposons que la méthode getUserProfileImage() renvoie l'URL de l'ancienne image.
+                $oldProfileImage = $this->UserController->getUserProfileImage($_SESSION['user_id']);
+
+                // Si une ancienne image existe, la supprimer
+                if ($oldProfileImage && file_exists($oldProfileImage)) {
+                    unlink($oldProfileImage);  // Supprimer le fichier de l'ancienne image
+                }
+
                 // Déplacer le fichier vers le répertoire cible
                 if (move_uploaded_file($_FILES['profileImage']['tmp_name'], $uploadFile)) {
                     // Ajouter l'URL du fichier dans la base de données
-                    $result = $this->UserController->addImgProfil($fileName, $_SESSION['user_id']);  // Utiliser l'ID utilisateur de la session
+                    $result = $this->UserController->addImgProfil($uploadFile, $_SESSION['user_id']);  // Utiliser l'ID utilisateur de la session
                     if ($result) {
                         $this->sendResponse([
                             'success' => true,
                             'newProfileImageUrl' => $uploadFile,  // Ou l'URL complète si vous voulez
+                            'message' => 'PP modifiée avec succès'
                         ]);
                     } else {
                         $this->sendResponse(['success' => false, 'message' => 'Erreur lors de la mise à jour en base de données']);
@@ -113,9 +123,23 @@ class ApiUser
                 $this->sendResponse(['success' => false, 'message' => 'Fichier invalide']);
             }
         } else {
-            $this->sendResponse(['success' => false, 'message' => 'Aucun fichier reçu']);
+            // Si aucun fichier n'est envoyé, réinitialiser l'image à l'image par défaut (et ajouter cette information dans la base de données)
+            $result = $this->UserController->addImgProfil('', $_SESSION['user_id']);  // Enregistrer une valeur vide dans la base de données
+
+            if ($result) {
+                // Réinitialiser l'image de profil à l'image par défaut (lien sans mise à jour en base de données)
+                $this->sendResponse([
+                    'success' => true,
+                    'message' => 'Image de profil réinitialisée à l\'image par défaut'
+                ]);
+            } else {
+                $this->sendResponse(['success' => false, 'message' => 'Erreur lors de la réinitialisation de la photo de profil']);
+            }
         }
     }
+
+
+
 
     private function handleLogoutRequest()
     {

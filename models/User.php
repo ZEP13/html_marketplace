@@ -51,6 +51,28 @@ class User
             return false;
         }
     }
+    public function getUserProfileImage($id)
+    {
+        try {
+            $query = "SELECT user_img FROM users WHERE id_user = :id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':id', $id);
+            $stmt->execute();
+
+            // Utiliser fetch() pour récupérer une seule ligne
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Vérifier si un résultat a été trouvé
+            if ($result) {
+                return $result['user_img'];  // Retourner le chemin de l'image
+            } else {
+                return null;  // Aucun résultat, retourner null
+            }
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
+    }
 
     public function createUser($nom, $prenom, $mail, $password)
     {

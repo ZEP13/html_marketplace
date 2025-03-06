@@ -56,6 +56,12 @@ class UserController
         return $user->addImgProfil($img, $id);
     }
 
+    public function getUserProfileImage($id)
+    {
+        $user = new User($this->db);
+        return $user->getUserProfileImage($id);
+    }
+
     public function validateUserData($data)
     {
         $pattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/';
