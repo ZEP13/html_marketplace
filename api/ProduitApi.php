@@ -115,7 +115,20 @@ class ApiProduit
     //afaire pour eddit produit en vente
     private function handleEditProduit() {}
 
+
     private function handleGetRequest()
+    {
+        // Vérifier si un ID est présent dans l'URL pour récupérer un produit spécifique
+        if (isset($_GET['id']) && !empty($_GET['id'])) {
+            // Appeler la méthode pour récupérer un produit par son ID
+            $this->getProduitById($_GET['id']);
+        } else {
+            // Sinon, récupérer tous les produits
+            $this->getAllProduit();
+        }
+    }
+
+    private function getAllProduit()
     {
         $produit = $this->ProduitController->getAllProduit();  // Utiliser le contrôleur pour récupérer tous les produits
         if ($produit) {
@@ -124,6 +137,17 @@ class ApiProduit
             $this->sendResponse(['error' => 'Aucun produit trouvé'], 404);
         }
     }
+
+    private function getProduitById($id)
+    {
+        $produit = $this->ProduitController->getProduitById($id);  // Utiliser le contrôleur pour récupérer le produit par ID
+        if ($produit) {
+            $this->sendResponse($produit);  // Retourner les données du produit
+        } else {
+            $this->sendResponse(['error' => 'Aucun produit trouvé'], 404);
+        }
+    }
+
 
     private function sendResponse($data, $statusCode = 200)
     {

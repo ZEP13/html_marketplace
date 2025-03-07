@@ -72,4 +72,23 @@ class Produit
             return false;
         }
     }
+    public function getProduitById($id)
+    {
+        try {
+            $sql = 'SELECT products.*, categorie.*, users.*
+FROM products
+JOIN categorie ON products.category = categorie.id
+JOIN users ON products.user_id = users.id_user
+WHERE products.id_produit = :id;
+';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', $id);
+            $stmt->execute();
+            $produits = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $produits;
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des produits : " . $e->getMessage());
+            return false;
+        }
+    }
 }

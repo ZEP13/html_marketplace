@@ -23,7 +23,7 @@ $apiPanier = new ApiPanier();
 $apicategory = new ApiCategory();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $apiUser->handleRequest();
+    $apiProduit->handleRequest();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

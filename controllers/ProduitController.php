@@ -29,6 +29,11 @@ class ProduitController
         $produit = new Produit($this->db);
         return $produit->getAllProduit();
     }
+    public function getProduitById($id)
+    {
+        $produit = new Produit($this->db);
+        return $produit->getProduitById($id);
+    }
 
     public function getProduitByUserSeller($id_user)
     {
