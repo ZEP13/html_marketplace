@@ -22,7 +22,7 @@ class Category
     public function getCategory()
     {
         try {
-            $query = "SELECT * FROM categorie";
+            $query = "SELECT * FROM categorie JOIN users ON categorie.id_user = users.id_user";
             $stmt = $this->db->prepare($query);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

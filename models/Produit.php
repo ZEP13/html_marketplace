@@ -17,6 +17,7 @@ class Produit
     public $categorie;
     public $quantite;
     public $prix;
+    public $actif;
     public $img;
     private $db;
 
@@ -35,6 +36,19 @@ class Produit
             return $produits;
         } catch (PDOException $e) {
             error_log("Erreur lors de la récupération des produits : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteProduit($id)
+    {
+        try {
+            $query = "DELETE FROM products WHERE id_produit = :id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
             return false;
         }
     }
@@ -88,6 +102,53 @@ WHERE products.id_produit = :id;
             return $produits;
         } catch (PDOException $e) {
             error_log("Erreur lors de la récupération des produits : " . $e->getMessage());
+            return false;
+        }
+    }
+    public function getProduitByIdUser($id_user)
+    {
+        try {
+            $sql = 'SELECT products.*, categorie.*, users.*
+FROM products
+JOIN categorie ON products.category = categorie.id
+JOIN users ON products.user_id = users.id_user
+WHERE products.user_id = :id_user;
+';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id_user', $id_user);
+            $stmt->execute();
+            $produits = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $produits;
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des produits : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updateProduit($id, $title, $description, $price, $quantite, $image, $category, $actif)
+    {
+        try {
+            $sql = "UPDATE products 
+                    SET title = :title, 
+                        description = :description, 
+                        price = :price, 
+                        quantite = :quantite, 
+                        image = :image, 
+                        category = :category, 
+                        actif = :actif 
+                    WHERE id_produit = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':title', $title);
+            $stmt->bindValue(':description', $description);
+            $stmt->bindValue(':price', $price);
+            $stmt->bindValue(':quantite', $quantite);
+            $stmt->bindValue(':image', $image);
+            $stmt->bindValue(':category', $category);
+            $stmt->bindValue(':actif', $actif);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la mise à jour du produit : " . $e->getMessage());
             return false;
         }
     }

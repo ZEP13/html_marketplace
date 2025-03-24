@@ -34,7 +34,21 @@ class ProduitController
         $produit = new Produit($this->db);
         return $produit->getProduitById($id);
     }
-
+    public function deleteProduit($id)
+    {
+        $produit = new Produit($this->db);
+        return $produit->deleteProduit($id);
+    }
+    public function updateProduit($id, $title, $description, $price, $quantite, $image, $category, $actif)
+    {
+        $produit = new Produit($this->db);
+        return $produit->updateProduit($id, $title, $description, $price, $quantite, $image, $category, $actif);
+    }
+    public function getProduitByIdUser($id_user)
+    {
+        $produit = new Produit($this->db);
+        return $produit->getProduitByIdUser($id_user);
+    }
     public function getProduitByUserSeller($id_user)
     {
         $produit = new Produit($this->db);

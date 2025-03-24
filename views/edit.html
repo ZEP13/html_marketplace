@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="" />
+    <title>Modifier produit</title>
+  </head>
+  <body>
+    <!-- Formulaire pour ajouter un produit -->
+    <div class="container mt-5">
+      <div
+        class="container mt-5 d-flex align-items-center justify-content-between"
+      >
+        <button class="btn btn-outline-primary">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-arrow-left"
+            viewBox="0 0 16 16"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
+            />
+          </svg>
+        </button>
+        <div class="title text-center flex-grow-1">
+          <h1>Modifier un produit</h1>
+        </div>
+      </div>
+      <div id="alertContainerAdd"></div>
+      <form id="addProduitForm" method="POST">
+        <input type="hidden" id="productId" value="ID_DU_PRODUIT" />
+        <input
+          type="hidden"
+          id="currentImage"
+          value="URL_DE_L_IMAGE_ACTUELLE"
+        />
+        <div class="m-3">
+          <label for="productName" class="form-label">Nom du produit</label>
+          <input
+            type="text"
+            class="form-control"
+            id="productName"
+            placeholder="Nom du produit"
+          />
+        </div>
+        <div class="m-3">
+          <label for="productName" class="form-label">Quantite</label>
+          <input
+            type="number"
+            min="1"
+            class="form-control"
+            id="productQuantite"
+          />
+        </div>
+        <div class="m-3">
+          <label for="productDescription" class="form-label">Description</label>
+          <textarea
+            class="form-control"
+            id="productDescription"
+            rows="3"
+            placeholder="Description du produit"
+          ></textarea>
+        </div>
+        <div class="m-3">
+          <select
+            class="form-select"
+            aria-label="Default select example"
+            id="selectCategory"
+          >
+            <option selected>Choisir categorie</option>
+          </select>
+        </div>
+        <div class="m-3">
+          <label for="productPrice" class="form-label">Prix</label>
+          <input
+            type="text"
+            class="form-control"
+            id="productPrice"
+            placeholder="Prix en €"
+          />
+        </div>
+        <div class="m-3">
+          <label for="productImage" class="form-label">Image du produit</label>
+          <input type="file" class="form-control" id="productImage" />
+        </div>
+        <div class="m-3">
+          <input type="checkbox" name="actif" id="actifProduit" />
+          <label for="actif">Rendre le produit disponnible à l'achat</label>
+        </div>
+        <button type="submit" class="btn btn-primary m-3">
+          Ajouter le produit
+        </button>
+      </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/scipt/addProduit..js"></script>
+  </body>
+</html>
