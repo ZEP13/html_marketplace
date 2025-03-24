@@ -39,10 +39,10 @@ class ProduitController
         $produit = new Produit($this->db);
         return $produit->deleteProduit($id);
     }
-    public function updateProduit($id, $title, $description, $price, $quantite, $image, $category, $actif)
+    public function updateProduit($id, $user_id, $title, $description, $price, $quantite, $image, $category, $actif)
     {
         $produit = new Produit($this->db);
-        return $produit->updateProduit($id, $title, $description, $price, $quantite, $image, $category, $actif);
+        return $produit->updateProduit($id, $user_id, $title, $description, $price, $quantite, $image, $category, $actif);
     }
     public function getProduitByIdUser($id_user)
     {

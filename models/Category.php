@@ -19,15 +19,15 @@ class Category
         $this->db = $db;
     }
 
-    public function getCategory()
+    public function getAllCategories()
     {
         try {
-            $query = "SELECT * FROM categorie JOIN users ON categorie.id_user = users.id_user";
-            $stmt = $this->db->prepare($query);
+            $sql = "SELECT id, category_name FROM categorie";
+            $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
+            error_log("Erreur lors de la récupération des catégories : " . $e->getMessage());
             return false;
         }
     }

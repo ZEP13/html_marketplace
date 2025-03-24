@@ -45,6 +45,9 @@ class ApiProduit
             if ($action === 'addProduit') {
                 $data = json_decode(file_get_contents('php://input'), true);
                 $this->handleAddProduitToSell($data);
+            } elseif ($action === 'updateProduit') {
+                $data = json_decode(file_get_contents('php://input'), true);
+                $this->handleEditProduit($data);
             } elseif ($action === 'deleteProduit') {
                 if (isset($_GET['id']) && !empty($_GET['id'])) {
                     $this->deleteProduit($_GET['id']);
@@ -59,15 +62,6 @@ class ApiProduit
         }
     }
 
-    public function handlePostRequest()
-    {
-        // Pas besoin de json_decode, car nous utilisons multipart/form-data
-        if (isset($_POST['action']) && $_POST['action'] === 'addProduit') {
-            $this->handleAddProduitToSell($_POST);  // Envoi directement avec $_POST
-        } else if (isset($_POST['action']) && $_POST['action'] === 'updateProduit') {
-            $this->handleEditProduit($_POST);
-        }
-    }
 
     private function handleAddProduitToSell($data)
     {
@@ -141,6 +135,8 @@ class ApiProduit
 
     private function handleEditProduit($data)
     {
+        // Use $_POST and $_FILES for FormData
+        $data = $_POST;
         // Vérifier si l'utilisateur est connecté
         if (!isset($_SESSION['user_id'])) {
             $this->sendResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 401);
@@ -149,16 +145,17 @@ class ApiProduit
 
         // Vérifier les données obligatoires
         if (empty($data['id']) || empty($data['title']) || empty($data['description']) || empty($data['price']) || empty($data['quantite']) || empty($data['category'])) {
+            error_log('Données manquantes : ' . print_r($data, true));
             $this->sendResponse(['success' => false, 'message' => 'Des informations sont manquantes pour le produit'], 400);
             return;
         }
 
-        // Vérifier si une image est fournie
+        // Handle image upload
         $image = isset($_FILES['img']) && $_FILES['img']['error'] == 0
             ? $this->uploadImage($_FILES['img'])
-            : $data['current_image']; // Utiliser l'image actuelle si aucune nouvelle image n'est fournie
+            : (isset($data['current_image']) ? $data['current_image'] : null);
 
-        if ($image === false) {
+        if ($image === false && !isset($data['current_image'])) {
             $this->sendResponse(['success' => false, 'message' => 'Erreur lors du téléchargement de l\'image']);
             return;
         }
@@ -166,13 +163,14 @@ class ApiProduit
         // Appeler le contrôleur pour mettre à jour le produit
         $updated = $this->ProduitController->updateProduit(
             $data['id'],
+            $_SESSION['user_id'],
             $data['title'],
             $data['description'],
             $data['price'],
             $data['quantite'],
             $image,
             $data['category'],
-            $data['actif']
+            isset($data['actif']) ? $data['actif'] : 0
         );
 
         if ($updated) {
@@ -187,6 +185,18 @@ class ApiProduit
         $uploadDir = '../img/imgProduct/';
         if (!file_exists($uploadDir)) {
             mkdir($uploadDir, 0777, true);
+        }
+
+        // Vérifier le type de fichier
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($file['type'], $allowedTypes)) {
+            return false;
+        }
+
+        // Vérifier la taille du fichier (max 2 MB)
+        $maxFileSize = 2 * 1024 * 1024;
+        if ($file['size'] > $maxFileSize) {
+            return false;
         }
 
         $fileName = uniqid(time(), true) . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -211,14 +221,13 @@ class ApiProduit
 
     private function getProduitById($id)
     {
-        $produit = $this->ProduitController->getProduitById($id);  // Utiliser le contrôleur pour récupérer le produit par ID
+        $produit = $this->ProduitController->getProduitById($id);
         if ($produit) {
-            $this->sendResponse($produit);  // Retourner les données du produit
+            $this->sendResponse(['success' => true, 'produit' => $produit]);
         } else {
-            $this->sendResponse(['error' => 'Aucun produit trouvé'], 404);
+            $this->sendResponse(['success' => false, 'message' => 'Produit introuvable'], 404);
         }
     }
-
     private function getProduitByIdUser($id_user)
     {
         $produit = $this->ProduitController->getProduitByIdUser($id_user);

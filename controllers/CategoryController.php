@@ -18,10 +18,10 @@ class CategoryController
         $this->db = $database->getConnection();
     }
 
-    public function getCategory()
+    public function getAllCategories()
     {
         $Category = new Category($this->db);
-        return $Category->getCategory();
+        return $Category->getAllCategories();
     }
 
     public function addCategory($nom)

@@ -42,7 +42,7 @@ if (isset($_GET['api']) && isset($apis[$_GET['api']])) {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $api->handleRequest(); // Appeler la méthode handleRequest() de l'API
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $api->handleRequest(); // Appeler la méthode handleRequest() de l'API
+        $api->handleRequest(); // Ensure POST requests are routed correctly
     } else {
         echo json_encode(['error' => 'Méthode non supportée'], JSON_PRETTY_PRINT);
     }

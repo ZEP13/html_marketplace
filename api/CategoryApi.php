@@ -57,11 +57,17 @@ class ApiCategory
 
     private function handleGetRequest()
     {
-        $category = $this->CategoryController->getCategory();  // Utiliser le contrôleur pour récupérer tous les produits
-        if ($category) {
-            $this->sendResponse($category);  // Retourner les données des produits
+        $action = isset($_GET['action']) ? $_GET['action'] : null;
+
+        if ($action === 'getAllCategories') {
+            $categories = $this->CategoryController->getAllCategories();
+            if ($categories) {
+                $this->sendResponse(['success' => true, 'categories' => $categories]);
+            } else {
+                $this->sendResponse(['success' => false, 'message' => 'Aucune catégorie trouvée'], 404);
+            }
         } else {
-            $this->sendResponse(['error' => 'Aucune categorie trouvé'], 404);
+            $this->sendResponse(['error' => 'Action non reconnue'], 400);
         }
     }
     private function sendResponse($data, $statusCode = 200)
