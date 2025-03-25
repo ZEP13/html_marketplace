@@ -1,23 +1,34 @@
 // Récupérer les données du produit et pré-remplir le formulaire
 const alertContainer = document.getElementById("alertContainerEdit");
 document.addEventListener("DOMContentLoaded", function () {
-  const productId = document.getElementById("productId").value;
+  // Retrieve the product ID from sessionStorage
+  const productId = sessionStorage.getItem("editProductId");
 
-  // Récupérer les informations du produit via l'API
-  fetch(`../public/index.php?api=produit&action=getProduitsById&id=1`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
+  if (!productId) {
+    console.error("No product ID found in sessionStorage.");
+    alert("No product selected for editing.");
+    window.location.href = "user_vente.html"; // Redirect back to the product list
+    return;
+  }
+
+  // Use the product ID to fetch product details
+  fetch(
+    `../public/index.php?api=produit&action=getProduitsById&id=${productId}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  )
     .then((response) => response.json())
     .then((data) => {
-      console.log("Données du produit :", data);
+      console.log("Product data:", data);
 
       if (data.success && data.produit) {
         const produit = data.produit[0];
 
-        // Pré-remplir les champs du formulaire
+        // Populate the form fields with product data
         document.getElementById("productId").value = produit.id_produit;
         document.getElementById("productName").value = produit.title;
         document.getElementById("productQuantite").value = produit.quantite;
@@ -109,7 +120,7 @@ document
 
     // Ajouter les données au FormData avec les noms de champs corrects
     formData.append("action", "updateProduit");
-    formData.append("id", productId); // Ensure dynamic productId is used
+    formData.append("id", 1); // Use dynamic productId instead of hardcoded value
     formData.append("title", productName); // Changed from 'nom' to 'title'
     formData.append("quantite", productQuantite);
     formData.append("description", productDescription);
@@ -128,22 +139,10 @@ document
     // Debug des données envoyées
     console.log("Données envoyées :", Object.fromEntries(formData));
 
-    // Debugging the form data before sending
-    console.log("Form Data Before Sending:");
-    formData.forEach((value, key) => {
-      console.log(`${key}: ${value}`);
-    });
-
     // Add debug headers to see what's being sent
-    console.log("FormData Debug:");
-    formData.forEach((value, key) => {
-      console.log(`${key}:`, value);
-    });
-
-    // Send the FormData without manually setting the Content-Type header
     fetch("../public/index.php?api=produit&action=updateProduit", {
       method: "POST",
-      body: formData, // Let the browser set the correct Content-Type
+      body: formData,
     })
       .then((response) => {
         if (!response.ok) {

@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let userId; // Variable globale pour stocker l'ID utilisateur
 
   // Vérifier la session et récupérer les données de l'utilisateur
-  fetch("../public/index.php", {
+  fetch("../public/index.php?api=user&action=getUser", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -16,43 +16,20 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data.id) {
         userId = data.id; // Stocker l'ID utilisateur dans la variable globale
 
-        // Si la session est active, récupérer les informations de l'utilisateur
-        fetch(`../public/index.php?id=${userId}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Erreur du serveur: " + response.status);
-            }
-            return response.json();
-          })
-          .then((data) => {
-            console.log("Données reçues :", data);
-            if (data.error) {
-              console.error(data.error);
-              return;
-            }
-            const imageSrc = data.img
-              ? data.img
-              : "../img/imgUserProfil/defaultPP.png";
+        // Mettre à jour le profil avec les données de l'utilisateur
+        const imageSrc = data.img
+          ? data.img
+          : "../img/imgUserProfil/defaultPP.png";
 
-            document.getElementById("imgPhotoProfil").src = imageSrc;
-
-            // Mettre à jour le profil avec les données de l'utilisateur
-            document.getElementById("usernameprofil").textContent =
-              data.nom + " " + data.prenom;
-            document.getElementById("usermailprofil").textContent = data.mail;
-            document.getElementById("emailInputEditModal").value = data.mail;
-          })
-          .catch((error) => {
-            console.error("Erreur lors de la requête:", error);
-          });
+        document.getElementById("imgPhotoProfil").src = imageSrc;
+        document.getElementById("usernameprofil").textContent =
+          data.nom + " " + data.prenom;
+        document.getElementById("usermailprofil").textContent = data.mail;
+        document.getElementById("emailInputEditModal").value = data.mail;
       } else {
         console.error("Aucune session active");
-        // Rediriger l'utilisateur vers la page de connexion s'il n'est pas
+        // Rediriger l'utilisateur vers la page de connexion s'il n'est pas connecté
+        window.location.href = "../views/login.html";
       }
     })
     .catch((error) => {
@@ -65,13 +42,13 @@ document.addEventListener("DOMContentLoaded", function () {
     .addEventListener("submit", function (event) {
       event.preventDefault();
       const dataEditMail = {
-        action: "EditMail",
+        action: "editMail",
         mail: document.getElementById("usermailprofil").textContent,
         newMail: document.getElementById("emailInputEditModal").value,
         id: userId, // Utiliser l'ID utilisateur stocké dans la variable globale
       };
       console.log(dataEditMail);
-      fetch("../public/index.php", {
+      fetch("../public/index.php?api=user&action=editMail", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,31 +57,30 @@ document.addEventListener("DOMContentLoaded", function () {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log("Réponse du serveur:", data); // Affiche la réponse brute du serveur
+          console.log("Réponse du serveur:", data);
 
           if (data.success) {
             alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-            window.location.href = "../views/user.html";
+            document.getElementById("usermailprofil").textContent =
+              dataEditMail.newMail;
           } else {
             alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
           }
         })
         .catch((error) => {
-          const alertContainer = document.getElementById(
-            "alertContainerProfil"
-          );
           alertContainer.innerHTML = `<div class="alert alert-danger">Erreur lors de la requête: ${error.message}</div>`;
           console.error("Erreur lors de la requête:", error);
         });
     });
 });
+
 // Fonction pour déconnecter l'utilisateur
 function logout() {
   const logout = {
     action: "logout",
   };
   // Appel à l'API de déconnexion
-  fetch("../public/index.php", {
+  fetch("../public/index.php?api=user&action=logout", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -113,48 +89,46 @@ function logout() {
   })
     .then((response) => response.json())
     .then((data) => {
-      const alertContainer = document.getElementById("alertContainerProfil");
       if (data.success) {
         alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-        // Rediriger l'utilisateur vers la page d'accueil ou la page de connexion
+        // Rediriger l'utilisateur vers la page de connexion
         window.location.href = "../views/login.html";
       } else {
-        alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+        alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
       }
     })
     .catch((error) => {
       console.error("Erreur de déconnexion:", error);
     });
 }
+
 // Attacher cette fonction au bouton de déconnexion
 document.getElementById("deconnection").addEventListener("click", logout);
 
-//pense modifie les alerts pour un container moin intrussif
+// Fonction pour mettre à jour l'image de profil
 document
   .getElementById("formImgProfil")
   .addEventListener("submit", function (event) {
     event.preventDefault();
     const imgInput = document.getElementById("imgInput");
-    const formData = new FormData(); // Créer une nouvelle instance de FormData
+    const formData = new FormData();
 
-    // Ajoutez l'image à FormData
+    // Ajouter l'image et l'action à FormData
     formData.append("profileImage", imgInput.files[0]);
-    formData.append("action", "addImgProfil"); // Ajouter l'action pour l'API
+    formData.append("action", "addImgProfil");
 
     // Envoi de la photo via fetch
-    fetch("../public/index.php", {
+    fetch("../public/index.php?api=user&action=addImgProfil", {
       method: "POST",
       body: formData,
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          location.reload();
-
-          // Afficher un message de succès et mettre à jour l'image
-          alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-          document.querySelector(".profile-card img").src =
+          // Mettre à jour l'image de profil
+          document.getElementById("imgPhotoProfil").src =
             data.newProfileImageUrl;
+          alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
         } else {
           alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
         }

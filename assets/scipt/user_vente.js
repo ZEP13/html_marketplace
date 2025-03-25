@@ -33,9 +33,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 <td>${produit.actif}</td>
                 <td>
                   <button class="btn btn-warning btn-sm" onclick="deleteProduit(${
-                    produit.id
+                    produit.id_produit
                   })">Supprimer</button>
-                  <button class="btn btn-danger btn-sm">Edit</button>
+                   <button class="btn btn-warning btn-sm" onclick="navigateToEditPage(${
+                     produit.id_produit
+                   })">Edit</button>
                 </td>
               `;
           tableBody.appendChild(row);
@@ -70,4 +72,12 @@ function deleteProduit(id) {
       console.error("Erreur lors de la requête :", error);
       alert("Une erreur est survenue lors de la suppression du produit.");
     });
+}
+
+function navigateToEditPage(productId) {
+  // Store the product ID in sessionStorage
+  sessionStorage.setItem("editProductId", productId);
+
+  // Navigate to the edit page
+  window.location.href = "edit.html";
 }

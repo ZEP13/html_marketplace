@@ -135,25 +135,26 @@ class ApiProduit
 
     private function handleEditProduit($data)
     {
-        // Use $_POST and $_FILES for FormData
-        $data = $_POST;
+        // Debug des données reçues
+        error_log('Données reçues : ' . print_r($data, true));
+        error_log('Fichiers reçus : ' . print_r($_FILES, true));
+
         // Vérifier si l'utilisateur est connecté
         if (!isset($_SESSION['user_id'])) {
             $this->sendResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 401);
             return;
         }
 
-        // Vérifier les données obligatoires
+        // Vérifier les données obligatoires avec les nouveaux noms de champs
         if (empty($data['id']) || empty($data['title']) || empty($data['description']) || empty($data['price']) || empty($data['quantite']) || empty($data['category'])) {
-            error_log('Données manquantes : ' . print_r($data, true));
             $this->sendResponse(['success' => false, 'message' => 'Des informations sont manquantes pour le produit'], 400);
             return;
         }
 
-        // Handle image upload
+        // Vérifier si une image est fournie
         $image = isset($_FILES['img']) && $_FILES['img']['error'] == 0
             ? $this->uploadImage($_FILES['img'])
-            : (isset($data['current_image']) ? $data['current_image'] : null);
+            : $data['current_image']; // Utiliser l'image actuelle si aucune nouvelle image n'est fournie
 
         if ($image === false && !isset($data['current_image'])) {
             $this->sendResponse(['success' => false, 'message' => 'Erreur lors du téléchargement de l\'image']);

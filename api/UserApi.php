@@ -19,26 +19,44 @@ class ApiUser
 
     public function handleRequest()
     {
-        $requestMethod = $_SERVER['REQUEST_METHOD'];
+        $action = isset($_GET['action']) ? $_GET['action'] : null;
 
-        if ($requestMethod === 'GET') {
-            $this->handleGetRequest();
-        } elseif ($requestMethod === 'POST') {
-            $this->handlePostRequest();
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            if ($action === 'getUser') {
+                $this->getUser();
+            } else {
+                $this->sendResponse(['error' => 'Action non reconnue'], 400);
+            }
+        } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if ($action === 'login') {
+                $data = json_decode(file_get_contents('php://input'), true);
+                $this->handleLoginRequest($data);
+            } elseif ($action === 'register') {
+                $data = json_decode(file_get_contents('php://input'), true);
+                $this->handleRegisterRequest($data);
+            } elseif ($action === 'logout') {
+                $this->handleLogoutRequest();
+            } elseif ($action === 'editMail') {
+                $data = json_decode(file_get_contents('php://input'), true);
+                $this->handleEditMailRequest($data);
+            } elseif ($action === 'addImgProfil') {
+                $this->handleAddImgProfilRequest($_POST);
+            } else {
+                $this->sendResponse(['error' => 'Action non reconnue'], 400);
+            }
         } else {
             $this->sendResponse(['error' => 'Méthode non supportée'], 405);
         }
     }
 
-    private function handleGetRequest()
+    private function getUser()
     {
-        // Vérification de la session active
         if (isset($_SESSION['user_id'])) {
-            $id = $_SESSION['user_id'];  // Récupérer l'ID de l'utilisateur depuis la session
-            $user = $this->UserController->getUserById($id);  // Utiliser le contrôleur pour récupérer l'utilisateur
+            $id = $_SESSION['user_id'];
+            $user = $this->UserController->getUserById($id);
 
             if ($user) {
-                $this->sendResponse($user);  // Retourner les données utilisateur
+                $this->sendResponse($user);
             } else {
                 $this->sendResponse(['error' => 'Utilisateur non trouvé'], 404);
             }
@@ -47,26 +65,66 @@ class ApiUser
         }
     }
 
-    private function handlePostRequest()
+    private function handleLoginRequest($data)
     {
-        if (isset($_POST['action']) && $_POST['action'] === 'addImgProfil') {
-            $this->handleaddImgProfilRequest($_POST);
-        } else {
-            $data = json_decode(file_get_contents('php://input'), true);
+        if (!$this->UserController->validateLogin($data)) {
+            $this->sendResponse(['success' => false, 'message' => 'Données invalides'], 400);
+            return;
+        }
 
-            if (isset($data['action']) && $data['action'] === 'login') {
-                $this->handleLoginRequest($data);
-            } else if ($data['action'] === 'EditMail') {
-                $this->handleEdditMailRequest($data);
-            } else if ($data['action'] === 'logout') {
-                $this->handleLogoutRequest();
-            } else {
-                $this->handleRegisterRequest($data);
-            }
+        $result = $this->UserController->checkLogin($data['mail'], $data['password']);
+
+        if ($result) {
+            $this->sendResponse(['success' => true, 'message' => 'Utilisateur connecté avec succès']);
+        } else {
+            $this->sendResponse(['success' => false, 'message' => 'Échec de la connexion'], 401);
         }
     }
 
-    private function handleaddImgProfilRequest($data)
+    private function handleRegisterRequest($data)
+    {
+        if (!$this->UserController->validateUserData($data)) {
+            $this->sendResponse(['success' => false, 'message' => 'Données invalides'], 400);
+            return;
+        }
+
+        $result = $this->UserController->createUser($data['nom'], $data['prenom'], $data['mail'], $data['password']);
+
+        if ($result) {
+            $this->sendResponse(['success' => true, 'message' => 'Utilisateur ajouté avec succès']);
+        } else {
+            $this->sendResponse(['success' => false, 'message' => 'Échec de l\'ajout de l\'utilisateur'], 500);
+        }
+    }
+
+    private function handleLogoutRequest()
+    {
+        if (isset($_SESSION['user_id'])) {
+            session_unset();
+            session_destroy();
+            $this->sendResponse(['success' => true, 'message' => 'Déconnexion réussie']);
+        } else {
+            $this->sendResponse(['success' => false, 'message' => 'Aucune session active'], 400);
+        }
+    }
+
+    private function handleEditMailRequest($data)
+    {
+        if (empty($data['mail']) || empty($data['newMail'])) {
+            $this->sendResponse(['success' => false, 'message' => 'Données invalides'], 400);
+            return;
+        }
+
+        $result = $this->UserController->editMail($data['newMail'], $data['id']);
+
+        if ($result) {
+            $this->sendResponse(['success' => true, 'message' => 'Mail modifié avec succès']);
+        } else {
+            $this->sendResponse(['success' => false, 'message' => 'Échec de la modification du mail'], 500);
+        }
+    }
+
+    private function handleAddImgProfilRequest($data)
     {
         // Chemin du dossier où les images sont stockées
         $uploadDir = '../img/imgUserProfil/defaultPP.png';
@@ -138,72 +196,9 @@ class ApiUser
         }
     }
 
-
-
-
-    private function handleLogoutRequest()
-    {
-        if (isset($_SESSION['user_id'])) {
-
-            session_unset();
-            session_destroy();
-
-            $this->sendResponse(['success' => true, 'message' => 'Déconnexion réussie']);
-        } else {
-            $this->sendResponse(['success' => true, 'message' => 'erreur de deconnexion']);
-        }
-    }
-
-    private function handleEdditMailRequest($data)
-    {
-        if (empty($data['mail']) || empty($data['newMail'])) {
-            $this->sendResponse(['success' => false, 'message' => 'Données invalides'], 400);
-            return;
-        }
-
-        $result = $this->UserController->editMail($data['newMail'], $data['id']);
-
-        if ($result) {
-            $this->sendResponse(['success' => true, 'message' => 'Mail modifié avec succès']);
-        } else {
-            $this->sendResponse(['success' => false, 'message' => 'Échec de la modification du mail'], 500);
-        }
-    }
-
-    private function handleRegisterRequest($data)
-    {
-        if (!$this->UserController->validateUserData($data)) {
-            $this->sendResponse(['success' => false, 'message' => 'Données invalides'], 400);
-            return;
-        }
-
-        $result = $this->UserController->createUser($data['nom'], $data['prenom'], $data['mail'], $data['password']);
-
-        if ($result) {
-            $this->sendResponse(['success' => true, 'message' => 'Utilisateur ajouté avec succès']);
-        } else {
-            $this->sendResponse(['success' => false, 'message' => 'Échec de l\'ajout de l\'utilisateur'], 500);
-        }
-    }
-
-    private function handleLoginRequest($data)
-    {
-        if (!$this->UserController->validateLogin($data)) {
-            $this->sendResponse(['success' => false, 'message' => 'Données invalides'], 400);
-            return;
-        }
-
-        $result = $this->UserController->checkLogin($data['mail'], $data['password']);
-
-        if ($result) {
-            $this->sendResponse(['success' => true, 'message' => 'Utilisateur connecté avec succès']);
-        } else {
-            $this->sendResponse(['success' => false, 'message' => 'Échec de la connexion'], 401);
-        }
-    }
-
     private function sendResponse($data, $statusCode = 200)
     {
+        header('Content-Type: application/json');
         http_response_code($statusCode);
         echo json_encode($data);
         exit();

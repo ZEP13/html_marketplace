@@ -80,7 +80,7 @@ document
       password: document.getElementById("loginPassword").value,
     };
     console.log(dataFormlog);
-    fetch("../public/index.php", {
+    fetch("../public/index.php?api=user&action=login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
