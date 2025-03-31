@@ -29,7 +29,16 @@ class Produit
     public function getAllProduit()
     {
         try {
-            $sql = 'SELECT products.*, categorie.* FROM products JOIN categorie ON products.category = categorie.id';
+            $sql = 'SELECT 
+                    p.*,
+                    c.*,
+                    COUNT(r.id_review) as review_count,
+                    COALESCE(AVG(r.rating), 0) as average_rating
+                FROM products p
+                JOIN categorie c ON p.category = c.id
+                LEFT JOIN reviews_produit r ON p.id_produit = r.id_produit
+                GROUP BY p.id_produit';
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             $produits = $stmt->fetchAll(PDO::FETCH_ASSOC);

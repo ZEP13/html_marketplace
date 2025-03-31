@@ -1,8 +1,7 @@
-
 /* Initial state of the navbar */
 #navbar {
     position: fixed; /* Position fixe pour glisser par-dessus le contenu */
-    z-index: 100; /* S'assurer qu'il est au-dessus des autres éléments */
+    z-index: 1030; /* S'assurer qu'il est au-dessus des autres éléments */
     width: 250px;
     height: 100%; /* Prend toute la hauteur de la page */
     top: 0;
@@ -16,6 +15,16 @@
     width: 0;
     padding: 0;
     overflow: hidden;
+  }
+  
+  /* Initial position for toggle button when navbar is closed */
+  #navbar.closed + #toggle-btn {
+    left: 0;
+  }
+  
+  /* Button icon when navbar is closed */
+  #navbar.closed + #toggle-btn i {
+    transform: rotate(180deg);
   }
   
   /* Button to toggle navbar visibility */
@@ -44,6 +53,9 @@
     border: 1px solid #ddd;
     border-radius: 10px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;   /* Hauteur à 100% du conteneur parent */
+    display: flex;
+    flex-direction: column;
   }
   
   .product-card:hover {
@@ -53,19 +65,30 @@
   
   .product-card img {
     width: 100%;
-    height: 50%;
+    height: 200px;
     object-fit: cover;
-    transition: transform 0.3s ease;
   }
   
   .product-card:hover img {
-    transform: scale(1.1);
+    height: 200px; /* Réduction de 20% */
   }
-  
+
   .card-body {
     padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+    background: rgb(255, 255, 255);
+    position: relative;
   }
-  
+
+  .product-card:hover .card-body {
+    transform: translateY(-20px); 
+    border-radius: 10px 10px 0;/* déplace le body vers le haut */
+    box-shadow: 0 -5px 10px rgba(0,0,0,0.1);
+  }
+
   .card-title {
     font-size: 1.2rem;
     font-weight: bold;
@@ -75,7 +98,22 @@
     font-size: 1rem;
     margin-bottom: 1rem;
   }
-  
+  .description {
+    margin: 0.5rem 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    transition: all 0.3s ease;
+  }
+  .product-card:hover .description {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    
+  }
   .rating {
     margin-top: 0.5rem;
   }
@@ -91,7 +129,7 @@
   /* Conteneur des boutons qui glissent depuis la droite */
   .btn-container {
     position: absolute;
-    top: 50%;
+    top: 30%;
     right: -60px;
     /* Masqué à droite */
     transform: translateY(-50%);
@@ -109,6 +147,8 @@
   }
   .card-container .col-12 {
     display: block !important;    
+    margin-bottom: 20px;  /* Espacement entre les cartes */
+    height: 350px;       /* Hauteur fixe pour toutes les cartes */
   }
   .btn-container .btn {
     width: 40px;
@@ -187,3 +227,13 @@
       height: 40%; /* Vous pouvez ajuster la hauteur de l'image si nécessaire */
     }
   }
+
+/* Ensure main content doesn't conflict with navbar */
+.mainContent {
+  margin-top: 60px; /* Adjust based on your navbar height */
+}
+
+/* Ensure offcanvas appears above other elements */
+.offcanvas {
+  z-index: 1040;
+}

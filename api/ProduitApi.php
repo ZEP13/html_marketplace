@@ -62,74 +62,77 @@ class ApiProduit
         }
     }
 
-
     private function handleAddProduitToSell($data)
     {
         // Vérifier si l'utilisateur est connecté
-        if (isset($_SESSION['user_id'])) {
-            $id_user = $_SESSION['user_id'];
-        } else {
-            $this->sendResponse(['success' => false, 'message' => 'Aucun utilisateur trouvé dans la session'], 500);
+        if (!isset($_SESSION['user_id'])) {
+            $this->sendResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 401);
             return;
         }
 
-        // Vérifier les données du produit
-        if (empty($data['nom']) || empty($data['description']) || empty($data['prix']) || empty($data['quantite']) || empty($data['category'])) {
-            $this->sendResponse(['success' => false, 'message' => 'Des informations sont manquantes pour le produit'], 400);
+        $id_user = $_SESSION['user_id'];
+
+        // Pour FormData, les données sont dans $_POST et les fichiers dans $_FILES
+        $nom = isset($_POST['nom']) ? $_POST['nom'] : null;
+        $description = isset($_POST['description']) ? $_POST['description'] : null;
+        $prix = isset($_POST['prix']) ? $_POST['prix'] : null;
+        $quantite = isset($_POST['quantite']) ? $_POST['quantite'] : null;
+        $category = isset($_POST['category']) ? $_POST['category'] : null;
+        $actif = isset($_POST['actif']) ? $_POST['actif'] : 0;
+
+        // Debug
+        error_log("Données reçues: " . print_r($_POST, true));
+        error_log("Fichiers reçus: " . print_r($_FILES, true));
+
+        // Vérifier les données obligatoires
+        if (!$nom || !$description || !$prix || !$quantite || !$category) {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Des informations sont manquantes pour le produit',
+                'received' => [
+                    'nom' => $nom,
+                    'description' => $description,
+                    'prix' => $prix,
+                    'quantite' => $quantite,
+                    'category' => $category
+                ]
+            ], 400);
             return;
         }
 
-        // Définir le répertoire d'upload pour les images
+        // Gérer l'upload de l'image
+        if (!isset($_FILES['img']) || $_FILES['img']['error'] !== UPLOAD_ERR_OK) {
+            $this->sendResponse(['success' => false, 'message' => 'Image manquante ou erreur lors du téléchargement'], 400);
+            return;
+        }
+
         $uploadDir = '../img/imgProduct/';
-
-        // Créer le répertoire s'il n'existe pas
         if (!file_exists($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
 
-        // Vérifier si une image est téléchargée
-        if (isset($_FILES['img']) && $_FILES['img']['error'] == 0) {
-            $fileName = uniqid(time(), true) . '.' . pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
-            $uploadFile = $uploadDir . $fileName;
+        $fileName = uniqid(time(), true) . '.' . pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
+        $uploadFile = $uploadDir . $fileName;
 
-            // Vérifier le type de fichier
-            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-            if (!in_array($_FILES['img']['type'], $allowedTypes)) {
-                $this->sendResponse(['success' => false, 'message' => 'Type de fichier non autorisé']);
-                return;
-            }
+        if (move_uploaded_file($_FILES['img']['tmp_name'], $uploadFile)) {
+            $addProduit = $this->ProduitController->addProduitToSell(
+                $id_user,
+                $nom,
+                $description,
+                $prix,
+                $quantite,
+                $uploadFile,
+                $category,
+                $actif
+            );
 
-            // Vérifier la taille du fichier (max 2 MB)
-            $maxFileSize = 2 * 1024 * 1024; // 2 MB
-            if ($_FILES['img']['size'] > $maxFileSize) {
-                $this->sendResponse(['success' => false, 'message' => 'Le fichier est trop volumineux']);
-                return;
-            }
-
-            // Déplacer le fichier téléchargé
-            if (move_uploaded_file($_FILES['img']['tmp_name'], $uploadFile)) {
-                // Ajouter le produit à la base de données
-                $addProduit = $this->ProduitController->addProduitToSell(
-                    $id_user,
-                    $data['nom'],
-                    $data['description'],
-                    $data['prix'],
-                    $data['quantite'],
-                    $uploadFile,
-                    $data['category'],
-                    $data['actif']
-                );
-
-                if ($addProduit) {
-                    $this->sendResponse(['success' => true, 'message' => 'Produit ajouté à la vente']);
-                } else {
-                    $this->sendResponse(['success' => false, 'message' => 'Impossible d\'ajouter le produit à la vente']);
-                }
+            if ($addProduit) {
+                $this->sendResponse(['success' => true, 'message' => 'Produit ajouté avec succès']);
             } else {
-                $this->sendResponse(['success' => false, 'message' => 'Erreur lors du téléchargement du fichier']);
+                $this->sendResponse(['success' => false, 'message' => 'Erreur lors de l\'ajout du produit']);
             }
         } else {
-            $this->sendResponse(['success' => false, 'message' => 'Aucune image téléchargée ou erreur de fichier']);
+            $this->sendResponse(['success' => false, 'message' => 'Erreur lors de l\'upload de l\'image']);
         }
     }
 
