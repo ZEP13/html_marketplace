@@ -29,7 +29,7 @@ class Review
     public function getReveiwByProduct($id_produit)
     {
         try {
-            $query = "SELECT * FROM reviews_produit WHERE id_produit = :id";
+            $query = "SELECT reviews_produit.*, users.* FROM reviews_produit JOIN users ON reviews_produit.id_user = users.id_user WHERE id_produit = :id";
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':id', $id_produit, PDO::PARAM_INT);
             $stmt->execute();

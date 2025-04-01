@@ -7,14 +7,14 @@ function initializePanier() {
   loadPanierContent();
   setupPanierEventListeners();
 }
+const alertContainer = document.getElementById("alertContainernav");
 
 function loadPanierContent() {
   if (isLoading) return;
 
   const cardPanier = document.getElementById("cardPanier");
-  const alertContainer = document.getElementById("alertContainernav");
-
-  if (!cardPanier || !alertContainer) return;
+  const totalPanier = document.getElementById("totalPanier");
+  let total = 0; // Déplacer la déclaration ici et corriger à let
 
   isLoading = true;
   cardPanier.innerHTML = '<p class="text-center">Chargement...</p>';
@@ -23,6 +23,11 @@ function loadPanierContent() {
     .then((response) => response.json())
     .then((data) => {
       if (data.success && Array.isArray(data.panier)) {
+        // Calculer le total avant de générer le HTML
+        total = data.panier.reduce((sum, product) => {
+          return sum + product.price * product.quantite_panier;
+        }, 0);
+
         cardPanier.innerHTML =
           data.panier.length > 0
             ? data.panier
@@ -64,6 +69,9 @@ function loadPanierContent() {
                 )
                 .join("")
             : '<p class="text-center text-muted">Votre panier est vide</p>';
+
+        // Mettre à jour le total
+        totalPanier.textContent = total.toFixed(2) + " €";
       }
     })
     .catch((error) => console.error("Error loading cart:", error))
@@ -104,12 +112,16 @@ function setupPanierEventListeners() {
 
   document.addEventListener("change", function (e) {
     if (e.target.matches(".quantity-input")) {
+      const alertContainer = document.getElementById("alertContainernav");
       const quantityInput = e.target;
       const id_produit = quantityInput.getAttribute("data-id");
       const newQuantity = parseInt(quantityInput.value, 10);
+      const totalPanier = document.getElementById("totalPanier");
 
       if (newQuantity < 0 || isNaN(newQuantity)) {
-        alertContainer.innerHTML = `<div class="alert alert-danger">Invalid quantity.</div>`;
+        if (alertContainer) {
+          alertContainer.innerHTML = `<div class="alert alert-danger">Invalid quantity.</div>`;
+        }
         return;
       }
 
@@ -126,18 +138,34 @@ function setupPanierEventListeners() {
       })
         .then((response) => response.json())
         .then((data) => {
-          if (data.success) {
+          if (data.success && alertContainer) {
             alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-          } else {
+
+            // Récupérer le nouveau total du panier
+            fetch("../public/index.php?api=panier")
+              .then((response) => response.json())
+              .then((cartData) => {
+                if (cartData.success && Array.isArray(cartData.panier)) {
+                  const newTotal = cartData.panier.reduce((sum, product) => {
+                    return sum + product.price * product.quantite_panier;
+                  }, 0);
+                  totalPanier.textContent = newTotal.toFixed(2) + " €";
+                }
+              });
+          } else if (alertContainer) {
             alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
           }
         })
         .catch((error) => {
           console.error("Error updating quantity:", error);
-          alertContainer.innerHTML = `<div class="alert alert-danger">Error updating the quantity.</div>`;
+          if (alertContainer) {
+            alertContainer.innerHTML = `<div class="alert alert-danger">Error updating the quantity.</div>`;
+          }
         });
     }
   });
 }
+
+// Supprimer la fonction totalPanier() qui n'est plus nécessaire
 
 window.initializePanier = initializePanier;

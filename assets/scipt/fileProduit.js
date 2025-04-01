@@ -35,6 +35,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+function openDetailProduit(id) {
+  document.location.href = `detail_produit.html?id=${id}`;
+}
+
 function displayProducts(page, products = allProducts) {
   const container = document.querySelector(".card-container");
   container.innerHTML = ""; // Clear container
@@ -43,40 +47,9 @@ function displayProducts(page, products = allProducts) {
   const endIndex = startIndex + itemsPerPage;
   const paginatedItems = products.slice(startIndex, endIndex);
 
+  let htmlContent = ""; // Accumulate HTML content
+
   paginatedItems.forEach((produit) => {
-    const cardCol = document.createElement("div");
-    cardCol.className = "col-12 col-md-4 pb-3";
-    const card = document.createElement("div");
-    card.className = "product-card card";
-
-    const img = document.createElement("img");
-    img.className = "card-img-top";
-    img.src = produit.image || "../img/imgProduct/default.jpg";
-    img.alt = produit.title || "Image produit";
-    img.width = "70";
-
-    const cardBody = document.createElement("div");
-    cardBody.className = "card-body";
-
-    const title = document.createElement("h5");
-    title.className = "card-title";
-    title.textContent = produit.title;
-
-    const row = document.createElement("div");
-    row.className = "col";
-
-    const priceCol = document.createElement("div");
-    priceCol.className = "col-md-12";
-    const priceText = document.createElement("p");
-    priceText.className = "card-text";
-    priceText.innerHTML = `<strong>Prix: </strong>${produit.price} €`;
-
-    const reviewCol = document.createElement("div");
-    reviewCol.className = "col-md-12";
-    const reviewText = document.createElement("p");
-    reviewText.className = "card-text";
-
-    // Calcul de la moyenne des notes
     const reviewCount = parseInt(produit.review_count) || 0;
     const averageRating = Math.round(parseFloat(produit.average_rating)) || 0;
 
@@ -89,87 +62,86 @@ function displayProducts(page, products = allProducts) {
            </div>`
         : '<div class="text-muted">Aucun avis</div>';
 
-    reviewText.innerHTML = reviewsHtml;
+    htmlContent += `
+      <div class="col-12 col-md-4 pb-3" id="produitCard">
+        <div class="product-card card" onclick="openDetailProduit(${
+          produit.id_produit
+        })">
+          <img
+            class="card-img-top"
+            src="${produit.image || "../img/imgProduct/default.jpg"}"
+            alt="${produit.title || "Image produit"}"
+            width="70"
+          />
+          <div class="card-body">
+            <h5 class="card-title">${produit.title}</h5>
+            <div class="col">
+              <div class="col-md-12">
+                <p class="card-text"><strong>Prix: </strong>${
+                  produit.price
+                } €</p>
+              </div>
+              <div class="col-md-12">
+                ${reviewsHtml}
+              </div>
+              <div class="col-md-12">
+                <p class="card-text description">${produit.description}</p>
+              </div>
+            </div>
+          </div>
+          <div class="btn-container">
+            <a href="./detail_product.php?id=${
+              produit.id
+            }" class="btn btn-primary">
+              <i class="fas fa-heart"></i>
+            </a>
+            <a href="#" class="btn btn-secondary panier" data-id="${
+              produit.id
+            }">
+              <i class="fas fa-cart-plus"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+  });
 
-    const descriptionCol = document.createElement("div");
-    descriptionCol.className = "col-md-12";
-    const descriptionText = document.createElement("p");
-    descriptionText.className = "card-text description";
-    descriptionText.textContent = produit.description;
+  container.innerHTML = htmlContent; // Inject the accumulated HTML
 
-    row.appendChild(priceCol);
-    row.appendChild(reviewCol);
-    reviewCol.appendChild(reviewText);
-    row.appendChild(descriptionCol);
+  // Ajouter les gestionnaires d'événements pour les boutons "Ajouter au panier"
+  const cartButtons = container.querySelectorAll(".panier");
+  const alertContainer = document.getElementById("alertContainerfilproduit");
 
-    priceCol.appendChild(priceText);
-    descriptionCol.appendChild(descriptionText);
+  cartButtons.forEach((button) => {
+    button.addEventListener("click", function (event) {
+      event.preventDefault();
 
-    cardBody.appendChild(title);
-    cardBody.appendChild(row);
+      const produitId = this.getAttribute("data-id"); // Récupérer l'ID du produit
 
-    const btnContainer = document.createElement("div");
-    btnContainer.className = "btn-container";
-
-    const heartButton = document.createElement("a");
-    heartButton.href = `./detail_product.php?id=${produit.id}`;
-    heartButton.className = "btn btn-primary";
-    const heartIcon = document.createElement("i");
-    heartIcon.className = "fas fa-heart";
-    heartButton.appendChild(heartIcon);
-
-    const cartButton = document.createElement("a");
-    cartButton.href = "#";
-    cartButton.className = "btn btn-secondary panier";
-    cartButton.id = "panier";
-    const cartIcon = document.createElement("i");
-    cartIcon.className = "fas fa-cart-plus";
-    cartButton.appendChild(cartIcon);
-    const alertContainer = document.getElementById("alertContainerfilproduit");
-    if (cartButton) {
-      cartButton.addEventListener("click", function (event) {
-        event.preventDefault();
-
-        // Récupérer l'ID du produit spécifique pour cet élément
-        const produitId = produit.id_produit; // Utiliser l'id_produit de l'élément actuel
-
-        // Appel de la fonction d'ajout au panier
-        fetch("../public/index.php?api=panier", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action: "addPanier",
-            id_produit: produitId, // Utiliser l'id du produit spécifique
-            quantite: 1,
-          }),
+      // Appel de la fonction d'ajout au panier
+      fetch("../public/index.php?api=panier", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "addPanier",
+          id_produit: produitId,
+          quantite: 1,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+          } else {
+            alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+          }
         })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-            } else {
-              alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
-            }
-          })
-          .catch((error) => {
-            console.error("Erreur lors de l'ajout au panier :", error);
-          });
-      });
-    } else {
-      console.error("L'élément  n'a pas été trouvé.");
-    }
-
-    btnContainer.appendChild(heartButton);
-    btnContainer.appendChild(cartButton);
-
-    card.appendChild(img);
-    card.appendChild(cardBody);
-    card.appendChild(btnContainer);
-
-    cardCol.appendChild(card);
-    container.appendChild(cardCol);
+        .catch((error) => {
+          console.error("Erreur lors de l'ajout au panier :", error);
+        });
+    });
   });
 }
 

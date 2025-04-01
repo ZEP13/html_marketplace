@@ -1,5 +1,3 @@
-const alertContainer = document.getElementById("alertContainerVente");
-
 document.addEventListener("DOMContentLoaded", function () {
   fetch("../public/index.php?api=produit&action=getProduitsByUser", {
     method: "GET",
@@ -7,6 +5,8 @@ document.addEventListener("DOMContentLoaded", function () {
   })
     .then((response) => response.json())
     .then((data) => {
+      const alertContainer = document.getElementById("alertContainerVente");
+
       console.log(data);
       if (data && data.length > 0) {
         const tableBody = document.querySelector("tbody");

@@ -1,7 +1,6 @@
-const alertContainer = document.getElementById("alertContainerProfil");
 document.addEventListener("DOMContentLoaded", function () {
   let userId; // Variable globale pour stocker l'ID utilisateur
-
+  const alertContainer = document.getElementById("alertContainerProfil");
   // Vérifier la session et récupérer les données de l'utilisateur
   fetch("../public/index.php?api=user&action=getUser", {
     method: "GET",

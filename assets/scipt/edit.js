@@ -1,5 +1,5 @@
 // Récupérer les données du produit et pré-remplir le formulaire
-const alertContainer = document.getElementById("alertContainerEdit");
+
 document.addEventListener("DOMContentLoaded", function () {
   // Retrieve the product ID from sessionStorage
   const productId = sessionStorage.getItem("editProductId");

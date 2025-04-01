@@ -114,6 +114,7 @@
         <h5 class="offcanvas-title" id="offcanvasRightLabel">
           <i class="bi bi-cart3"></i> Votre panier
         </h5>
+
         <button
           type="button"
           class="btn-close"
@@ -121,11 +122,17 @@
           aria-label="Close"
         ></button>
       </div>
+      <div>
+        <p style="padding-left: 1rem">
+          <strong>Total: </strong><span id="totalPanier"></span>
+        </p>
+      </div>
       <div class="offcanvas-body">
         <div id="alertContainernav"></div>
         <div id="cardPanier" class="monPanier">
           <!-- ici je note mes produit au panier -->
         </div>
+
         <div class="buy d-grid">
           <button
             class="btn btn-danger"

@@ -94,6 +94,9 @@
     font-weight: bold;
   }
   
+  #produitCard:hover{
+    cursor: pointer;
+  }
   .card-text {
     font-size: 1rem;
     margin-bottom: 1rem;
