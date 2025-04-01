@@ -39,7 +39,25 @@ class Review
             return false;
         }
     }
-
+    public function getAllReview()
+    {
+        try {
+            $query = "SELECT 
+                        products.*, 
+                        AVG(reviews_produit.rating) as average_rating,
+                        COUNT(reviews_produit.id_review) as review_count
+                     FROM reviews_produit 
+                     JOIN products ON reviews_produit.id_produit = products.id_produit 
+                     GROUP BY products.id_produit
+                     ORDER BY average_rating DESC";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
+    }
     public function AddReview($id_user, $id_produit, $rating, $commentaire)
     {
         try {

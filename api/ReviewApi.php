@@ -45,6 +45,20 @@ class ApiReview
         if (isset($_GET['id']) && !empty($_GET['id'])) {
             $this->getReveiwByProduct($_GET['id']);
         }
+
+        $action = isset($_GET['action']) ? $_GET['action'] : null;
+
+        if ($action === 'getAllReview') {
+
+            $review = $this->ReviewController->getAllReview();
+            if ($review) {
+                $this->sendResponse(['success' => true, 'review' => $review]);
+            } else {
+                $this->sendResponse(['success' => false, 'message' => 'Aucune reviewv trouvée'], 404);
+            }
+        } else {
+            $this->sendResponse(['error' => 'Action non reconnue'], 400);
+        }
     }
 
     private function getReveiwByProduct($id)

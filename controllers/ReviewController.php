@@ -23,6 +23,11 @@ class ReviewController
         $review = new Review($this->db);
         return $review->getReveiwByProduct($id);
     }
+    public function getAllReview()
+    {
+        $review = new Review($this->db);
+        return $review->getAllReview();
+    }
 
     public function AddReview($id_user, $id_produit, $rating, $commentaire)
     {

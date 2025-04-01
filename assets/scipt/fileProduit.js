@@ -145,6 +145,49 @@ function displayProducts(page, products = allProducts) {
   });
 }
 
+//affiche les categorie dans la section de filtrage
+fetch("../public/index.php?api=category&action=getAllCategories", {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+  },
+})
+  .then((response) => response.json())
+  .then((data) => {
+    const selecte = document.getElementById("selectCategoryProduit");
+
+    // Check if the response is successful and contains categories
+    if (!data.success || !Array.isArray(data.categories)) {
+      console.error(
+        "Erreur : La réponse ne contient pas de catégories :",
+        data
+      );
+      selecte.innerHTML =
+        '<option value="">Erreur lors de la récupération des catégories</option>';
+      return;
+    }
+
+    if (data.categories.length === 0) {
+      selecte.innerHTML =
+        '<option value="">Aucune catégorie disponible</option>';
+      return;
+    }
+
+    // Populate the select element with categories
+    data.categories.forEach((category) => {
+      const option = document.createElement("option");
+      option.value = category.id;
+      option.textContent = category.category_name;
+      selecte.appendChild(option);
+    });
+  })
+  .catch((error) => {
+    console.error("Erreur lors de la requête :", error);
+    const selecte = document.getElementById("selectCategory");
+    selecte.innerHTML =
+      '<option value="">Erreur lors de la récupération des catégories</option>';
+  });
+
 function setupPagination(totalItems) {
   const pagination = document.querySelector(".pagination");
   const pageCount = Math.ceil(totalItems / itemsPerPage);

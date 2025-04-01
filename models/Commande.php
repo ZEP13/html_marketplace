@@ -39,6 +39,22 @@ class Commande
             return false;
         }
     }
+    public function getComandeByMostSell()
+    {
+        try {
+            $sql = "SELECT c.*, p.*, COUNT(c.id_produit_commande) AS total_sells
+                    FROM commande c 
+                    JOIN products p ON c.id_produit_commande = p.id_produit 
+                    GROUP BY c.id_produit_commande 
+                    ORDER BY total_sells DESC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erreur SQL dans getComandeByMostSell: " . $e->getMessage());
+            return false;
+        }
+    }
     public function AddCommande($id_user, $id_produit)
     {
         try {

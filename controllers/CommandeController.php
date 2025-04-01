@@ -28,4 +28,9 @@ class CommandeController
         $commande = new Commande($this->db);
         return $commande->AddCommande($id_user, $id_produit);
     }
+    public function getComandeByMostSell()
+    {
+        $commande = new Commande($this->db);
+        return $commande->getComandeByMostSell();
+    }
 }

@@ -56,6 +56,13 @@ class ApiCommande
             } else {
                 $this->sendResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 401);
             }
+        } else if ($action === 'getComandeByMostSell') {
+            $commande = $this->CommandeController->getComandeByMostSell();
+            if ($commande) {
+                $this->sendResponse(['success' => true, 'commande' => $commande]);
+            } else {
+                $this->sendResponse(['success' => false, 'message' => 'Aucune commande trouvée'], 404);
+            }
         } else {
             $this->sendResponse(['error' => 'Action non reconnue'], 400);
         }

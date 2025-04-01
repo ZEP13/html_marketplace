@@ -147,6 +147,7 @@ class SearchManager {
 
       // Si aucun résultat, afficher le message
       if (!hasResults) {
+        document.querySelector(".pagination").style.display = "none";
         const mainContent =
           document.querySelector(".product-container") ||
           document.querySelector("main");

@@ -61,7 +61,7 @@
                   id="priceRange"
                   name="prix"
                   min="0"
-                  max="1000"
+                  max=""
                   value="0"
                 />
                 <div id="priceValue" class="mt-2">
@@ -74,17 +74,20 @@
               <div class="mt-4">
                 <select class="form-select" name="like">
                   <option value="">Autres options</option>
-                  <option value="1">Produits les plus aimés</option>
-                  <option value="2">Les mieux notées</option>
+                  <option value="1">Prix décroissant</option>
+                  <option value="2">Prix croissant</option>
+                  <option value="3">Les mieux notés</option>
                 </select>
               </div>
 
               <!-- Catégorie -->
               <div class="mt-4">
-                <select class="form-select" name="categorie">
+                <select
+                  id="selectCategoryProduit"
+                  class="form-select"
+                  name="categorie"
+                >
                   <option value="">Catégorie</option>
-                  <option value="1">Produits enfants</option>
-                  <option value="2">Produit femme</option>
                 </select>
               </div>
 
@@ -107,7 +110,6 @@
                     type="checkbox"
                     value=""
                     id="flexCheckChecked"
-                    checked
                   />
                   <label class="form-check-label" for="flexCheckChecked">
                     Les plus vendu
@@ -118,6 +120,11 @@
             <hr />
             <a href="#" class="btn btn-outline-primary btn-sm mt-4"
               >Filtrer ma recherche</a
+            ><a
+              href="#"
+              class="btn btn-outline-primary btn-sm mt-4"
+              data-action="reset"
+              >Reset les filtres</a
             >
           </div>
         </div>
@@ -176,5 +183,6 @@
     <script src="../assets/scipt/managePanier.js"></script>
     <script src="../assets/scipt/navbar-init.js"></script>
     <script src="../assets/scipt/fileProduit.js"></script>
+    <script src="../assets/scipt/filtre_produit.js"></script>
   </body>
 </html>
