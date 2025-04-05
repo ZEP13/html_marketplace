@@ -10,6 +10,7 @@ require_once '../api/PanierApi.php';
 require_once '../api/CategoryApi.php';
 require_once '../api/ReviewApi.php';
 require_once '../api/CommandeApi.php';
+require_once '../api/MessageApi.php';
 
 use Api\ApiUser;
 use ApiCategory\ApiCategory;
@@ -17,6 +18,7 @@ use ApiP\ApiProduit;
 use ApiPanier\ApiPanier;
 use ApiReview\ApiReview;
 use ApiCommande\ApiCommande;
+use ApiM\ApiMessage;
 
 header('Content-Type: application/json');
 
@@ -25,6 +27,7 @@ $apiUser = new ApiUser();
 $apiProduit = new ApiProduit();
 $apiPanier = new ApiPanier();
 $apicategory = new ApiCategory();
+$apiMessage = new ApiMessage();
 
 
 
@@ -36,6 +39,7 @@ $apis = [
     'category' => new ApiCategory(),
     'review' => new ApiReview(),
     'commande' => new ApiCommande(),
+    'message' => new ApiMessage(),
 ];
 
 // Vérifier les paramètres pour router la requête

@@ -1,8 +1,13 @@
-ajoute filtre prix croissant et decroisssant
-
-ajoute voir detail de ma commande
+pense a modifie la possibilite de filtre et faire une recherche depui le filtre et vice versa
 
 ahoute une ligne marque en db pour pour la marque du produit
+
+
+VIDE PANIER UNE FOIS COMMANDE valides
+
+page de remerciement et validation de commande apres payeemnt
+
+gama.app pour power point
 
 file:///C:/xampp/apache/logs/error.log
 user:
@@ -249,3 +254,167 @@ views/index.php affiche les produits à partir des données reçues de ProductCo
 main.js peut envoyer une requête AJAX à api/get_products.php pour récupérer les produits sans recharger la page.
 
 
+1. Bannière principale (Hero Section)
+Visuel :
+
+Une grande image ou un carrousel d'images représentant votre marketplace.
+Exemple : Une image mettant en avant des produits populaires ou des promotions.
+Texte :
+
+Un slogan accrocheur, par exemple :
+"Découvrez les meilleures offres du moment !"
+"Achetez tout ce dont vous avez besoin en un seul endroit !"
+Effets visuels :
+
+Animation légère sur le texte ou les boutons (par exemple, un effet de survol).
+Transition fluide entre les images si vous utilisez un carrousel.
+Appel à l'action (CTA) :
+
+Un bouton bien visible, comme :
+"Voir les produits".
+"Commencer vos achats".
+2. Produits populaires ou en vedette
+Visuel :
+
+Une grille de produits avec des images attrayantes.
+Exemple : Les produits les plus vendus ou les mieux notés.
+Texte :
+
+Titre de la section : "Produits populaires" ou "Nos best-sellers".
+Informations pour chaque produit :
+Nom du produit.
+Prix.
+Note moyenne (étoiles) et nombre d'avis.
+Effets visuels :
+
+Animation au survol des cartes produits (par exemple, zoom sur l'image ou ombre portée).
+Transition fluide entre les produits si vous utilisez un carrousel.
+3. Catégories principales
+Visuel :
+
+Des icônes ou des images représentant chaque catégorie.
+Exemple : Une image pour "Électronique", une autre pour "Mode", etc.
+Texte :
+
+Titre de la section : "Parcourir par catégorie".
+Nom de chaque catégorie.
+Effets visuels :
+
+Animation au survol des catégories (par exemple, changement de couleur ou agrandissement de l'icône).
+Transition fluide si vous utilisez un carrousel pour les catégories.
+4. Offres spéciales ou promotions
+Visuel :
+
+Une bannière ou une grille de produits en promotion.
+Exemple : Une image avec un badge "Promo" ou "-30%".
+Texte :
+
+Titre de la section : "Offres spéciales" ou "Promotions du moment".
+Informations pour chaque produit :
+Nom du produit.
+Prix avant et après réduction.
+Pourcentage de réduction.
+Effets visuels :
+
+Badge animé pour les promotions (par exemple, un badge "Promo" qui clignote légèrement).
+Animation au survol des produits (par exemple, mise en avant du prix réduit).
+5. Avis clients
+Visuel :
+
+Une section avec des témoignages ou des avis clients.
+Exemple : Une photo ou un avatar pour chaque client.
+Texte :
+
+Titre de la section : "Ce que disent nos clients".
+Contenu des avis :
+Nom ou pseudonyme du client.
+Note (étoiles).
+Commentaire.
+Effets visuels :
+
+Animation au survol des avis (par exemple, agrandissement ou mise en avant).
+Transition fluide entre les avis si vous utilisez un carrousel.
+6. Accès rapide aux fonctionnalités principales
+Visuel :
+
+Des boutons ou des icônes pour accéder rapidement aux sections importantes.
+Exemple : Une icône de panier pour "Mon Panier", une icône de commande pour "Mes Commandes", etc.
+Texte :
+
+Titre de la section : "Accès rapide".
+Nom des fonctionnalités :
+"Mon Panier"
+"Mes Commandes"
+"Messagerie"
+Effets visuels :
+
+Animation au survol des boutons (par exemple, changement de couleur ou agrandissement).
+Transition fluide entre les icônes si elles sont affichées sous forme de carrousel.
+7. Section de confiance
+Visuel :
+
+Des icônes ou des badges pour représenter les avantages de votre marketplace.
+Exemple : Une icône de bouclier pour "Paiement sécurisé", une icône de camion pour "Livraison rapide", etc.
+Texte :
+
+Titre de la section : "Pourquoi nous choisir ?"
+Liste des avantages :
+"Paiement sécurisé"
+"Livraison rapide"
+"Service client 24/7"
+"Garantie satisfait ou remboursé"
+Effets visuels :
+
+Animation au survol des icônes (par exemple, rotation ou changement de couleur).
+8. Produits récemment consultés (optionnel)
+Visuel :
+
+Une grille de produits que l'utilisateur a récemment consultés.
+Exemple : Les mêmes cartes produits que dans la section "Produits populaires".
+Texte :
+
+Titre de la section : "Vos produits récemment consultés".
+Effets visuels :
+
+Animation au survol des produits (par exemple, zoom sur l'image ou ombre portée).
+9. Actualités ou blog (optionnel)
+Visuel :
+
+Une section avec des images ou des vignettes pour chaque article.
+Exemple : Une image pour "Les tendances shopping de 2025".
+Texte :
+
+Titre de la section : "Actualités et conseils"
+Contenu pour chaque article :
+Titre.
+Résumé.
+Lien pour lire l'article complet.
+Effets visuels :
+
+Animation au survol des articles (par exemple, mise en avant du titre ou agrandissement de l'image).
+10. Footer
+Visuel :
+
+Une section en bas de page avec un fond contrasté (par exemple, gris ou noir).
+Texte :
+
+Informations sur votre marketplace :
+"À propos de nous"
+"Politique de confidentialité"
+"Conditions générales de vente"
+"Contactez-nous"
+Copyright et année.
+Effets visuels :
+
+Icônes des réseaux sociaux avec animation au survol.
+Résumé des contenus pour votre page Home :
+Bannière principale : Image attrayante, slogan, bouton CTA.
+Produits populaires : Grille de produits avec images, prix, et avis.
+Catégories principales : Icônes ou images pour chaque catégorie.
+Offres spéciales : Produits en promotion avec prix réduit.
+Avis clients : Témoignages ou notes des clients.
+Accès rapide : Boutons pour les fonctionnalités principales.
+Section de confiance : Icônes pour les avantages (paiement sécurisé, livraison rapide, etc.).
+Produits récemment consultés (optionnel).
+Actualités ou blog (optionnel).
+Footer : Informations légales et liens utiles.

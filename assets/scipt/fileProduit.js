@@ -55,11 +55,9 @@ function displayProducts(page, products = allProducts) {
 
     const reviewsHtml =
       reviewCount > 0
-        ? `<div class="text-warning">
-            ${"★".repeat(averageRating)}
-            ${"☆".repeat(5 - averageRating)}
-            <span class="text-muted">(${reviewCount} avis)</span>
-           </div>`
+        ? `<div class="text-warning">${"★".repeat(averageRating)}${"☆".repeat(
+            5 - averageRating
+          )}<span class="text-muted"> (${reviewCount} avis)</span></div>`
         : '<div class="text-muted">Aucun avis</div>';
 
     htmlContent += `

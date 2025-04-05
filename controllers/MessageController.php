@@ -11,26 +11,28 @@ use Config\Database;
 
 class MessageController
 {
-    private $messageModel;
-    private $userModel;
+    private $db;
 
-    public function __construct($db)
+    public function __construct()
     {
-        $this->messageModel = new Message($db);
-        $this->userModel = new User($db);
+        $database = new Database();
+        $this->db = $database->getConnection();
     }
 
-    public function showConversation($id_sender, $id_receiver)
+    public function getMessages($id_user, $id_receiver)
     {
-        $messages = $this->messageModel->getMessage($id_sender, $id_receiver);
-        $contacts = $this->messageModel->getContacts($id_sender);
-        $receiver = $this->userModel->getUserById($id_receiver);
-
-        return ['messages' => $messages, 'contacts' => $contacts, 'receiver' => $receiver];
+        $message = new Message($this->db);
+        return $message->getMessages($id_user, $id_receiver);
     }
 
-    public function sendMessage($id_sender, $id_receiver, $message)
+    public function addMessage($id_user, $id_receiver, $message)
     {
-        $this->messageModel->addMessage($id_sender, $id_receiver, $message);
+        $message = new Message($this->db);
+        return $message->addMessage($id_user, $id_receiver, $message);
+    }
+    public function getContacts($id_user)
+    {
+        $message = new Message($this->db);
+        return $message->getContacts($id_user);
     }
 }

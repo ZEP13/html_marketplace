@@ -37,6 +37,7 @@ class Produit
                 FROM products p
                 JOIN categorie c ON p.category = c.id
                 LEFT JOIN reviews_produit r ON p.id_produit = r.id_produit
+                WHERE p.actif = 1
                 GROUP BY p.id_produit';
 
             $stmt = $this->db->prepare($sql);
