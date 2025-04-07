@@ -15,6 +15,7 @@
 
     <div class="container" style="height: 100vh">
       <div class="row">
+        <div class="alertContainerMessage"></div>
         <!-- Liste des contacts -->
         <div class="col-md-4 contact-list-container">
           <h2>Mes contacts</h2>
@@ -47,8 +48,10 @@
               <!-- ici sont display les messages -->
             </div>
             <div class="card-footer">
-              <input type="text" id="messageValue" placeholder="Message" />
-              <button type="submit" id="sendMessage">Envoyer</button>
+              <form id="messageForm">
+                <input type="text" id="messageValue" placeholder="Message" />
+                <button type="submit" id="sendMessage">Envoyer</button>
+              </form>
             </div>
           </div>
         </div>

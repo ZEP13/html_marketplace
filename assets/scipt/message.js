@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
+  let currentContactId = null; // Variable globale pour stocker l'ID du destinataire
+
   // Affichage des contacts
   fetch("../public/index.php?api=message&action=getContacts", {
     method: "GET",
@@ -14,24 +16,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
       data.contacts.forEach((nom) => {
         htmlContent += `
-          <li data-contact-id="${nom.contact_id}" class="contact-item">${nom.user_nom}  ${nom.user_prenom}</li>
+          <li data-contact-id="${nom.contact_id}" class="contact-item">${nom.user_nom} ${nom.user_prenom}</li>
         `;
       });
 
-      contact.innerHTML = htmlContent; // Affichage des contacts
+      contact.innerHTML = htmlContent;
 
       // Ajouter un gestionnaire d'événements pour chaque contact
       const contactItems = document.querySelectorAll(".contact-item");
       contactItems.forEach((item) => {
         item.addEventListener("click", function () {
-          const contactId = item.getAttribute("data-contact-id");
-          const userPrenom = item.innerText.split(" ")[1]; // Extraction du prénom depuis le texte
-          const userNom = item.innerText.split(" ")[0]; // Extraction du nom depuis le texte
-          showChat(contactId, userPrenom, userNom); // Appeler la fonction showChat avec les paramètres
+          currentContactId = item.getAttribute("data-contact-id"); // Enregistrer l'ID du contact sélectionné
+          const userPrenom = item.innerText.split(" ")[1]; // Extraction du prénom
+          const userNom = item.innerText.split(" ")[0]; // Extraction du nom
+          showChat(currentContactId, userPrenom, userNom); // Appeler la fonction showChat avec les paramètres
         });
       });
 
-      console.log("contact: ", data); // Affichage des contacts récupérés
+      console.log("contacts: ", data); // Affichage des contacts récupérés
     });
 
   // Fonction pour afficher le chat avec les messages
@@ -110,4 +112,48 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   });
+
+  // Soumission du formulaire pour envoyer un message
+  document
+    .getElementById("messageForm")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      if (!currentContactId) {
+        alert("Veuillez sélectionner un contact avant d'envoyer un message.");
+        return;
+      }
+
+      fetch("../public/index.php?api=message&action=sendMessage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          receiver: currentContactId, // Utilisation de l'ID du destinataire
+          message: document.getElementById("messageValue").value,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const alertContainer = document.getElementById(
+            "alertContainerMessage"
+          );
+          if (data.success) {
+            alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+          } else {
+            alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+          }
+        })
+        .catch((error) => {
+          const alertContainer = document.getElementById(
+            "alertContainerMessage"
+          );
+          if (alertContainer) {
+            alertContainer.innerHTML = `<div class="alert alert-danger">Erreur lors de la requête: ${error.message}</div>`;
+          }
+
+          console.error("Erreur lors de la requête:", error);
+        });
+    });
 });
