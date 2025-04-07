@@ -9,6 +9,11 @@ page de remerciement et validation de commande apres payeemnt
 
 gama.app pour power point
 
+dans admi pnese a ajooute possibilite de cree code promo et implmente la logique au panier
+
+panier et commande = 1seul et meme tableu, passe de 1 - 0 si comande ou pas permet l'archivage du panier pour ne pas perdfre les info usser. 
+Pour acienne comande, juste affiche panier ou commande = 1
+
 file:///C:/xampp/apache/logs/error.log
 user:
 
