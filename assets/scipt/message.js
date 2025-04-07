@@ -124,11 +124,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      const message = document.getElementById("messageValue").value;
-      console.log(message);
-      if (typeof message !== "string" || message.trim() === "") {
-        console.log("c pas un string");
-      }
       fetch("../public/index.php?api=message&action=sendMessage", {
         method: "POST",
         headers: {
@@ -136,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         body: JSON.stringify({
           receiver: currentContactId, // Utilisation de l'ID du destinataire
-          message: document.getElementById("messageValue").value,
+          messages: document.getElementById("messageValue").value,
         }),
       })
         .then((response) => response.json())
@@ -154,9 +149,8 @@ document.addEventListener("DOMContentLoaded", function () {
           const alertContainer = document.getElementById(
             "alertContainerMessage"
           );
-          if (alertContainer) {
-            alertContainer.innerHTML = `<div class="alert alert-danger">Erreur lors de la requête: ${error.message}</div>`;
-          }
+
+          alertContainer.innerHTML = `<div class="alert alert-danger">Erreur lors de la requête: ${error.message}</div>`;
 
           console.error("Erreur lors de la requête:", error);
         });

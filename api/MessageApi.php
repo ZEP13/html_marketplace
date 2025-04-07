@@ -50,7 +50,7 @@ class ApiMessage
     {
         if (isset($_SESSION['user_id'])) {
             $id_sender = $_SESSION['user_id'];
-            $send = $this->MessageController->addMessage($id_sender, $data['receiver'], $data['message']);
+            $send = $this->MessageController->addMessage($id_sender, $data['receiver'], $data['messages']);
             if ($send) {
                 $this->sendResponse(['success' => true, 'message' => 'Message envoyé']);
             } else {

@@ -62,6 +62,12 @@ class UserController
         return $user->getUserProfileImage($id);
     }
 
+    public function addUserData($id, $phone, $rue, $code, $num, $city)
+    {
+        $user = new User($this->db);
+        return $user->addUserData($id, $phone, $rue, $code, $num, $city);
+    }
+
     public function validateUserData($data)
     {
         $pattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/';

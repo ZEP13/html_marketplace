@@ -41,6 +41,8 @@ class ApiUser
                 $this->handleEditMailRequest($data);
             } elseif ($action === 'addImgProfil') {
                 $this->handleAddImgProfilRequest($_POST);
+            } else if ($action === 'addInfo') {
+                $this->handleAddInfoUser($_POST);
             } else {
                 $this->sendResponse(['error' => 'Action non reconnue'], 400);
             }
@@ -65,6 +67,18 @@ class ApiUser
         }
     }
 
+    private function handleAddInfoUser($data)
+    {
+        if (isset($_SESSION['user_id'])) {
+            $id = $_SESSION['user_id'];
+            $user = $this->UserController->addUserData($id, $data["tel"], $data["rue"], $data["numero"], $data["code"], $data["city"]);
+            if ($user) {
+                $this->sendResponse(['success' => true, 'message' => 'donne user commande ajoute']);
+            } else {
+                $this->sendResponse(['success' => false, 'message' => 'echec ajout donne user commande']);
+            }
+        }
+    }
     private function handleLoginRequest($data)
     {
         if (!$this->UserController->validateLogin($data)) {

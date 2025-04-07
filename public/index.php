@@ -22,15 +22,6 @@ use ApiM\ApiMessage;
 
 header('Content-Type: application/json');
 
-$reviewApi = new ApiReview();
-$apiUser = new ApiUser();
-$apiProduit = new ApiProduit();
-$apiPanier = new ApiPanier();
-$apicategory = new ApiCategory();
-$apiMessage = new ApiMessage();
-
-
-
 // Initialiser les APIs
 $apis = [
     'user' => new ApiUser(),
@@ -55,15 +46,4 @@ if (isset($_GET['api']) && isset($apis[$_GET['api']])) {
     }
 } else {
     echo json_encode(['error' => 'API non reconnue ou non spécifiée'], JSON_PRETTY_PRINT);
-}
-
-
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $apiProduit->handleRequest();
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $apiProduit->handleRequest();
-} else {
-    $reviewApi->handleRequest();
 }

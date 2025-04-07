@@ -150,13 +150,17 @@ class User
             return false;
         }
     }
-    public function addPhoneUser($phone, $id)
+    public function addUserData($id, $phone, $rue, $code, $num, $city)
     {
         try {
             // Requête de mise à jour
-            $sql = 'UPDATE `users` SET `user_phone` = :user_phone WHERE `id_user` = :id';
+            $sql = 'UPDATE `users` SET `phone` = :user_phone, `rue` = :user_rue, `codePostal` =: user_code, `numMaison` =: user_num, `city` =:user_city WHERE `id_user` = :id';
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':user_phone', $phone);
+            $stmt->bindValue(':user_rue', $rue);
+            $stmt->bindValue(':user_code', $code);
+            $stmt->bindValue(':user_num', $num);
+            $stmt->bindValue(':user_city', $city);
             $stmt->bindValue(':id', $id);
             return $stmt->execute();
         } catch (PDOException $e) {
