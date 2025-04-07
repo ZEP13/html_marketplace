@@ -42,6 +42,7 @@ class ApiUser
             } elseif ($action === 'addImgProfil') {
                 $this->handleAddImgProfilRequest($_POST);
             } else if ($action === 'addInfo') {
+                $data = json_decode(file_get_contents('php://input'), true);
                 $this->handleAddInfoUser($_POST);
             } else {
                 $this->sendResponse(['error' => 'Action non reconnue'], 400);
@@ -71,7 +72,7 @@ class ApiUser
     {
         if (isset($_SESSION['user_id'])) {
             $id = $_SESSION['user_id'];
-            $user = $this->UserController->addUserData($id, $data["tel"], $data["rue"], $data["numero"], $data["code"], $data["city"]);
+            $user = $this->UserController->addUserData($id, $data['tel'], $data['rue'], $data['numero'], $data['code'], $data['city']);
             if ($user) {
                 $this->sendResponse(['success' => true, 'message' => 'donne user commande ajoute']);
             } else {

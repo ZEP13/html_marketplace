@@ -20,20 +20,20 @@ document
   .getElementById("formCommande")
   .addEventListener("submit", function (event) {
     event.preventDefault();
-    FormData = {
+    dataForm = {
       tel: document.getElementById("tel").value,
       rue: document.getElementById("rue").value,
       numero: document.getElementById("numeroMaison").value,
       code: document.getElementById("codePostal").value,
       city: document.getElementById("city").value,
     };
-    console.log(FormData);
+    console.log(dataForm);
     fetch("../public/index.php?api=user&action=addInfo", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(FormData),
+      body: JSON.stringify(dataForm),
     })
       .then((reponse) => reponse.json())
       .then((data) => {

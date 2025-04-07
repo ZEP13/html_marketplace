@@ -150,25 +150,33 @@ class User
             return false;
         }
     }
+
     public function addUserData($id, $phone, $rue, $code, $num, $city)
     {
         try {
-            // Requête de mise à jour
-            $sql = 'UPDATE `users` SET `phone` = :user_phone, `rue` = :user_rue, `codePostal` =: user_code, `numMaison` =: user_num, `city` =:user_city WHERE `id_user` = :id';
+            // Correct query with consistent parameter spacing
+            $sql = 'UPDATE `users` SET `phone` = :user_phone, `rue` = :user_rue, `codePostal` = :user_code, `numMaison` = :user_num, `city` = :user_city WHERE `id_user` = :id';
+
+            // Prepare the statement
             $stmt = $this->db->prepare($sql);
+
+            // Bind values
             $stmt->bindValue(':user_phone', $phone);
             $stmt->bindValue(':user_rue', $rue);
             $stmt->bindValue(':user_code', $code);
             $stmt->bindValue(':user_num', $num);
             $stmt->bindValue(':user_city', $city);
             $stmt->bindValue(':id', $id);
+
+            // Execute the query and return the result
             return $stmt->execute();
         } catch (PDOException $e) {
-            // Log l'erreur et retour
-            error_log("Erreur lors de la mise à jour : " . $e->getMessage());
+            // Log the error for further inspection
+            error_log("Erreur lors de la mise à jour des données utilisateur : " . $e->getMessage());
             return false;
         }
     }
+
     public function changeRoleUser($role, $id)
     {
         try {
