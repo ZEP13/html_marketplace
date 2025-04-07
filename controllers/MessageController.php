@@ -27,8 +27,8 @@ class MessageController
 
     public function addMessage($id_user, $id_receiver, $message)
     {
-        $message = new Message($this->db);
-        return $message->addMessage($id_user, $id_receiver, $message);
+        $messageModel = new Message($this->db);
+        return $messageModel->addMessage($id_user, $id_receiver, $message);
     }
     public function getContacts($id_user)
     {

@@ -124,6 +124,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
+      const message = document.getElementById("messageValue").value;
+      console.log(message);
+      if (typeof message !== "string" || message.trim() === "") {
+        console.log("c pas un string");
+      }
       fetch("../public/index.php?api=message&action=sendMessage", {
         method: "POST",
         headers: {

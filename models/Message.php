@@ -52,11 +52,14 @@ ORDER BY m.created_at DESC;
             $sql = "INSERT INTO messages (sender_id, receiver_id, message) VALUES (:sender_id, :receiver_id, :message)";
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':sender_id', $id_sender);
-            $stmt->bindValue(':receiver_id', $id_receiver);
-            $stmt->bindValue(':message', $message);
+            if (!is_string($message)) {
+                error_log("Erreur lors de l'insertion : c pas du string");
+            }
+            error_log("param:" . print_r([
+                'message' => $message
+            ], true));
 
-            return $stmt->execute();
+            return $stmt->execute(['sender_id' => $id_sender, 'receiver_id' => $id_receiver, 'message' => $message]);
         } catch (PDOException $e) {
             // Log l'erreur et retour
             error_log("Erreur lors de l'insertion : " . $e->getMessage());
