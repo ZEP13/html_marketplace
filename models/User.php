@@ -155,7 +155,7 @@ class User
     {
         try {
             // Correct query with consistent parameter spacing
-            $sql = 'UPDATE `users` SET `phone` = :user_phone, `rue` = :user_rue, `codePostal` = :user_code, `numMaison` = :user_num, `city` = :user_city WHERE `id_user` = :id';
+            $sql = 'UPDATE `users` SET `user_phone` = :user_phone, `rue` = :user_rue, `codePostal` = :user_code, `numMaison` = :user_num, `city` = :user_city WHERE `id_user` = :id';
 
             // Prepare the statement
             $stmt = $this->db->prepare($sql);

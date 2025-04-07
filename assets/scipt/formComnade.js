@@ -14,12 +14,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
       document.getElementById("nom").value = data.nom;
       document.getElementById("prenom").value = data.prenom;
       document.getElementById("mail").value = data.mail;
+      //ajoute  les autre valeur des champs si dispo pour l'user.
     });
 });
 document
   .getElementById("formCommande")
   .addEventListener("submit", function (event) {
     event.preventDefault();
+    //pense ajoute verification pour numéro de tel et code postal et adresse
     dataForm = {
       tel: document.getElementById("tel").value,
       rue: document.getElementById("rue").value,
