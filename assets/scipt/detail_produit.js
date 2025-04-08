@@ -17,6 +17,17 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
         console.log(produit);
 
+        const stockStatus =
+          produit.quantite <= 0
+            ? "Rupture de stock"
+            : produit.quantite < 5
+            ? `Plus que ${produit.quantite} en stock`
+            : "";
+
+        document.getElementById(
+          "stock"
+        ).innerHTML = `<p class="text-muted small" id="alertStock">${stockStatus}</p>`;
+
         const imageSrc = produit.image
           ? produit.image
           : "../img/imgProduct/default.jpg";

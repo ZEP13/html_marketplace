@@ -10,6 +10,21 @@
     background-color: #09234a !important; /* Couleur de fond de la navbar */
   }
   
+  #alertStock {
+    padding: 0;
+    margin: 0;
+    visibility: hidden;
+    transition: ease;
+    position: absolute;
+    transition: transform 0.3s ease;
+    top: -15px;
+    left: 0;
+    padding-left: 15px;
+    width: 100%;
+    border-radius: 0 0 6px 6px;
+    color: rgb(255, 38, 0) !important;
+    background: #ffffff;
+  }
   /* State of navbar when closed */
   #navbar.closed {
     width: 0;
@@ -72,7 +87,10 @@
   .product-card:hover img {
     height: 200px; /* Réduction de 20% */
   }
-
+  .product-card:hover #alertStock {
+    visibility: visible; 
+    transform: translateY(15px);
+  }
   .card-body {
     padding: 1rem;
     flex: 1;

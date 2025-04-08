@@ -1,10 +1,14 @@
 const alertContainer = document.getElementById("alertContainerPanier");
+
 document.addEventListener("DOMContentLoaded", function (event) {
   event.preventDefault();
+
+  let cartData; // Define a variable to store the cart data
 
   fetch("../public/index.php?api=panier")
     .then((response) => response.json())
     .then((data) => {
+      cartData = data; // Store the fetched data here
       console.log(data);
 
       let htmlContent = "";
@@ -35,9 +39,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 </div>
               </div>
               <div class="d-flex align-items-center">
-                <input type="number" class="form-control item-quantity" value="${
-                  produit.quantite_panier
-                }" min="1" data-id="${produit.id_produit}" />
+                <input type="number" max="${
+                  produit.quantite
+                }" class="form-control item-quantity" value="${
+          produit.quantite_panier
+        }" min="1" data-id="${produit.id_produit}" />
                 <span class="remove-btn ms-3" data-id="${
                   produit.id_produit
                 }">Supprimer</span>
@@ -60,10 +66,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
         totalPaye.textContent = totalAvecFrais.toFixed(2) + " €";
       }
 
-      setupPanierEventListeners();
+      setupPanierEventListeners(cartData); // Pass the data to the event handler
     });
 
-  function setupPanierEventListeners() {
+  function setupPanierEventListeners(data) {
     // Gérer la suppression des produits
     document.addEventListener("click", function (e) {
       if (e.target.matches(".remove-btn")) {
@@ -105,35 +111,43 @@ document.addEventListener("DOMContentLoaded", function (event) {
         const id_produit = quantityInput.getAttribute("data-id");
         const newQuantity = parseInt(quantityInput.value, 10);
 
+        // Find the correct product data based on the ID
+        const produit = data.panier.find((p) => p.id_produit == id_produit);
+        const quantiteStock = produit ? produit.quantite : 0;
+
         if (newQuantity < 1 || isNaN(newQuantity)) {
           alertContainer.innerHTML = `<div class="alert alert-danger">Quantité invalide.</div>`;
           return;
         }
 
-        fetch("../public/index.php?api=panier", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action: "addPanier",
-            id_produit: id_produit,
-            quantite: newQuantity,
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-              updateTotalPanier();
-            } else {
-              alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
-            }
+        if (quantiteStock >= newQuantity) {
+          fetch("../public/index.php?api=panier", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action: "addPanier",
+              id_produit: id_produit,
+              quantite: newQuantity,
+            }),
           })
-          .catch((error) => {
-            console.error("Error updating quantity:", error);
-            alertContainer.innerHTML = `<div class="alert alert-danger">Error updating the quantity.</div>`;
-          });
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                updateTotalPanier();
+              } else {
+                alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+              }
+            })
+            .catch((error) => {
+              console.error("Error updating quantity:", error);
+              alertContainer.innerHTML = `<div class="alert alert-danger">Error updating the quantity.</div>`;
+            });
+        } else {
+          alertContainer.innerHTML = `<div class="alert alert-danger">Quantité supérieure au stock disponible.</div>`;
+        }
       }
     });
   }

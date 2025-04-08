@@ -53,6 +53,16 @@ function displayProducts(page, products = allProducts) {
     const reviewCount = parseInt(produit.review_count) || 0;
     const averageRating = Math.round(parseFloat(produit.average_rating)) || 0;
 
+    const stockStatus =
+      produit.quantite <= 0
+        ? "Rupture de stock"
+        : produit.quantite < 5
+        ? `Plus que ${produit.quantite} en stock`
+        : ""; // Ne rien afficher si la quantité est suffisante
+
+    // Créer un élément alertStock spécifique à chaque produit dans la carte
+    const stockAlertHtml = `<p class="text-muted small" id="alertStock">${stockStatus}</p>`;
+
     const reviewsHtml =
       reviewCount > 0
         ? `<div class="text-warning">${"★".repeat(averageRating)}${"☆".repeat(
@@ -64,7 +74,7 @@ function displayProducts(page, products = allProducts) {
       <div class="col-12 col-md-4 pb-3" id="produitCard">
         <div class="product-card card" onclick="openDetailProduit(${
           produit.id_produit
-        })">
+        })">${stockAlertHtml}
           <img
             class="card-img-top"
             src="${produit.image || "../img/imgProduct/default.jpg"}"
