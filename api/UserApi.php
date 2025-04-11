@@ -24,6 +24,10 @@ class ApiUser
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if ($action === 'getUser') {
                 $this->getUser();
+            } else if ($action === 'getUserById') {
+                $this->getUserById($_GET['id']);
+            } else if ($action === 'getSessionId') {
+                $this->handlegetSessionId();
             } else {
                 $this->sendResponse(['error' => 'Action non reconnue'], 400);
             }
@@ -67,7 +71,21 @@ class ApiUser
             $this->sendResponse(['error' => 'Aucune session active'], 401);
         }
     }
-
+    private function getUserById($id)
+    {
+        $user = $this->UserController->getUserById($id);
+        if ($user) {
+            $this->sendResponse([
+                'success' => true,
+                'user' => $user
+            ]);
+        } else {
+            $this->sendResponse([
+                'success' => false,
+                'error' => 'Utilisateur non trouvé'
+            ], 404);
+        }
+    }
     private function handleAddInfoUser($data)
     {
         if (isset($_SESSION['user_id'])) {
@@ -138,7 +156,21 @@ class ApiUser
             $this->sendResponse(['success' => false, 'message' => 'Échec de la modification du mail'], 500);
         }
     }
-
+    public function handlegetSessionId()
+    {
+        if (isset($_SESSION['user_id'])) {
+            $response = [
+                'success' => true,
+                'id' => $_SESSION['user_id']
+            ];
+        } else {
+            $response = [
+                'success' => false,
+                'message' => 'Utilisateur non connecté'
+            ];
+        }
+        $this->sendResponse($response);
+    }
     private function handleAddImgProfilRequest($data)
     {
         // Chemin du dossier où les images sont stockées

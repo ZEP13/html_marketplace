@@ -32,6 +32,8 @@ class ApiMessage
                 $this->handlegetMessages($_GET); // Passer les données GET
             } elseif ($action === 'getContacts') {
                 $this->handlegetContacts();
+            } else if ($action === 'getSessionId') {
+                $this->handlegetSessionId();
             } else {
                 $this->sendResponse(['error' => 'Action non reconnue'], 400);
             }
@@ -98,6 +100,21 @@ class ApiMessage
         }
     }
 
+    public function handlegetSessionId()
+    {
+        if (isset($_SESSION['user_id'])) {
+            $response = [
+                'success' => true,
+                'id' => $_SESSION['user_id']
+            ];
+        } else {
+            $response = [
+                'success' => false,
+                'message' => 'Utilisateur non connecté'
+            ];
+        }
+        $this->sendResponse($response);
+    }
 
     private function sendResponse($data, $statusCode = 200)
     {

@@ -21,21 +21,21 @@ class Message
     {
         try {
             $query = "SELECT 
-    m.id AS message_id,
-    m.message,
-    m.created_at,
-    m.sender_id,
-    s.user_prenom AS sender_prenom,
-    s.user_nom AS sender_nom,
-    m.receiver_id,
-    r.user_prenom AS receiver_prenom,
-    r.user_nom AS receiver_nom
-FROM messages m
-JOIN users s ON m.sender_id = s.id_user
-JOIN users r ON m.receiver_id = r.id_user
-WHERE m.sender_id = :sender_id OR m.receiver_id = :sender_id
-ORDER BY m.created_at DESC;
-";
+                m.id AS message_id,
+                m.message,
+                m.created_at,
+                m.sender_id,
+                s.user_prenom AS sender_prenom,
+                s.user_nom AS sender_nom,
+                m.receiver_id,
+                r.user_prenom AS receiver_prenom,
+                r.user_nom AS receiver_nom
+            FROM messages m
+            JOIN users s ON m.sender_id = s.id_user
+            JOIN users r ON m.receiver_id = r.id_user
+            WHERE (m.sender_id = :sender_id AND m.receiver_id = :receiver_id)
+               OR (m.sender_id = :receiver_id AND m.receiver_id = :sender_id)
+            ORDER BY m.created_at ASC"; // Changer en ASC pour avoir du plus ancien au plus récent
 
             $stmt = $this->db->prepare($query);
             $stmt->execute(['sender_id' => $id_sender, 'receiver_id' => $id_receiver]);

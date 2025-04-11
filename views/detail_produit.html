@@ -10,6 +10,26 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="" />
+    <style>
+      .btn-contact.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: #6c757d;
+      }
+      #link_vend.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        color: #6c757d;
+        text-decoration: none;
+      }
+
+      .alertContainerDetail {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+    </style>
   </head>
   <body>
     <div id="navContainer"></div>
@@ -78,7 +98,7 @@
 
               <!-- Nom du vendeur et Contact -->
               <p><strong>Vendeur: </strong><span id="nomVendeur"></span></p>
-              <button>
+              <button class="btn btn-secondary">
                 <a id="link_vend" onclick="contactVendeur()"
                   >Contacter le vendeur</a
                 >

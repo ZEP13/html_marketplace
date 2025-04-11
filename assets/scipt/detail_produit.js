@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
   event.preventDefault();
   const urlParams = new URLSearchParams(window.location.search);
   const produitId = urlParams.get("id"); // Récupère l'ID correctement depuis l'URL
-
+  let idSeler;
   fetch(
     `../public/index.php?api=produit&action=getProduitsById&id=${produitId}`,
     {
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         const produit = data.produit[0];
 
         console.log(produit);
-
+        idSeler = produit.id_user;
         const stockStatus =
           produit.quantite <= 0
             ? "Rupture de stock"
@@ -147,9 +147,55 @@ function contactVendeur() {
   const vendeurId = document
     .getElementById("link_vend")
     .getAttribute("data-vendeur-id");
-  if (vendeurId) {
-    document.location.href = `../views/chat.html?id=${vendeurId}`;
-  } else {
+
+  if (!vendeurId) {
     console.error("ID du vendeur non trouvé");
+    return;
   }
+
+  fetch("../public/index.php?api=user&action=getSessionId", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      const alertContainer = document.getElementById("alertContainerDetail");
+
+      if (!data.success) {
+        // L'utilisateur n'est pas connecté
+        alertContainer.innerHTML = `
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        Veuillez vous connecter pour contacter le vendeur
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`;
+        return;
+      }
+
+      if (vendeurId == data.id) {
+        // L'utilisateur est le vendeur
+        alertContainer.innerHTML = `
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        Vous ne pouvez pas vous contacter vous-même car vous êtes le vendeur
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`;
+
+        // Désactiver le bouton de contact
+        const btnContact = document.getElementById("link_vend");
+        btnContact.classList.add("disabled");
+        btnContact.style.pointerEvents = "none";
+        btnContact.title = "Vous ne pouvez pas vous contacter vous-même";
+      } else {
+        // L'utilisateur n'est pas le vendeur, redirection vers le chat
+        window.location.href = `../views/chat.html?contact_id=${vendeurId}`;
+      }
+    })
+    .catch((error) => {
+      console.error("Erreur:", error);
+      const alertContainer = document.getElementById("alertContainerDetail");
+      alertContainer.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Une erreur est survenue, veuillez réessayer plus tard
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`;
+    });
 }
