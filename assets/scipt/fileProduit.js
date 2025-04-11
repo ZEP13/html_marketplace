@@ -72,9 +72,10 @@ function displayProducts(page, products = allProducts) {
 
     htmlContent += `
       <div class="col-12 col-md-4 pb-3" id="produitCard">
-        <div class="product-card card" onclick="openDetailProduit(${
+        <div class="product-card card product-details" data-id="${
           produit.id_produit
-        })">${stockAlertHtml}
+        }">
+          ${stockAlertHtml}
           <img
             class="card-img-top"
             src="${produit.image || "../img/imgProduct/default.jpg"}"
@@ -99,12 +100,12 @@ function displayProducts(page, products = allProducts) {
           </div>
           <div class="btn-container">
             <a href="./detail_product.php?id=${
-              produit.id
-            }" class="btn btn-primary">
+              produit.id_produit
+            }" class="btn btn-primary stop-propagation">
               <i class="fas fa-heart"></i>
             </a>
-            <a href="#" class="btn btn-secondary panier" data-id="${
-              produit.id
+            <a href="#" class="btn btn-secondary panier stop-propagation" data-id="${
+              produit.id_produit
             }">
               <i class="fas fa-cart-plus"></i>
             </a>
@@ -116,12 +117,22 @@ function displayProducts(page, products = allProducts) {
 
   container.innerHTML = htmlContent; // Inject the accumulated HTML
 
+  // Add click handlers for product cards
+  const productCards = container.querySelectorAll(".product-details");
+  productCards.forEach((card) => {
+    card.addEventListener("click", function () {
+      const productId = this.getAttribute("data-id");
+      openDetailProduit(productId);
+    });
+  });
+
   // Ajouter les gestionnaires d'événements pour les boutons "Ajouter au panier"
   const cartButtons = container.querySelectorAll(".panier");
   const alertContainer = document.getElementById("alertContainerfilproduit");
 
   cartButtons.forEach((button) => {
     button.addEventListener("click", function (event) {
+      event.stopPropagation(); // This prevents the click from bubbling up to the card
       event.preventDefault();
 
       const produitId = this.getAttribute("data-id"); // Récupérer l'ID du produit
@@ -141,9 +152,21 @@ function displayProducts(page, products = allProducts) {
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+            // Mettre à jour le panier sans rechargement
+            if (window.updatePanierContent) {
+              window.updatePanierContent();
+            }
+            if (window.updateCartBadge) {
+              // Ajouter cette condition
+              window.updateCartBadge();
+            }
+            // Ouvrir le panier automatiquement
+            const offcanvasRight = new bootstrap.Offcanvas(
+              document.getElementById("offcanvasRight")
+            );
+            offcanvasRight.show();
           } else {
-            alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+            alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
           }
         })
         .catch((error) => {

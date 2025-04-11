@@ -46,6 +46,33 @@ document.addEventListener("DOMContentLoaded", function (event) {
         document
           .getElementById("link_vend")
           .setAttribute("data-vendeur-id", produit.id_user);
+
+        // Ajouter la limitation de quantité sur l'input
+        const quantityInput = document.getElementById("quantity");
+        quantityInput.max = produit.quantite;
+        quantityInput.setAttribute("data-stock", produit.quantite);
+
+        // Ajouter l'événement pour vérifier la quantité en temps réel
+        quantityInput.addEventListener("input", function (e) {
+          const stock = parseInt(this.getAttribute("data-stock"), 10);
+          const value = parseInt(this.value, 10);
+          const alertContainer = document.getElementById(
+            "alertContainerDetail"
+          );
+
+          if (value > stock) {
+            this.value = stock;
+            alertContainer.innerHTML = `
+              <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                Le stock disponible est limité à ${stock} unités
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>`;
+          }
+
+          if (value < 1) {
+            this.value = 1;
+          }
+        });
       } else {
         console.log(data);
         console.error("Produit non trouvé ou données vides.");
@@ -115,30 +142,57 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
   addPanierBtn.addEventListener("click", function (event) {
     event.preventDefault();
-    const alertContainer = document.querySelector(".alertContainerDetail");
-    const quantite = document.getElementById("quantity").value;
+    const alertContainer = document.getElementById("alertContainerDetail");
+    const quantite = parseInt(document.getElementById("quantity").value, 10);
 
-    fetch("../public/index.php?api=panier", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "addPanier",
-        id_produit: produitId,
-        quantite: quantite,
-      }),
-    })
+    // Vérification de la validité de la quantité
+    if (quantite < 1 || isNaN(quantite)) {
+      alertContainer.innerHTML = `<div class="alert alert-danger">Quantité invalide.</div>`;
+      return;
+    }
+
+    // Vérification du stock disponible
+    fetch(
+      `../public/index.php?api=produit&action=getProduitsById&id=${produitId}`
+    )
       .then((response) => response.json())
       .then((data) => {
-        if (data.success) {
-          alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-        } else {
-          alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+        if (data.produit && data.produit.length > 0) {
+          const stockDisponible = data.produit[0].quantite;
+
+          if (stockDisponible >= quantite) {
+            // Ajout au panier si le stock est suffisant
+            fetch("../public/index.php?api=panier", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                action: "addPanier",
+                id_produit: produitId,
+                quantite: quantite,
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                } else {
+                  alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                }
+              })
+              .catch((error) => {
+                console.error("Erreur lors de l'ajout au panier :", error);
+                alertContainer.innerHTML = `<div class="alert alert-danger">Une erreur est survenue lors de l'ajout au panier.</div>`;
+              });
+          } else {
+            alertContainer.innerHTML = `<div class="alert alert-danger">Quantité supérieure au stock disponible.</div>`;
+          }
         }
       })
       .catch((error) => {
-        console.error("Erreur lors de l'ajout au panier :", error);
+        console.error("Erreur lors de la vérification du stock:", error);
+        alertContainer.innerHTML = `<div class="alert alert-danger">Erreur lors de la vérification du stock.</div>`;
       });
   });
 });
