@@ -59,30 +59,33 @@ class Message
             return false;
         }
     }
-    public function getContacts($id_sender)
+
+    public function getContacts($userId)
     {
         try {
-            $contactsQuery = "
-            SELECT DISTINCT 
-                   CASE
-                       WHEN m.sender_id = :sender_id THEN m.receiver_id
-                       ELSE m.sender_id
-                   END AS contact_id,
-                   u.user_prenom, u.user_nom
-            FROM messages m
-            JOIN users u ON u.id_user = 
-                CASE
-                    WHEN m.sender_id = :sender_id THEN m.receiver_id
-                    ELSE m.sender_id
-                END
-            WHERE (m.sender_id = :sender_id OR m.receiver_id = :sender_id)
-        ";
-            $contactsStmt = $this->db->prepare($contactsQuery);
-            $contactsStmt->execute(['sender_id' => $id_sender]);
-            return $contactsStmt->fetchAll(PDO::FETCH_ASSOC);
+            $query = "SELECT DISTINCT 
+                      u.id_user as contact_id,
+                      u.user_prenom,
+                      u.user_nom
+                      FROM users u 
+                      LEFT JOIN messages m 
+                      ON (m.sender_id = u.id_user OR m.receiver_id = u.id_user)
+                      WHERE (m.sender_id = :userId OR m.receiver_id = :userId)
+                      AND u.id_user != :userId
+                      AND u.chat_ban = 0
+                      AND EXISTS (
+                          SELECT 1 FROM messages 
+                          WHERE (sender_id = :userId AND receiver_id = u.id_user)
+                          OR (receiver_id = :userId AND sender_id = u.id_user)
+                      )";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            // Log l'erreur et retour
-            error_log("Erreur lors de l'insertion : " . $e->getMessage());
+            error_log($e->getMessage());
             return false;
         }
     }

@@ -97,4 +97,34 @@ class UserController
 
         return true;
     }
+
+    public function getAllUsers()
+    {
+        $user = new User($this->db);
+        return $user->getAllUsers();
+    }
+
+    public function changeUserRole($userId, $role)
+    {
+        $user = new User($this->db);
+        return $user->changeUserRole($userId, $role);
+    }
+
+    public function banUserChat($userId)
+    {
+        $user = new User($this->db);
+        return $user->banUserChat($userId);
+    }
+
+    public function banUserTotal($userId)
+    {
+        $user = new User($this->db);
+        return $user->banUserTotal($userId);
+    }
+
+    public function checkChatBan($userId)
+    {
+        $user = new User($this->db);
+        return $user->isChatBanned($userId);
+    }
 }

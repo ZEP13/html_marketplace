@@ -28,6 +28,10 @@ class ApiUser
                 $this->getUserById($_GET['id']);
             } else if ($action === 'getSessionId') {
                 $this->handlegetSessionId();
+            } else if ($action === 'getAllUsers') {
+                $this->getAllUsers();
+            } else if ($action === 'checkChatBan') {
+                $this->handleCheckChatBan();
             } else {
                 $this->sendResponse(['error' => 'Action non reconnue'], 400);
             }
@@ -48,6 +52,12 @@ class ApiUser
             } else if ($action === 'addInfo') {
                 $data = json_decode(file_get_contents('php://input'), true);
                 $this->handleAddInfoUser($_POST);
+            } else if ($action === 'changeRole') {
+                $data = json_decode(file_get_contents('php://input'), true);
+                $this->handleChangeRole($data);
+            } else if ($action === 'banUser') {
+                $data = json_decode(file_get_contents('php://input'), true);
+                $this->handleBanUser($data);
             } else {
                 $this->sendResponse(['error' => 'Action non reconnue'], 400);
             }
@@ -241,6 +251,95 @@ class ApiUser
                 $this->sendResponse(['success' => false, 'message' => 'Erreur lors de la réinitialisation de la photo de profil']);
             }
         }
+    }
+
+    private function getAllUsers()
+    {
+        $users = $this->UserController->getAllUsers();
+        if ($users) {
+            $this->sendResponse([
+                'success' => true,
+                'users' => $users
+            ]);
+        } else {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des utilisateurs'
+            ], 500);
+        }
+    }
+
+    private function handleChangeRole($data)
+    {
+        if (empty($data['userId']) || empty($data['role'])) {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Données manquantes'
+            ], 400);
+            return;
+        }
+
+        $result = $this->UserController->changeUserRole($data['userId'], $data['role']);
+        if ($result) {
+            $this->sendResponse([
+                'success' => true,
+                'message' => 'Rôle modifié avec succès'
+            ]);
+        } else {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Erreur lors de la modification du rôle'
+            ], 500);
+        }
+    }
+
+    private function handleBanUser($data)
+    {
+        if (empty($data['userId']) || empty($data['banType'])) {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Données manquantes'
+            ], 400);
+            return;
+        }
+
+        $result = false;
+        if ($data['banType'] === 'chat') {
+            $result = $this->UserController->banUserChat($data['userId']);
+        } else if ($data['banType'] === 'total') {
+            $result = $this->UserController->banUserTotal($data['userId']);
+        }
+
+        if ($result) {
+            $this->sendResponse([
+                'success' => true,
+                'message' => 'Utilisateur banni avec succès'
+            ]);
+        } else {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Erreur lors du bannissement'
+            ], 500);
+        }
+    }
+
+    private function handleCheckChatBan()
+    {
+        $userId = isset($_GET['userId']) ? $_GET['userId'] : $_SESSION['user_id'];
+
+        if (!$userId) {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'ID utilisateur manquant'
+            ], 400);
+            return;
+        }
+
+        $isBanned = $this->UserController->checkChatBan($userId);
+        $this->sendResponse([
+            'success' => true,
+            'chat_ban' => $isBanned
+        ]);
     }
 
     private function sendResponse($data, $statusCode = 200)

@@ -1,6 +1,8 @@
+let userId; // Variable globale pour stocker l'ID utilisateur
+
 document.addEventListener("DOMContentLoaded", function () {
-  let userId; // Variable globale pour stocker l'ID utilisateur
   const alertContainer = document.getElementById("alertContainerProfil");
+
   // Vérifier la session et récupérer les données de l'utilisateur
   fetch("../public/index.php?api=user&action=getUser", {
     method: "GET",
@@ -71,68 +73,65 @@ document.addEventListener("DOMContentLoaded", function () {
           console.error("Erreur lors de la requête:", error);
         });
     });
-});
 
-// Fonction pour déconnecter l'utilisateur
-function logout() {
-  const logout = {
-    action: "logout",
-  };
-  // Appel à l'API de déconnexion
-  fetch("../public/index.php?api=user&action=logout", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(logout),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-        // Rediriger l'utilisateur vers la page de connexion
-        window.location.href = "../views/login.html";
-      } else {
-        alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
-      }
-    })
-    .catch((error) => {
-      console.error("Erreur de déconnexion:", error);
+  // Attacher cette fonction au bouton de déconnexion après le chargement du DOM
+  document.getElementById("deconnection").addEventListener("click", logout);
+
+  // Fonction pour mettre à jour l'image de profil
+  document
+    .getElementById("formImgProfil")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+      const imgInput = document.getElementById("imgInput");
+      const formData = new FormData();
+
+      // Ajouter l'image et l'action à FormData
+      formData.append("profileImage", imgInput.files[0]);
+      formData.append("action", "addImgProfil");
+
+      // Envoi de la photo via fetch
+      fetch("../public/index.php?api=user&action=addImgProfil", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            // Mettre à jour l'image de profil
+            document.getElementById("imgPhotoProfil").src =
+              data.newProfileImageUrl;
+            alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+          } else {
+            alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+          }
+        })
+        .catch((error) => {
+          console.error("Erreur:", error);
+        });
     });
-}
 
-// Attacher cette fonction au bouton de déconnexion
-document.getElementById("deconnection").addEventListener("click", logout);
-
-// Fonction pour mettre à jour l'image de profil
-document
-  .getElementById("formImgProfil")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
-    const imgInput = document.getElementById("imgInput");
-    const formData = new FormData();
-
-    // Ajouter l'image et l'action à FormData
-    formData.append("profileImage", imgInput.files[0]);
-    formData.append("action", "addImgProfil");
-
-    // Envoi de la photo via fetch
-    fetch("../public/index.php?api=user&action=addImgProfil", {
+  // Déplacer la fonction logout à l'intérieur du DOMContentLoaded pour avoir accès à alertContainer
+  function logout() {
+    fetch("../public/index.php?api=user&action=logout", {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+      },
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          // Mettre à jour l'image de profil
-          document.getElementById("imgPhotoProfil").src =
-            data.newProfileImageUrl;
-          alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+          window.location.href = "../views/login.html";
         } else {
-          alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+          alertContainer.innerHTML = `<div class="alert alert-danger">Échec de la déconnexion</div>`;
         }
       })
       .catch((error) => {
-        console.error("Erreur:", error);
+        console.error("Erreur de déconnexion:", error);
+        alertContainer.innerHTML = `<div class="alert alert-danger">Erreur lors de la déconnexion</div>`;
       });
-  });
+  }
+
+  // Attacher l'événement de déconnexion
+  document.getElementById("deconnection").addEventListener("click", logout);
+});

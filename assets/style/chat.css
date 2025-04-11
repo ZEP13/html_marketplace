@@ -52,9 +52,8 @@ body {
     padding: 15px;
   }
   #messageForm{
-    display: flex
-;
-    justify-content: space-between;
+    display: flex !important;
+    justify-content: space-between !important;
     width: 100%;
     gap: 7px;
   }

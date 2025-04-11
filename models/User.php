@@ -177,18 +177,72 @@ class User
         }
     }
 
-    public function changeRoleUser($role, $id)
+    // Ajout de la méthode getAllUsers
+    public function getAllUsers()
     {
         try {
-            // Requête de mise à jour
+            $query = "SELECT * FROM users";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des utilisateurs : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Correction du nom de la méthode pour correspondre à l'appel dans le controller
+    public function changeUserRole($id, $role)
+    {
+        try {
             $sql = 'UPDATE `users` SET `role` = :role WHERE `id_user` = :id';
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':role', $role);
             $stmt->bindValue(':id', $id);
             return $stmt->execute();
         } catch (PDOException $e) {
-            // Log l'erreur et retour
             error_log("Erreur lors de la mise à jour : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function banUserChat($id)
+    {
+        try {
+            $sql = 'UPDATE `users` SET `chat_ban` = 1 WHERE `id_user` = :id';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', $id);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Erreur lors du bannissement chat : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function banUserTotal($id)
+    {
+        try {
+            $sql = 'UPDATE `users` SET `is_banned` = 1 WHERE `id_user` = :id';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', $id);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Erreur lors du bannissement total : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function isChatBanned($userId)
+    {
+        try {
+            $query = "SELECT chat_ban FROM users WHERE id_user = :id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? (bool)$result['chat_ban'] : false;
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la vérification du ban chat : " . $e->getMessage());
             return false;
         }
     }

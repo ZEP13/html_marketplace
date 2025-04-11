@@ -84,10 +84,7 @@ document
   .addEventListener("submit", function (event) {
     event.preventDefault();
 
-    const alertContainer = document.getElementById("alertContainerEdit");
-    const formData = new FormData(); // Initialisation du FormData
-
-    // Vérifier et collecter les données du formulaire
+    const formData = new FormData();
     const productId = document.getElementById("productId").value;
     const productName = document.getElementById("productName").value;
     const productQuantite = document.getElementById("productQuantite").value;
@@ -99,47 +96,43 @@ document
       ? 1
       : 0;
     const selectCategory = document.getElementById("selectCategory").value;
+    const alertContainer = document.getElementById("alertContainerEdit");
 
     // Vérification des champs obligatoires
     if (
       !productName ||
       !productPrice ||
       !productQuantite ||
-      !productDescription
+      !productDescription ||
+      !selectCategory
     ) {
       alertContainer.innerHTML = `<div class="alert alert-danger">Tous les champs sont obligatoires</div>`;
       return;
     }
 
-    // Vérifier si le prix est valide
-    const regex = /^[0-9]+([,.][0-9]{1,2})?$/;
-    if (!regex.test(productPrice)) {
-      alertContainer.innerHTML = `<div class="alert alert-danger">Prix incorrect</div>`;
-      return;
-    }
-
-    // Ajouter les données au FormData avec les noms de champs corrects
-    formData.append("action", "updateProduit");
-    formData.append("id", 1); // Use dynamic productId instead of hardcoded value
-    formData.append("title", productName); // Changed from 'nom' to 'title'
+    // Ajouter toutes les données au FormData
+    formData.append("id", productId);
+    formData.append("title", productName);
     formData.append("quantite", productQuantite);
     formData.append("description", productDescription);
-    formData.append("price", productPrice); // Changed from 'prix' to 'price'
+    formData.append("price", productPrice);
     formData.append("category", selectCategory);
     formData.append("actif", actifProduit);
 
-    // Vérifier si une nouvelle image a été sélectionnée
+    // Gestion de l'image
     const newImage = document.getElementById("productImage").files[0];
     if (newImage) {
       formData.append("img", newImage);
-    } else if (currentImage) {
+    }
+    if (currentImage) {
       formData.append("current_image", currentImage);
     }
 
-    // Debug des données envoyées
-    console.log("Données envoyées :", Object.fromEntries(formData));
+    // Debug
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
 
-    // Add debug headers to see what's being sent
     fetch("../public/index.php?api=produit&action=updateProduit", {
       method: "POST",
       body: formData,

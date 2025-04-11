@@ -22,40 +22,61 @@ class ApiProduit
         $action = isset($_GET['action']) ? $_GET['action'] : null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            if ($action === 'getProduitsByUser') {
-                // Vérifier si l'utilisateur est connecté
-                if (isset($_SESSION['user_id'])) {
-                    $id_user = $_SESSION['user_id'];
-                    $this->getProduitByIdUser($id_user);
-                } else {
-                    $this->sendResponse(['error' => 'Utilisateur non connecté'], 401);
-                }
-            } elseif ($action === 'getAllProduits') {
-                $this->getAllProduit();
-            } elseif ($action === 'getProduitsById') {
-                if (isset($_GET['id']) && !empty($_GET['id'])) {
-                    $this->getProduitById($_GET['id']);
-                } else {
-                    $this->sendResponse(['error' => 'ID du produit manquant'], 400);
-                }
-            } else {
-                $this->sendResponse(['error' => 'Action non reconnue'], 400);
+            switch ($action) {
+                case 'getValidProducts':
+                    $this->getValidProducts();
+                    break;
+                case 'getProduitsByUser':
+                    // Vérifier si l'utilisateur est connecté
+                    if (isset($_SESSION['user_id'])) {
+                        $id_user = $_SESSION['user_id'];
+                        $this->getProduitByIdUser($id_user);
+                    } else {
+                        $this->sendResponse(['error' => 'Utilisateur non connecté'], 401);
+                    }
+                    break;
+                case 'getAllProduits':
+                    $this->getAllProduit();
+                    break;
+                case 'getProduitsById':
+                    if (isset($_GET['id']) && !empty($_GET['id'])) {
+                        $this->getProduitById($_GET['id']);
+                    } else {
+                        $this->sendResponse(['error' => 'ID du produit manquant'], 400);
+                    }
+                    break;
+                default:
+                    $this->sendResponse(['error' => 'Action non reconnue'], 400);
             }
         } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if ($action === 'addProduit') {
-                $data = json_decode(file_get_contents('php://input'), true);
-                $this->handleAddProduitToSell($data);
-            } elseif ($action === 'updateProduit') {
-                $data = json_decode(file_get_contents('php://input'), true);
-                $this->handleEditProduit($data);
-            } elseif ($action === 'deleteProduit') {
-                if (isset($_GET['id']) && !empty($_GET['id'])) {
-                    $this->deleteProduit($_GET['id']);
-                } else {
-                    $this->sendResponse(['error' => 'ID du produit manquant'], 400);
-                }
-            } else {
-                $this->sendResponse(['error' => 'Action non reconnue'], 400);
+            $data = json_decode(file_get_contents('php://input'), true);
+
+            switch ($action) {
+                case 'addProduit':
+                    $this->handleAddProduitToSell($data);
+                    break;
+                case 'updateProduit':
+                    $this->handleEditProduit($data);
+                    break;
+                case 'deleteProduit':
+                    if (isset($_GET['id']) && !empty($_GET['id'])) {
+                        $this->deleteProduit($_GET['id']);
+                    } else {
+                        $this->sendResponse(['error' => 'ID du produit manquant'], 400);
+                    }
+                    break;
+                case 'updateStatus':
+                    $this->handleUpdateStatus($data);
+                    break;
+                case 'resetValidation':
+                    if (empty($data['productId'])) {
+                        $this->sendResponse(['success' => false, 'message' => 'ID du produit manquant'], 400);
+                        return;
+                    }
+                    $this->handleResetValidation($data);
+                    break;
+                default:
+                    $this->sendResponse(['error' => 'Action non reconnue'], 400);
             }
         } else {
             $this->sendResponse(['error' => 'Méthode non supportée'], 405);
@@ -138,9 +159,18 @@ class ApiProduit
 
     private function handleEditProduit($data)
     {
-        // Debug des données reçues
-        error_log('Données reçues : ' . print_r($data, true));
-        error_log('Fichiers reçus : ' . print_r($_FILES, true));
+        // Récupérer les données du formulaire
+        $id = isset($_POST['id']) ? $_POST['id'] : null;
+        $title = isset($_POST['title']) ? $_POST['title'] : null;
+        $description = isset($_POST['description']) ? $_POST['description'] : null;
+        $price = isset($_POST['price']) ? $_POST['price'] : null;
+        $quantite = isset($_POST['quantite']) ? $_POST['quantite'] : null;
+        $category = isset($_POST['category']) ? $_POST['category'] : null;
+        $actif = isset($_POST['actif']) ? $_POST['actif'] : 0;
+
+        // Debug
+        error_log('POST data: ' . print_r($_POST, true));
+        error_log('FILES data: ' . print_r($_FILES, true));
 
         // Vérifier si l'utilisateur est connecté
         if (!isset($_SESSION['user_id'])) {
@@ -148,39 +178,87 @@ class ApiProduit
             return;
         }
 
-        // Vérifier les données obligatoires avec les nouveaux noms de champs
-        if (empty($data['id']) || empty($data['title']) || empty($data['description']) || empty($data['price']) || empty($data['quantite']) || empty($data['category'])) {
-            $this->sendResponse(['success' => false, 'message' => 'Des informations sont manquantes pour le produit'], 400);
+        // Vérifier les données obligatoires
+        if (!$id || !$title || !$description || !$price || !$quantite || !$category) {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Des informations sont manquantes pour le produit',
+                'received' => [
+                    'id' => $id,
+                    'title' => $title,
+                    'description' => $description,
+                    'price' => $price,
+                    'quantite' => $quantite,
+                    'category' => $category
+                ]
+            ], 400);
             return;
         }
 
-        // Vérifier si une image est fournie
-        $image = isset($_FILES['img']) && $_FILES['img']['error'] == 0
-            ? $this->uploadImage($_FILES['img'])
-            : $data['current_image']; // Utiliser l'image actuelle si aucune nouvelle image n'est fournie
-
-        if ($image === false && !isset($data['current_image'])) {
-            $this->sendResponse(['success' => false, 'message' => 'Erreur lors du téléchargement de l\'image']);
-            return;
+        // Gestion de l'image
+        $image = '';
+        if (isset($_FILES['img']) && $_FILES['img']['error'] == 0) {
+            $image = $this->uploadImage($_FILES['img']);
+        } elseif (isset($_POST['current_image'])) {
+            $image = $_POST['current_image'];
         }
 
         // Appeler le contrôleur pour mettre à jour le produit
         $updated = $this->ProduitController->updateProduit(
-            $data['id'],
+            $id,
             $_SESSION['user_id'],
-            $data['title'],
-            $data['description'],
-            $data['price'],
-            $data['quantite'],
+            $title,
+            $description,
+            $price,
+            $quantite,
             $image,
-            $data['category'],
-            isset($data['actif']) ? $data['actif'] : 0
+            $category,
+            $actif
         );
 
         if ($updated) {
             $this->sendResponse(['success' => true, 'message' => 'Produit mis à jour avec succès']);
         } else {
             $this->sendResponse(['success' => false, 'message' => 'Impossible de mettre à jour le produit']);
+        }
+    }
+
+    private function handleUpdateStatus($data)
+    {
+        if (empty($data['productId']) || empty($data['status'])) {
+            $this->sendResponse(['success' => false, 'message' => 'Données manquantes'], 400);
+            return;
+        }
+
+        $comment = isset($data['comment']) ? $comment = $data['comment'] : '';
+        $result = $this->ProduitController->updateProductStatus($data['productId'], $data['status'], $comment);
+
+        if ($result) {
+            $this->sendResponse(['success' => true, 'message' => 'Statut du produit mis à jour avec succès']);
+        } else {
+            $this->sendResponse(['success' => false, 'message' => 'Erreur lors de la mise à jour du statut'], 500);
+        }
+    }
+
+    private function handleResetValidation($data)
+    {
+        if (empty($data['productId'])) {
+            $this->sendResponse(['success' => false, 'message' => 'ID du produit manquant'], 400);
+            return;
+        }
+
+        $result = $this->ProduitController->resetValidation($data['productId']);
+
+        if ($result) {
+            $this->sendResponse([
+                'success' => true,
+                'message' => 'Statut de validation réinitialisé'
+            ]);
+        } else {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Erreur lors de la réinitialisation du statut'
+            ], 500);
         }
     }
 
@@ -215,11 +293,17 @@ class ApiProduit
 
     private function getAllProduit()
     {
-        $produit = $this->ProduitController->getAllProduit();  // Utiliser le contrôleur pour récupérer tous les produits
-        if ($produit) {
-            $this->sendResponse($produit);  // Retourner les données des produits
+        $products = $this->ProduitController->getAllProduit();
+        if ($products) {
+            $this->sendResponse([
+                'success' => true,
+                'products' => $products
+            ]);
         } else {
-            $this->sendResponse(['error' => 'Aucun produit trouvé'], 404);
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des produits'
+            ], 500);
         }
     }
 
@@ -239,6 +323,22 @@ class ApiProduit
             $this->sendResponse($produit);  // Retourner les données du produit
         } else {
             $this->sendResponse(['message' => 'Aucun produit mis en vente pour le moment'], 404);
+        }
+    }
+
+    private function getValidProducts()
+    {
+        $products = $this->ProduitController->getValidatedProducts();
+        if ($products) {
+            $this->sendResponse([
+                'success' => true,
+                'products' => $products
+            ]);
+        } else {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des produits'
+            ], 500);
         }
     }
 

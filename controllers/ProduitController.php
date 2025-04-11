@@ -54,4 +54,21 @@ class ProduitController
         $produit = new Produit($this->db);
         return $produit->getProduitByUserSeller($id_user);
     }
+    public function updateProductStatus($productId, $status, $comment = '')
+    {
+        $produit = new Produit($this->db);
+        return $produit->updateProductStatus($productId, $status, $comment);
+    }
+
+    public function resetValidation($productId)
+    {
+        $produit = new Produit($this->db);
+        return $produit->resetValidation($productId);
+    }
+
+    public function getValidatedProducts()
+    {
+        $produit = new Produit($this->db);
+        return $produit->getValidatedProducts();
+    }
 }

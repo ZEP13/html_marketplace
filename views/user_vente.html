@@ -9,6 +9,45 @@
     />
     <link rel="stylesheet" href="#" />
     <title>Ventes</title>
+    <style>
+      .status-badge {
+        font-size: 0.85rem;
+        padding: 0.35rem 0.65rem;
+      }
+      .status-pending {
+        background-color: #ffc107;
+      }
+      .status-approved {
+        background-color: #198754;
+      }
+      .status-rejected {
+        background-color: #dc3545;
+      }
+      .product-img-small {
+        max-width: 50px;
+        max-height: 50px;
+        object-fit: cover;
+      }
+      .switch-button {
+        width: 60px;
+        height: 30px;
+      }
+      .active-badge {
+        background-color: #20c997;
+      }
+      .inactive-badge {
+        background-color: #6c757d;
+      }
+      /* Ajout des styles pour les icônes */
+      .btn i {
+        font-size: 1.2rem;
+        padding: 0 2px;
+      }
+      .btn {
+        padding: 8px 12px;
+        margin: 0 3px;
+      }
+    </style>
   </head>
   <body>
     <div id="navContainer"></div>
@@ -47,14 +86,14 @@
               <th scope="col">Nom du produit</th>
               <th scope="col">Description</th>
               <th scope="col">Prix</th>
-              <th scope="col">Quantite</th>
+              <th scope="col">Quantité</th>
               <th scope="col">Image</th>
-              <th scope="col">Actif</th>
+              <th scope="col">Statut</th>
               <th scope="col">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            <tr></tr>
+          <tbody id="productTableBody">
+            <!-- Les produits seront chargés dynamiquement ici -->
           </tbody>
         </table>
         <a href="./ajoute_produit.html"
@@ -64,9 +103,290 @@
         >
       </div>
     </div>
+
+    <!-- Modal Détails Produit -->
+    <div class="modal fade" id="productDetailModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Détails du Produit</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6">
+                <img src="" class="img-fluid" alt="produit" />
+              </div>
+              <div class="col-md-6">
+                <h4 id="productName">Nom du Produit</h4>
+                <p class="text-muted" id="productCategory">
+                  Catégorie: Électronique
+                </p>
+                <p class="h5" id="productPrice">Prix: 99 €</p>
+                <hr />
+                <div class="mb-3">
+                  <h5>Visibilité</h5>
+                  <div class="mb-2">
+                    <span class="badge active-badge">Public</span>
+                  </div>
+                  <h5>Statut de Validation</h5>
+                  <div id="validationStatus">
+                    <span class="badge status-badge status-rejected"
+                      >Refusé</span
+                    >
+                  </div>
+                </div>
+                <div id="rejectionReason" class="alert alert-danger">
+                  <h6>Motif du refus:</h6>
+                  <p>Le prix n'est pas cohérent avec le marché actuel.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal pour message de refus -->
+    <div class="modal fade" id="refusModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Motif du refus</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-danger">
+              <h6>Message de l'administrateur :</h6>
+              <p id="refusMessage"></p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de confirmation de désactivation -->
+    <div class="modal fade" id="confirmDesactivationModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirmation de désactivation</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              <strong>Attention :</strong> Si vous désactivez ce produit, vous
+              devrez le faire revalider par un administrateur pour le remettre
+              en vente.
+            </div>
+            <p>Êtes-vous sûr de vouloir continuer ?</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              id="confirmDesactivation"
+            >
+              Confirmer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de confirmation de modification -->
+    <div class="modal fade" id="confirmEditModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirmation de modification</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              La modification du produit nécessitera une nouvelle validation par
+              un administrateur.
+            </div>
+            <p>Voulez-vous continuer ?</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Annuler
+            </button>
+            <button type="button" class="btn btn-primary" id="confirmEdit">
+              Continuer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirmation de suppression</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Cette action est irréversible !
+            </div>
+            <p>Êtes-vous sûr de vouloir supprimer ce produit ?</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Annuler
+            </button>
+            <button type="button" class="btn btn-danger" id="confirmDelete">
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de notification -->
+    <div class="modal fade" id="notificationModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Notification</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div id="notificationMessage"></div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-dismiss="modal"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/scipt/managePanier.js"></script>
     <script src="../assets/scipt/navbar-init.js"></script>
     <script src="../assets/scipt/user_vente.js"></script>
+    <script>
+      // Ajout du code pour gérer l'affichage des statuts
+      document.addEventListener("DOMContentLoaded", function () {
+        // Code à ajouter dans user_vente.js
+        function updateProductStatus(status, message) {
+          const statusBadge = document.querySelector(
+            "#validationStatus .badge"
+          );
+          const rejectionDiv = document.querySelector("#rejectionReason");
+
+          statusBadge.className = "badge status-badge";
+          switch (status) {
+            case "pending":
+              statusBadge.classList.add("status-pending");
+              statusBadge.textContent = "En attente";
+              rejectionDiv.style.display = "none";
+              break;
+            case "approved":
+              statusBadge.classList.add("status-approved");
+              statusBadge.textContent = "Approuvé";
+              rejectionDiv.style.display = "none";
+              break;
+            case "rejected":
+              statusBadge.classList.add("status-rejected");
+              statusBadge.textContent = "Refusé";
+              rejectionDiv.style.display = "block";
+              rejectionDiv.querySelector("p").textContent = message;
+              break;
+          }
+        }
+
+        const switchButtons = document.querySelectorAll(".form-check-input");
+
+        switchButtons.forEach((button) => {
+          button.addEventListener("change", function () {
+            const isActive = this.checked;
+            // Ici, ajoutez la logique pour mettre à jour la base de données
+            console.log("Produit " + (isActive ? "activé" : "désactivé"));
+          });
+        });
+
+        function updateProductStatus(status, message, isActive) {
+          // ...existing code for status update...
+          const activeBadge = document.querySelector(".active-badge");
+          if (activeBadge) {
+            activeBadge.textContent = isActive ? "Public" : "Privé";
+            activeBadge.className = `badge ${
+              isActive ? "active-badge" : "inactive-badge"
+            }`;
+          }
+        }
+      });
+    </script>
   </body>
 </html>

@@ -3,14 +3,13 @@ const itemsPerPage = 9;
 let allProducts = [];
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Check for search results in sessionStorage
   const searchQuery = new URLSearchParams(window.location.search).get("search");
   if (searchQuery) {
-    // Load all products then filter
-    fetch(`../public/index.php?api=produit&action=getAllProduits`)
+    // Utiliser la nouvelle route API qui filtre les produits actifs et validés
+    fetch(`../public/index.php?api=produit&action=getValidProducts`)
       .then((response) => response.json())
       .then((data) => {
-        allProducts = data;
+        allProducts = data.products || [];
         const filteredProducts = allProducts.filter(
           (product) =>
             product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -22,13 +21,11 @@ document.addEventListener("DOMContentLoaded", function () {
         displayProducts(1, filteredProducts);
       });
   } else {
-    // Normal product loading
-    fetch(`../public/index.php?api=produit&action=getAllProduits`)
+    // Utiliser la nouvelle route API pour le chargement normal
+    fetch(`../public/index.php?api=produit&action=getValidProducts`)
       .then((response) => response.json())
       .then((data) => {
-        allProducts = data;
-        console.log(allProducts);
-
+        allProducts = data.products || [];
         setupPagination(allProducts.length);
         displayProducts(1);
       });
@@ -40,12 +37,32 @@ function openDetailProduit(id) {
 }
 
 function displayProducts(page, products = allProducts) {
+  console.log("Données reçues:", products); // Debug log
   const container = document.querySelector(".card-container");
-  container.innerHTML = ""; // Clear container
+
+  if (!container) {
+    console.error("Container .card-container non trouvé");
+    return;
+  }
+
+  container.innerHTML = "";
+
+  // Ensure products is an array and not empty
+  const productsArray = Array.isArray(products) ? products : [];
+
+  if (productsArray.length === 0) {
+    container.innerHTML =
+      '<div class="col-12"><p>Aucun produit trouvé</p></div>';
+    return;
+  }
+
+  console.log("Nombre de produits:", productsArray.length); // Debug log
 
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedItems = products.slice(startIndex, endIndex);
+  const paginatedItems = productsArray.slice(startIndex, endIndex);
+
+  console.log("Produits paginés:", paginatedItems); // Debug log
 
   let htmlContent = ""; // Accumulate HTML content
 

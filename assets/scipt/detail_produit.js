@@ -42,6 +42,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
         document.getElementById("prixProduit2").textContent = produit.price;
         document.getElementById("nomVendeur").textContent =
           produit.user_nom + " " + produit.user_prenom;
+
+        // Afficher le badge "Vendeur vérifié" si le rôle est Vendeur
+        if (produit.role === "Vendeur") {
+          document.getElementById("vendeurVerifie").textContent =
+            "Vendeur vérifié";
+        }
+
         // Stocker l'ID du vendeur dans un attribut data
         document
           .getElementById("link_vend")
