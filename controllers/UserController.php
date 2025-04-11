@@ -35,10 +35,15 @@ class UserController
         $user = new User($this->db);
         $userData = $user->checkLogin($mail, $password);
 
-        if ($userData) {
+        if ($userData && !$userData['is_banned']) {
+            // Stocker toutes les informations importantes dans la session
             $_SESSION['user_id'] = $userData['id_user'];
             $_SESSION['user_mail'] = $userData['user_mail'];
-            return true;
+            $_SESSION['user_role'] = $userData['role'];
+            $_SESSION['user_nom'] = $userData['user_nom'];
+            $_SESSION['user_prenom'] = $userData['user_prenom'];
+
+            return $userData;
         }
 
         return false;
@@ -126,5 +131,10 @@ class UserController
     {
         $user = new User($this->db);
         return $user->isChatBanned($userId);
+    }
+
+    public function checkAdminRole()
+    {
+        return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Admin';
     }
 }

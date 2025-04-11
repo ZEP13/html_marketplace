@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function loadUsers() {
-  fetch("../public/index.php?api=user&action=getAllUsers")
+  fetch("../../public/index.php?api=user&action=getAllUsers")
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
@@ -121,7 +121,7 @@ function displayUsers(users) {
 
 // Modifier la fonction changeRole pour accepter directement le nouveau rôle
 function changeRole(userId, newRole) {
-  fetch("../public/index.php?api=user&action=changeRole", {
+  fetch("../../public/index.php?api=user&action=changeRole", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

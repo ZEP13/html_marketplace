@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function loadProducts() {
-  fetch("../public/index.php?api=produit&action=getAllProduits")
+  fetch("../../public/index.php?api=produit&action=getAllProduits")
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
@@ -140,7 +140,7 @@ function quickRefuse(productId) {
 }
 
 function updateProductStatus(productId, status, comment = "") {
-  fetch("../public/index.php?api=produit&action=updateStatus", {
+  fetch("../../public/index.php?api=produit&action=updateStatus", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -15,7 +15,15 @@ document.addEventListener("DOMContentLoaded", function () {
       console.log("Réponse du serveur:", data);
 
       if (data.id) {
-        userId = data.id; // Stocker l'ID utilisateur dans la variable globale
+        userId = data.id;
+
+        // Vérifier si l'utilisateur est admin et afficher le bouton si c'est le cas
+        if (data.role === "Admin") {
+          const adminButton = document.getElementById("adminButton");
+          if (adminButton) {
+            adminButton.style.display = "block";
+          }
+        }
 
         // Mettre à jour le profil avec les données de l'utilisateur
         const imageSrc = data.img

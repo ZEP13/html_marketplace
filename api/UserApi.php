@@ -32,6 +32,16 @@ class ApiUser
                 $this->getAllUsers();
             } else if ($action === 'checkChatBan') {
                 $this->handleCheckChatBan();
+            } else if ($action === 'checkAdminRole') {
+                $isAdmin = $this->UserController->checkAdminRole();
+                $this->sendResponse([
+                    'success' => true,
+                    'isAdmin' => $isAdmin,
+                    'debug' => [
+                        'session_exists' => isset($_SESSION),
+                        'user_role' => $_SESSION['user_role'] ?? 'non défini'
+                    ]
+                ]);
             } else {
                 $this->sendResponse(['error' => 'Action non reconnue'], 400);
             }
@@ -68,19 +78,28 @@ class ApiUser
 
     private function getUser()
     {
-        if (isset($_SESSION['user_id'])) {
-            $id = $_SESSION['user_id'];
-            $user = $this->UserController->getUserById($id);
+        if (!isset($_SESSION['user_id'])) {
+            $this->sendResponse(['error' => 'Non connecté'], 401);
+            return;
+        }
 
-            if ($user) {
-                $this->sendResponse($user);
-            } else {
-                $this->sendResponse(['error' => 'Utilisateur non trouvé'], 404);
-            }
+        $user = $this->UserController->getUserById($_SESSION['user_id']);
+
+        if ($user) {
+            // Assurons-nous que le rôle est correctement inclus
+            $this->sendResponse([
+                'success' => true,
+                'id' => $user->id,
+                'role' => $user->role, // S'assurer que le rôle est envoyé
+                'nom' => $user->nom,
+                'prenom' => $user->prenom,
+                'mail' => $user->mail
+            ]);
         } else {
-            $this->sendResponse(['error' => 'Aucune session active'], 401);
+            $this->sendResponse(['error' => 'Utilisateur non trouvé'], 404);
         }
     }
+
     private function getUserById($id)
     {
         $user = $this->UserController->getUserById($id);
@@ -115,10 +134,15 @@ class ApiUser
             return;
         }
 
-        $result = $this->UserController->checkLogin($data['mail'], $data['password']);
+        $userData = $this->UserController->checkLogin($data['mail'], $data['password']);
 
-        if ($result) {
-            $this->sendResponse(['success' => true, 'message' => 'Utilisateur connecté avec succès']);
+        if ($userData) {
+            $response = [
+                'success' => true,
+                'message' => 'Utilisateur connecté avec succès',
+                'role' => $userData['role']
+            ];
+            $this->sendResponse($response);
         } else {
             $this->sendResponse(['success' => false, 'message' => 'Échec de la connexion'], 401);
         }

@@ -137,7 +137,9 @@ function editProduct(productId) {
       .then((data) => {
         modal.hide();
         if (data.success) {
-          // Redirection immédiate vers la page d'édition
+          // Stocker l'ID dans sessionStorage avant la redirection
+          sessionStorage.setItem("editProductId", productId);
+          // Redirection vers la page d'édition
           window.location.href = `edit.html?id=${productId}`;
         } else {
           showNotification(

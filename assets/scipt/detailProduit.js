@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function loadProductDetails(productId) {
   fetch(
-    `../public/index.php?api=produit&action=getProduitsById&id=${productId}`
+    `../../public/index.php?api=produit&action=getProduitsById&id=${productId}`
   )
     .then((response) => response.json())
     .then((data) => {
@@ -96,7 +96,7 @@ function refuseProduct() {
 }
 
 function updateProductStatus(productId, action, comment = "") {
-  fetch("../public/index.php?api=produit&action=updateStatus", {
+  fetch("../../public/index.php?api=produit&action=updateStatus", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

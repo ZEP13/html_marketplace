@@ -98,27 +98,48 @@ class User
     public function checkLogin($mail, $password)
     {
         try {
-            // Requête de sélection
-            $sql = 'SELECT * FROM `users` WHERE `user_mail` = :user_mail';
+            $sql = 'SELECT * FROM users WHERE user_mail = :user_mail';
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':user_mail', $mail);
             $stmt->execute();
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Vérifier si l'utilisateur existe
             if ($user) {
-                // Vérifier si le mot de passe est correct
                 if (password_verify($password, $user['user_password'])) {
-                    return $user;
+                    // Retourner toutes les informations nécessaires
+                    return [
+                        'id_user' => $user['id_user'],
+                        'user_mail' => $user['user_mail'],
+                        'role' => $user['role'],
+                        'is_banned' => $user['is_banned'],
+                        'user_nom' => $user['user_nom'],
+                        'user_prenom' => $user['user_prenom']
+                    ];
                 }
             }
             return false;
         } catch (PDOException $e) {
-            // Log l'erreur et retour
             error_log("Erreur lors de la sélection : " . $e->getMessage());
             return false;
         }
     }
+
+    public function verifyRole($userId, $requiredRole)
+    {
+        try {
+            $sql = 'SELECT role FROM users WHERE id_user = :id';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', $userId);
+            $stmt->execute();
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $user && $user['role'] === $requiredRole;
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la vérification du rôle : " . $e->getMessage());
+            return false;
+        }
+    }
+
     public function editMail($id, $newMail)
     {
         try {
