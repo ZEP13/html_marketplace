@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestion Vendeur</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Mon Espace Vendeur</h1>
+
+      <div class="gestion-options">
+        <div class="option-card">
+          <div class="card-icon">
+            <i class="fas fa-store"></i>
+          </div>
+          <h2>Gestion des Ventes</h2>
+          <p>
+            Gérez vos produits, suivez vos ventes et analysez vos performances
+          </p>
+          <div class="card-stats">
+            <div class="stat">
+              <span class="stat-value">0</span>
+              <span class="stat-label">Ventes</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">0</span>
+              <span class="stat-label">Produits</span>
+            </div>
+          </div>
+          <a href="./user_vente.html" class="btn-primary">
+            <i class="fas fa-arrow-right"></i>
+            Accéder à mes ventes
+          </a>
+        </div>
+
+        <div class="option-card">
+          <div class="card-icon">
+            <i class="fas fa-tags"></i>
+          </div>
+          <h2>Codes Promo</h2>
+          <p>Créez et gérez vos promotions pour booster vos ventes</p>
+          <div class="card-stats">
+            <div class="stat">
+              <span class="stat-value">0</span>
+              <span class="stat-label">Promos actives</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">0</span>
+              <span class="stat-label">Utilisations</span>
+            </div>
+          </div>
+          <a href="./user_promo.html" class="btn-primary">
+            <i class="fas fa-arrow-right"></i>
+            Gérer mes promos
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      body {
+        background-color: #f5f7fa;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 50px;
+        font-size: 2.5em;
+      }
+
+      .gestion-options {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        flex-wrap: wrap;
+      }
+
+      .option-card {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 30px;
+        width: 350px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .option-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-icon {
+        font-size: 2.5em;
+        color: #3498db;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      h2 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.5em;
+      }
+
+      p {
+        color: #7f8c8d;
+        margin-bottom: 25px;
+        line-height: 1.6;
+      }
+
+      .card-stats {
+        display: flex;
+        justify-content: space-around;
+        margin: 25px 0;
+        padding: 15px 0;
+        border-top: 1px solid #ecf0f1;
+        border-bottom: 1px solid #ecf0f1;
+        flex-shrink: 0;
+      }
+
+      .stat {
+        text-align: center;
+      }
+
+      .stat-value {
+        display: block;
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .stat-label {
+        font-size: 0.9em;
+        color: #7f8c8d;
+      }
+
+      .btn-primary {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 15px 20px;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+        margin-top: auto;
+        width: calc(100% - 40px);
+        position: relative;
+        bottom: 0;
+      }
+
+      .btn-primary:hover {
+        background-color: #2980b9;
+      }
+
+      @media (max-width: 768px) {
+        .gestion-options {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .option-card {
+          width: 100%;
+          max-width: 350px;
+        }
+      }
+    </style>
+  </body>
+</html>

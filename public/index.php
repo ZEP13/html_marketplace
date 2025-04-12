@@ -11,6 +11,7 @@ require_once '../api/CategoryApi.php';
 require_once '../api/ReviewApi.php';
 require_once '../api/CommandeApi.php';
 require_once '../api/MessageApi.php';
+require_once '../api/PromoApi.php';
 
 use Api\ApiUser;
 use ApiCategory\ApiCategory;
@@ -19,6 +20,7 @@ use ApiPanier\ApiPanier;
 use ApiReview\ApiReview;
 use ApiCommande\ApiCommande;
 use ApiM\ApiMessage;
+use ApiPromo\ApiPromo;
 
 header('Content-Type: application/json');
 
@@ -31,6 +33,7 @@ $apis = [
     'review' => new ApiReview(),
     'commande' => new ApiCommande(),
     'message' => new ApiMessage(),
+    'promo' => new ApiPromo(),
 ];
 
 // Vérifier les paramètres pour router la requête

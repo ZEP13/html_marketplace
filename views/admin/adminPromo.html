@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestion des Promotions - Admin</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .sidebar {
+        background: #2c3e50;
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .sidebar a {
+        color: white;
+        text-decoration: none;
+      }
+      .content {
+        padding: 20px;
+      }
+      .stats-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+      }
+      .stats-card:hover {
+        transform: translateY(-5px);
+      }
+      .stat-value {
+        font-size: 2em;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .stat-label {
+        color: #7f8c8d;
+      }
+      .table-responsive {
+        margin-top: 20px;
+      }
+      .action-btn {
+        padding: 5px 10px;
+        margin: 0 2px;
+      }
+      .filter-section {
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="sidebar col-md-2 text-white">
+          <h3 class="mb-4">Admin Panel</h3>
+          <div class="d-flex flex-column">
+            <a href="admin.html"><i class="fas fa-home me-2"></i>Dashboard</a>
+            <a href="adminUser.html" class="mt-3"
+              ><i class="fas fa-users me-2"></i>Utilisateurs</a
+            >
+            <a href="adminGestionCommande.html" class="mt-3"
+              ><i class="fas fa-shopping-cart me-2"></i>Commandes</a
+            >
+            <a href="adminValidProduit.html" class="mt-3"
+              ><i class="fas fa-check-circle me-2"></i>Produits</a
+            >
+            <a href="adminPromo.html" class="mt-3"
+              ><i class="fas fa-tags me-2"></i>Promotions</a
+            >
+            <a href="adminValidPromo.html" class="mt-3"
+              ><i class="fas fa-percentage me-2"></i>Valid. Promos</a
+            >
+          </div>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="col-md-10 content">
+          <h2 class="mb-4">Gestion des Promotions</h2>
+
+          <!-- Stats Cards -->
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <div class="stats-card text-center">
+                <i
+                  class="fas fa-tag mb-3 text-primary"
+                  style="font-size: 2em"
+                ></i>
+                <div class="stat-value" id="totalPromos">0</div>
+                <div class="stat-label">Promos Actives</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stats-card text-center">
+                <i
+                  class="fas fa-shopping-cart mb-3 text-success"
+                  style="font-size: 2em"
+                ></i>
+                <div class="stat-value" id="totalUsage">0</div>
+                <div class="stat-label">Utilisations Totales</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stats-card text-center">
+                <i
+                  class="fas fa-clock mb-3 text-warning"
+                  style="font-size: 2em"
+                ></i>
+                <div class="stat-value" id="expiringSoon">0</div>
+                <div class="stat-label">Expirent Bientôt</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stats-card text-center">
+                <i
+                  class="fas fa-percentage mb-3 text-info"
+                  style="font-size: 2em"
+                ></i>
+                <div class="stat-value" id="avgDiscount">0%</div>
+                <div class="stat-label">Réduction Moyenne</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions rapides -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <button
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#createPromoModal"
+            >
+              <i class="fas fa-plus"></i> Nouvelle Promotion
+            </button>
+            <div class="filter-section">
+              <div class="btn-group">
+                <button class="btn btn-outline-secondary" id="filterAll">
+                  Toutes
+                </button>
+                <button class="btn btn-outline-secondary" id="filterActive">
+                  Actives
+                </button>
+                <button class="btn btn-outline-secondary" id="filterExpired">
+                  Expirées
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liste des promos -->
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Nom</th>
+                      <th>Type</th>
+                      <th>Valeur</th>
+                      <th>Période</th>
+                      <th>Utilisations</th>
+                      <th>Statut</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="promoList">
+                    <!-- Example row -->
+                    <tr>
+                      <td>SUMMER2024</td>
+                      <td>Promo Été</td>
+                      <td>Pourcentage</td>
+                      <td>20%</td>
+                      <td>01/06/24 - 31/08/24</td>
+                      <td>45</td>
+                      <td><span class="badge bg-success">Actif</span></td>
+                      <td>
+                        <button
+                          class="btn btn-sm btn-info action-btn"
+                          title="Éditer"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button
+                          class="btn btn-sm btn-warning action-btn"
+                          title="Désactiver"
+                        >
+                          <i class="fas fa-power-off"></i>
+                        </button>
+                        <button
+                          class="btn btn-sm btn-danger action-btn"
+                          title="Supprimer"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de création de promo -->
+    <div class="modal fade" id="createPromoModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Créer une nouvelle promotion</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="createGlobalPromoForm">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="code" class="form-label">Code Promo</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="code"
+                    id="code"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="nom_promo" class="form-label"
+                    >Nom de la promotion</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="nom_promo"
+                    id="nom_promo"
+                    required
+                  />
+                </div>
+                <div class="col-12">
+                  <label for="description" class="form-label"
+                    >Description</label
+                  >
+                  <textarea
+                    class="form-control"
+                    name="description"
+                    id="description"
+                    required
+                  ></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label for="date_debut" class="form-label"
+                    >Date de début</label
+                  >
+                  <input
+                    type="date"
+                    class="form-control"
+                    name="date_debut"
+                    id="date_debut"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="date_fin" class="form-label">Date de fin</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    name="date_fin"
+                    id="date_fin"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="reduction_value" class="form-label"
+                    >Valeur de la réduction</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="reduction_value"
+                    id="reduction_value"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="type_reduction" class="form-label"
+                    >Type de réduction</label
+                  >
+                  <select
+                    class="form-select"
+                    name="type_reduction"
+                    id="type_reduction"
+                    required
+                  >
+                    <option value="pourcentage">Pourcentage</option>
+                    <option value="montant">Montant fixe</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="condition_min" class="form-label"
+                    >Montant minimum d'achat</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="condition_min"
+                    id="condition_min"
+                  />
+                </div>
+                <div class="col-md-6" id="montantMaxContainer">
+                  <label for="montant_max" class="form-label"
+                    >Réduction maximale</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="montant_max"
+                    id="montant_max"
+                  />
+                </div>
+              </div>
+              <div class="col-12 pt-3">
+                <button type="submit" class="btn btn-primary">
+                  Créer la promotion
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/scipt/adminPromo.js"></script>
+    <script>
+      function toggleMontantMax() {
+        const typeReduction = document.getElementById("type_reduction").value;
+        const montantMaxContainer = document.getElementById(
+          "montantMaxContainer"
+        );
+
+        if (typeReduction === "montant") {
+          montantMaxContainer.style.display = "none";
+          document.getElementById("montant_max").value = "";
+          document.getElementById("montant_max").removeAttribute("required");
+        } else {
+          montantMaxContainer.style.display = "block";
+          document
+            .getElementById("montant_max")
+            .setAttribute("required", "required");
+        }
+      }
+
+      // Appeler la fonction au chargement de la page
+      document.addEventListener("DOMContentLoaded", toggleMontantMax);
+    </script>
+  </body>
+</html>

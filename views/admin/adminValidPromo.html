@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Validation des Promotions - Admin</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .sidebar {
+        background: #2c3e50;
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .sidebar a {
+        color: white;
+        text-decoration: none;
+      }
+      .content {
+        padding: 20px;
+      }
+      .stats-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+      }
+      .stats-card:hover {
+        transform: translateY(-5px);
+      }
+      .stats-icon {
+        font-size: 2em;
+        margin-bottom: 10px;
+      }
+      .table-actions {
+        white-space: nowrap;
+      }
+      .status-badge {
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.85em;
+      }
+      .filter-section {
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Same sidebar -->
+        <div class="sidebar col-md-2 text-white">
+          <h3 class="mb-4">Admin Panel</h3>
+          <div class="d-flex flex-column">
+            <a href="admin.html"><i class="fas fa-home me-2"></i>Dashboard</a>
+            <a href="adminUser.html" class="mt-3"
+              ><i class="fas fa-users me-2"></i>Utilisateurs</a
+            >
+            <a href="adminGestionCommande.html" class="mt-3"
+              ><i class="fas fa-shopping-cart me-2"></i>Commandes</a
+            >
+            <a href="adminValidProduit.html" class="mt-3"
+              ><i class="fas fa-check-circle me-2"></i>Produits</a
+            >
+            <a href="adminPromo.html" class="mt-3"
+              ><i class="fas fa-tags me-2"></i>Promotions</a
+            >
+            <a href="adminValidPromo.html" class="mt-3"
+              ><i class="fas fa-percentage me-2"></i>Valid. Promos</a
+            >
+          </div>
+        </div>
+        <!-- Contenu principal -->
+        <div class="col-md-10 content">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Validation des Promotions Vendeurs</h2>
+            <div class="filter-section">
+              <div class="btn-group">
+                <button class="btn btn-outline-secondary active">Tous</button>
+                <button class="btn btn-outline-secondary">En attente</button>
+                <button class="btn btn-outline-secondary">Validés</button>
+                <button class="btn btn-outline-secondary">Refusés</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats améliorées -->
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <div class="card stats-card bg-primary text-white">
+                <div class="card-body text-center">
+                  <i class="fas fa-clock stats-icon"></i>
+                  <h5>En attente</h5>
+                  <h2 id="pendingCount">0</h2>
+                  <small>Promotions à valider</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card bg-success text-white">
+                <div class="card-body text-center">
+                  <i class="fas fa-check-circle stats-icon"></i>
+                  <h5>Validées</h5>
+                  <h2 id="validatedCount">0</h2>
+                  <small>Dernières 24h: <span id="last24hCount">0</span></small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card bg-warning text-white">
+                <div class="card-body text-center">
+                  <i class="fas fa-percentage stats-icon"></i>
+                  <h5>Réduction Moy.</h5>
+                  <h2 id="avgDiscount">0%</h2>
+                  <small>Sur promotions actives</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card bg-info text-white">
+                <div class="card-body text-center">
+                  <i class="fas fa-store stats-icon"></i>
+                  <h5>Vendeurs</h5>
+                  <h2 id="vendorCount">0</h2>
+                  <small>Avec promos en attente</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liste des promos -->
+          <div class="card">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h3 class="m-0">Promotions en attente de validation</h3>
+              <div class="form-check form-switch">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="autoRefresh"
+                />
+                <label class="form-check-label" for="autoRefresh"
+                  >Auto-refresh</label
+                >
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Vendeur</th>
+                      <th>Description</th>
+                      <th>Valeur</th>
+                      <th>Période</th>
+                      <th>Conditions</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pendingPromoList">
+                    <!-- Exemple de ligne -->
+                    <tr>
+                      <td>
+                        <span class="badge bg-secondary">SUMMER2024</span>
+                      </td>
+                      <td>
+                        <div>John Doe</div>
+                        <small class="text-muted">ID: #12345</small>
+                      </td>
+                      <td>Réduction été 2024</td>
+                      <td>20%</td>
+                      <td>
+                        <div>01/06/24 - 31/08/24</div>
+                        <small class="text-muted">90 jours</small>
+                      </td>
+                      <td>
+                        <div>Min: 50€</div>
+                        <div>Max: 200€</div>
+                      </td>
+                      <td class="table-actions">
+                        <button class="btn btn-sm btn-success" title="Valider">
+                          <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" title="Refuser">
+                          <i class="fas fa-times"></i>
+                        </button>
+                        <button class="btn btn-sm btn-info" title="Détails">
+                          <i class="fas fa-eye"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de détails -->
+    <div class="modal fade" id="promoDetailModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Détails de la promotion</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <!-- Le contenu sera rempli dynamiquement -->
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-success"
+              onclick="validatePromoFromModal()"
+            >
+              Valider
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              onclick="refusePromoFromModal()"
+            >
+              Refuser
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/scipt/adminValidPromo.js"></script>
+  </body>
+</html>

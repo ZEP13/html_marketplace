@@ -202,6 +202,66 @@ document.addEventListener("DOMContentLoaded", function (event) {
         alertContainer.innerHTML = `<div class="alert alert-danger">Erreur lors de la vérification du stock.</div>`;
       });
   });
+
+  // Ajout de l'event listener pour l'achat immédiat
+  const acheterMaintenantBtn = document.getElementById("acheterMaintenant");
+
+  acheterMaintenantBtn.addEventListener("click", function (event) {
+    event.preventDefault();
+    const alertContainer = document.getElementById("alertContainerDetail");
+    const quantite = parseInt(document.getElementById("quantity").value, 10);
+
+    // Vérification de la validité de la quantité
+    if (quantite < 1 || isNaN(quantite)) {
+      alertContainer.innerHTML = `<div class="alert alert-danger">Quantité invalide.</div>`;
+      return;
+    }
+
+    // Vérification du stock disponible
+    fetch(
+      `../public/index.php?api=produit&action=getProduitsById&id=${produitId}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.produit && data.produit.length > 0) {
+          const stockDisponible = data.produit[0].quantite;
+
+          if (stockDisponible >= quantite) {
+            // Ajout au panier si le stock est suffisant
+            fetch("../public/index.php?api=panier", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                action: "addPanier",
+                id_produit: produitId,
+                quantite: quantite,
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  // Redirection vers la page panier après l'ajout réussi
+                  window.location.href = "./panier.html";
+                } else {
+                  alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                }
+              })
+              .catch((error) => {
+                console.error("Erreur lors de l'ajout au panier :", error);
+                alertContainer.innerHTML = `<div class="alert alert-danger">Une erreur est survenue lors de l'ajout au panier.</div>`;
+              });
+          } else {
+            alertContainer.innerHTML = `<div class="alert alert-danger">Quantité supérieure au stock disponible.</div>`;
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la vérification du stock:", error);
+        alertContainer.innerHTML = `<div class="alert alert-danger">Erreur lors de la vérification du stock.</div>`;
+      });
+  });
 });
 
 function contactVendeur() {
