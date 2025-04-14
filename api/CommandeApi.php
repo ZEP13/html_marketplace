@@ -34,37 +34,62 @@ class ApiCommande
 
     public function handlePostRequest()
     {
-        // Pas besoin de json_decode, car nous utilisons multipart/form-data
-        if (isset($_POST['action']) && $_POST['action'] === 'addCommande') {
-            $this->handleAddCommande($_POST);  // Envoi directement avec $_POST
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (!empty($data)) {
+            if (isset($data['id'])) {
+                $this->handleValideCommande($data);
+                return;
+            }
         }
+
+        // Handle form-data requests
+        if (isset($_POST['action'])) {
+            if ($_POST['action'] === 'addCommande') {
+                $this->handleAddCommande($_POST);
+            }
+        }
+
+        $this->sendResponse(['error' => 'Invalid request'], 400);
     }
 
     private function handleGetRequest()
     {
         $action = isset($_GET['action']) ? $_GET['action'] : null;
 
-        if ($action === 'getCommandeByUser') {
-            if (isset($_SESSION['user_id'])) {
-                $id_user = $_SESSION['user_id'];
-                $commande = $this->CommandeController->getCommandeByUser($id_user);
+        switch ($action) {
+            case 'getCommandeByUser':
+                if (isset($_SESSION['user_id'])) {
+                    $id_user = $_SESSION['user_id'];
+                    $commande = $this->CommandeController->getCommandeByUser($id_user);
+                    if ($commande) {
+                        $this->sendResponse(['success' => true, 'commande' => $commande]);
+                    } else {
+                        $this->sendResponse(['success' => false, 'message' => 'Aucune commande trouvée'], 404);
+                    }
+                } else {
+                    $this->sendResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 401);
+                }
+                break;
+            case 'getComandeByMostSell':
+                $commande = $this->CommandeController->getComandeByMostSell();
                 if ($commande) {
                     $this->sendResponse(['success' => true, 'commande' => $commande]);
                 } else {
                     $this->sendResponse(['success' => false, 'message' => 'Aucune commande trouvée'], 404);
                 }
-            } else {
-                $this->sendResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 401);
-            }
-        } else if ($action === 'getComandeByMostSell') {
-            $commande = $this->CommandeController->getComandeByMostSell();
-            if ($commande) {
-                $this->sendResponse(['success' => true, 'commande' => $commande]);
-            } else {
-                $this->sendResponse(['success' => false, 'message' => 'Aucune commande trouvée'], 404);
-            }
-        } else {
-            $this->sendResponse(['error' => 'Action non reconnue'], 400);
+                break;
+            case 'getAllCommandes':
+                $commandes = $this->CommandeController->getAllCommandes();
+                if ($commandes) {
+                    $this->sendResponse(['success' => true, 'commandes' => $commandes]);
+                } else {
+                    $this->sendResponse(['success' => false, 'message' => 'Aucune commande trouvée']);
+                }
+                break;
+            default:
+                $this->sendResponse(['error' => 'Action non reconnue'], 400);
+                break;
         }
     }
 
@@ -75,6 +100,21 @@ class ApiCommande
             $this->sendResponse(['success' => true, 'message' => 'Commande valide']);
         } else {
             $this->sendResponse(['success' => false, 'message' => 'impossible de passe commande'], 404);
+        }
+    }
+
+    public function handleValideCommande($data)
+    {
+        if (!isset($data['id'])) {
+            $this->sendResponse(['success' => false, 'message' => 'ID manquant'], 400);
+            return;
+        }
+
+        $commande = $this->CommandeController->valideCommande($data['id']);
+        if ($commande) {
+            $this->sendResponse(['success' => true, 'message' => 'Commande envoyée']);
+        } else {
+            $this->sendResponse(['success' => false, 'message' => 'Impossible de valider l\'envoi de la commande'], 404);
         }
     }
 
