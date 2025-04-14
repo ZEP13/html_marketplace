@@ -126,7 +126,8 @@ function showOrderDetails(commande) {
           onmouseout="this.style.backgroundColor=''" 
       >
         <div class="d-flex align-items-center">
-          <img src="${product.image}" alt="${product.name}" 
+          <img src="${product.image || "../../img/imgProduct/default.jpg"}" 
+               alt="${product.name}" 
                style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
           <span class="text-primary">${product.name}</span>
         </div>

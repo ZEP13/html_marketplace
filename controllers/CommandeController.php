@@ -28,4 +28,14 @@ class CommandeController
         $commande = new Commande($this->db);
         return $commande->AddCommande($id_user, $id_produit);
     }
+    public function valideCommande($id)
+    {
+        $commande = new Commande($this->db);
+        return $commande->valideCommande($id);
+    }
+    public function getAllCommandes()
+    {
+        $commande = new Commande($this->db);
+        return $commande->getAllCommandes();
+    }
 }
