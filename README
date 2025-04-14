@@ -3,6 +3,11 @@ pense a modifie la possibilite de filtre et faire une recherche depui le filtre 
 ahoute une ligne marque en db pour pour la marque du produit
 
 
+quand user passe commande, 
+      retire du stock la quandtite achete,
+      vide son panier
+      
+
 VIDE PANIER UNE FOIS COMMANDE valides
 
 page de remerciement et validation de commande apres payeemnt

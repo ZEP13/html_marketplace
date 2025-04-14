@@ -26,9 +26,10 @@ class Panier
         try {
             $query = "
         	            SELECT panier.*, products.*
-                        FROM panier
-                        JOIN products ON panier.id_produit = products.id_produit
-                        WHERE panier.id_user = :id AND panier.id_commande = 0
+FROM panier
+JOIN products ON panier.id_produit = products.id_produit
+WHERE panier.id_user = :id AND panier.id_commande_panier = 0
+
 
                     ";
 
@@ -45,28 +46,35 @@ class Panier
     public function addToPanier($id_user, $id_produit, $quantite)
     {
         try {
-            // Check if the product exists in the user's cart
-            $sql = 'SELECT `quantite_panier` FROM `panier` WHERE `id_user` = :id_user AND `id_produit` = :id_produit';
+            // On vérifie uniquement dans les paniers NON commandés
+            $sql = 'SELECT `quantite_panier` FROM `panier` 
+                    WHERE `id_user` = :id_user 
+                    AND `id_produit` = :id_produit 
+                    AND `id_commande_panier` = 0';
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':id_user', $id_user);
             $stmt->bindValue(':id_produit', $id_produit);
             $stmt->execute();
 
-            // If the product exists, update the quantity
             if ($stmt->rowCount() > 0) {
                 $currentQuantity = $stmt->fetchColumn();
-                $newQuantity =  $quantite;
+                $newQuantity = $quantite;
 
-                // If the new quantity is 0 or less, remove the product from the cart
                 if ($newQuantity <= 0) {
-                    $sql = 'DELETE FROM `panier` WHERE `id_user` = :id_user AND `id_produit` = :id_produit';
+                    $sql = 'DELETE FROM `panier` 
+                            WHERE `id_user` = :id_user 
+                            AND `id_produit` = :id_produit 
+                            AND `id_commande_panier` = 0';
                     $stmt = $this->db->prepare($sql);
                     $stmt->bindValue(':id_user', $id_user);
                     $stmt->bindValue(':id_produit', $id_produit);
                     return $stmt->execute();
                 } else {
-                    // Otherwise, update the quantity in the cart
-                    $sql = 'UPDATE `panier` SET `quantite_panier` = :quantite_panier WHERE `id_user` = :id_user AND `id_produit` = :id_produit';
+                    $sql = 'UPDATE `panier` 
+                            SET `quantite_panier` = :quantite_panier 
+                            WHERE `id_user` = :id_user 
+                            AND `id_produit` = :id_produit 
+                            AND `id_commande_panier` = 0';
                     $stmt = $this->db->prepare($sql);
                     $stmt->bindValue(':quantite_panier', $newQuantity);
                     $stmt->bindValue(':id_user', $id_user);
@@ -74,17 +82,17 @@ class Panier
                     return $stmt->execute();
                 }
             } else {
-                // If the product is not in the cart, add it with the specified quantity
                 if ($quantite > 0) {
-                    $sql = 'INSERT INTO `panier` (`id_user`, `id_produit`, `quantite_panier`)
-                        VALUES (:id_user, :id_produit, :quantite_panier)';
+                    $sql = 'INSERT INTO `panier` 
+                            (`id_user`, `id_produit`, `quantite_panier`, `id_commande_panier`)
+                            VALUES (:id_user, :id_produit, :quantite_panier, 0)';
                     $stmt = $this->db->prepare($sql);
                     $stmt->bindValue(':id_user', $id_user);
                     $stmt->bindValue(':id_produit', $id_produit);
                     $stmt->bindValue(':quantite_panier', $quantite);
                     return $stmt->execute();
                 } else {
-                    return false; // If the quantity is invalid, do nothing
+                    return false;
                 }
             }
         } catch (PDOException $e) {
@@ -92,6 +100,7 @@ class Panier
             return false;
         }
     }
+
 
     public function clearPanier($id_user, $id_produit)
     {
