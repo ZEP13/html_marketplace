@@ -8,13 +8,10 @@ use Config\Database;
 use PDO;
 use PDOException;
 
-
 class Commande
 {
-
     public $id_commande;
     public $id_user;
-    public $id_produit;
     public $db;
 
     public function __construct($db)
@@ -25,11 +22,21 @@ class Commande
     public function getCommandeByUser($id_user)
     {
         try {
-            // Corrected SQL query
-            $sql = "SELECT c.*, p.*
-                    FROM commande c 
-                    JOIN products p ON c.id_produit_commande = p.id_produit 
-                    WHERE c.id_user_commande = :id_user";
+            $sql = "SELECT 
+                c.*, 
+                GROUP_CONCAT(pr.title ORDER BY p.id_panier) AS products,
+                GROUP_CONCAT(pr.id_produit ORDER BY p.id_panier) AS product_ids, 
+                GROUP_CONCAT(pr.price ORDER BY p.id_panier) AS prices, 
+                GROUP_CONCAT(p.quantite_panier ORDER BY p.id_panier) AS quantities, 
+                GROUP_CONCAT(pr.image ORDER BY p.id_panier) AS images,
+                SUM(pr.price * p.quantite_panier) AS total_price
+            FROM panier p
+            JOIN products pr ON p.id_produit = pr.id_produit
+            JOIN commande c ON p.id_commande_panier = c.id_commande
+            WHERE p.id_user = :id_user AND p.id_commande_panier > 0
+            GROUP BY c.id_commande
+            ORDER BY c.date_commande DESC";
+
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id_user', $id_user, PDO::PARAM_INT);
             $stmt->execute();
@@ -39,33 +46,17 @@ class Commande
             return false;
         }
     }
-    public function getComandeByMostSell()
+
+    public function AddCommande($id_user)
     {
         try {
-            $sql = "SELECT c.*, p.*, COUNT(c.id_produit_commande) AS total_sells
-                    FROM commande c 
-                    JOIN products p ON c.id_produit_commande = p.id_produit 
-                    GROUP BY c.id_produit_commande 
-                    ORDER BY total_sells DESC";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Erreur SQL dans getComandeByMostSell: " . $e->getMessage());
-            return false;
-        }
-    }
-    public function AddCommande($id_user, $id_produit)
-    {
-        try {
-            $sql = "INSERT INTO commande (id_user_commande, id_produit_commande)VALUE id_user_commande = :id_user";
+            $sql = "INSERT INTO commande (id_user_commande) VALUES (:id_user)";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id_user', $id_user, PDO::PARAM_INT);
-            $stmt->bindParam(':id_produit', $id_produit, PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $this->db->lastInsertId();
         } catch (PDOException $e) {
-            echo "error: " . $e->getMessage();
+            error_log("Error creating commande: " . $e->getMessage());
             return false;
         }
     }

@@ -10,137 +10,41 @@ use Config\Database;
 
 class PromoController
 {
-    private $db;
+    private $promoModel;
 
     public function __construct()
     {
         $database = new Database();
-        $this->db = $database->getConnection();
+        $this->promoModel = new Promo($database->getConnection());
     }
 
-    public function addPromo(
-        $code,
-        $nom_promo,
-        $description,
-        $date_debut,
-        $date_fin,
-        $reduction_value,
-        $type_reduction,
-        $montant_max,
-        $condition_min,
-        $vendeur_id,
-        $est_globale,
-        $actif,
-        $validé_par_admin
-    ) {
-        $promo = new Promo($this->db);
-        return $promo->addPromo(
-            $code,
-            $nom_promo,
-            $description,
-            $date_debut,
-            $date_fin,
-            $reduction_value,
-            $type_reduction,
-            $montant_max,
-            $condition_min,
-            $vendeur_id,
-            $est_globale,
-            $actif,
-            $validé_par_admin
-        );
-    }
-
-    public function validatePromo($id_promo)
+    public function getAllPromos()
     {
-        $promo = new Promo($this->db);
-        return $promo->validatePromo($id_promo);
+        return $this->promoModel->getAllPromos();
     }
 
-    public function refusePromo($id_promo)
+    public function getPromoById($id)
     {
-        $promo = new Promo($this->db);
-        return $promo->refusePromo($id_promo);
-    }
-
-    public function updatePromo(
-        $id_promo,
-        $code,
-        $nom_promo,
-        $description,
-        $date_debut,
-        $date_fin,
-        $reduction_value,
-        $type_reduction,
-        $montant_max,
-        $condition_min
-    ) {
-        $promo = new Promo($this->db);
-        return $promo->updatePromo(
-            $id_promo,
-            $code,
-            $nom_promo,
-            $description,
-            $date_debut,
-            $date_fin,
-            $reduction_value,
-            $type_reduction,
-            $montant_max,
-            $condition_min
-        );
-    }
-
-    public function setPromoActive($id_promo, $active)
-    {
-        $promo = new Promo($this->db);
-        return $promo->setPromoActive($id_promo, $active);
-    }
-
-    public function resetPromo($id_promo)
-    {
-        $promo = new Promo($this->db);
-        return $promo->resetPromo($id_promo);
-    }
-
-    public function getPromo()
-    {
-        $promo = new Promo($this->db);
-        return $promo->getPromo();
-    }
-
-    public function getPromoById($id_promo)
-    {
-        $promo = new Promo($this->db);
-        return $promo->getPromoById($id_promo);
+        return $this->promoModel->getPromoById($id);
     }
 
     public function createPromo($data)
     {
-        $promo = new Promo($this->db);
-        return $promo->addPromo(
-            $data['code'],
-            $data['nom_promo'],
-            $data['description'],
-            $data['date_debut'],
-            $data['date_fin'],
-            $data['reduction_value'],
-            $data['type_reduction'],
-            $data['montant_max'] ?? null,
-            $data['condition_min'] ?? 0,
-            $data['vendeur_id'] ?? null,
-            $data['est_globale']
-        );
+        return $this->promoModel->createPromo($data);
     }
 
-    public function applyPromoToCart($code, $panier_produits)
+    public function updatePromo($id, $data)
     {
-        $promo = new Promo($this->db);
-        return $promo->isPromoValid($code, $panier_produits);
+        return $this->promoModel->updatePromo($id, $data);
     }
 
-    public function deletePromo($id_promo)
+    public function deletePromo($id)
     {
-        $promo = new Promo($this->db);
-        return $promo->deletePromo($id_promo);
+        return $this->promoModel->deletePromo($id);
+    }
+
+    public function togglePromoStatus($id, $active)
+    {
+        return $this->promoModel->togglePromoStatus($id, $active);
     }
 }

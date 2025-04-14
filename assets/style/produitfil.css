@@ -258,3 +258,18 @@
 .offcanvas {
   z-index: 1040;
 }
+
+.pagination-container {
+  width: 100%;
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+#footerContainer {
+  margin-top: 20px;
+}
+section{
+  padding-top: 46px;
+}

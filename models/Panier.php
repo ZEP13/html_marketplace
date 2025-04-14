@@ -25,11 +25,12 @@ class Panier
     {
         try {
             $query = "
-    SELECT panier.*, products.*
-    FROM panier
-    JOIN products ON panier.id_produit = products.id_produit
-    WHERE panier.id_user = :id
-";
+        	            SELECT panier.*, products.*
+                        FROM panier
+                        JOIN products ON panier.id_produit = products.id_produit
+                        WHERE panier.id_user = :id AND panier.id_commande = 0
+
+                    ";
 
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':id', $id_user, PDO::PARAM_INT);

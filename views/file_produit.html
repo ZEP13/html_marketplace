@@ -165,19 +165,15 @@
           </div>
         </main>
       </div>
-      <nav
-        aria-label="Page navigation example"
-        style="
-          position: fixed;
-          bottom: 1px;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 150;
-        "
-      >
-        <ul class="pagination"></ul>
-      </nav>
     </section>
+    <div class="container">
+      <div class="pagination-container">
+        <nav aria-label="Page navigation">
+          <ul class="pagination"></ul>
+        </nav>
+      </div>
+    </div>
+    <div id="footerContainer"></div>
     <script>
       // Add this before your other scripts
       function handleImageError(img) {
@@ -207,6 +203,7 @@
     <script src="../assets/scipt/managePanier.js"></script>
     <script src="../assets/scipt/navbar-init.js"></script>
     <script src="../assets/scipt/fileProduit.js"></script>
+    <script src="../assets/scipt/footer-init.js"></script>
     <script src="../assets/scipt/filtre_produit.js"></script>
   </body>
 </html>

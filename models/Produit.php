@@ -73,7 +73,8 @@ class Produit
     public function addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif)
     {
         try {
-            $query = "INSERT INTO products (user_id,title, description, price,quantite, image, category, actif) VALUES (:id_user,:nom,:description,:price,:quantite,:img,:category,:actif)";
+            $query = "INSERT INTO products (user_id, title, description, price, quantite, image, category, actif) 
+                      VALUES (:id_user, :nom, :description, :price, :quantite, :img, :category, :actif)";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':id_user', $id_user);
             $stmt->bindValue(':nom', $nom);
@@ -85,7 +86,7 @@ class Produit
             $stmt->bindValue(':actif', $actif);
             return $stmt->execute();
         } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
+            error_log("Error: " . $e->getMessage());
             return false;
         }
     }
@@ -233,6 +234,48 @@ WHERE products.user_id = :id_user;
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Erreur lors de la récupération des produits validés : " . $e->getMessage());
+            return false;
+        }
+    }
+    public function getAllImage($id)
+    {
+        try {
+            $sql = 'SELECT p.*, pi.image_url
+    FROM `products` p
+    LEFT JOIN `product_images` pi ON p.id_produit = pi.product_id
+    WHERE p.id_produit = :id;';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des images : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function AddAllImgProduit($productId, $images)
+    {
+        try {
+            $this->db->beginTransaction();
+
+            $sql = 'INSERT INTO product_images (product_id, image_url, created_at) VALUES (:product_id, :image_url, CURRENT_TIMESTAMP)';
+            $stmt = $this->db->prepare($sql);
+
+            foreach ($images as $imagePath) {
+                $stmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
+                $stmt->bindValue(':image_url', $imagePath, PDO::PARAM_STR);
+                if (!$stmt->execute()) {
+                    $this->db->rollBack();
+                    return false;
+                }
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Erreur lors de l'ajout des images : " . $e->getMessage());
             return false;
         }
     }

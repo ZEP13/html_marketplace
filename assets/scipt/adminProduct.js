@@ -1,4 +1,4 @@
-let currentSort = { field: "id", direction: "asc" };
+let currentSort = { field: "status", direction: "asc" };
 
 document.addEventListener("DOMContentLoaded", function () {
   loadProducts();
@@ -68,6 +68,21 @@ function displayProducts(products) {
       bValue = b.title;
     }
 
+    if (currentSort.field === "status") {
+      // Définir une priorité pour chaque statut
+      const getStatusPriority = (product) => {
+        if (product.valide === 1 && product.refuse === 0) return 1; // Validé
+        if (product.refuse === 1) return 2; // Refusé
+        if (product.valide === 0) return 0; // En attente
+        return 3; // Autres cas
+      };
+      aValue = getStatusPriority(a);
+      bValue = getStatusPriority(b);
+      return currentSort.direction === "asc"
+        ? aValue - bValue
+        : bValue - aValue;
+    }
+
     return currentSort.direction === "asc"
       ? String(aValue).localeCompare(String(bValue))
       : String(bValue).localeCompare(String(aValue));
@@ -115,7 +130,7 @@ function displayProducts(products) {
 }
 
 function getStatusBadge(product) {
-  if (product.valide === 1) {
+  if (product.valide === 1 && product.refuse === 0) {
     return `<span class="badge bg-success">Validé</span>`;
   } else if (product.refuse === 1) {
     return `<span class="badge bg-danger" title="${product.comm_refu}">Refusé</span>`;

@@ -21,7 +21,11 @@ class ProduitController
     public function addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif)
     {
         $produit = new Produit($this->db);
-        return $produit->addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif);
+        $result = $produit->addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif);
+        if ($result) {
+            return $this->db->lastInsertId();
+        }
+        return false;
     }
 
     public function getAllProduit()
@@ -70,5 +74,15 @@ class ProduitController
     {
         $produit = new Produit($this->db);
         return $produit->getValidatedProducts();
+    }
+    public function getAllImage($id)
+    {
+        $produit = new Produit($this->db);
+        return $produit->getAllImage($id);
+    }
+    public function AddAllImgProduit($id, $images)
+    {
+        $produit = new Produit($this->db);
+        return $produit->AddAllImgProduit($id, $images);
     }
 }

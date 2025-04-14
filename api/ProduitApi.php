@@ -7,13 +7,17 @@ require_once '../config/Database.php';
 require_once '../controllers/ProduitController.php';
 
 use ControllersP\ProduitController;
+use Config\Database;
 
 class ApiProduit
 {
     private $ProduitController;
+    private $db;
 
     public function __construct()
     {
+        $database = new Database();
+        $this->db = $database->getConnection();
         $this->ProduitController = new ProduitController();
     }
 
@@ -38,9 +42,19 @@ class ApiProduit
                 case 'getAllProduits':
                     $this->getAllProduit();
                     break;
+                case 'getAllImages':
+                    $this->getAllImage($_GET['id']);
+                    break;
                 case 'getProduitsById':
                     if (isset($_GET['id']) && !empty($_GET['id'])) {
                         $this->getProduitById($_GET['id']);
+                    } else {
+                        $this->sendResponse(['error' => 'ID du produit manquant'], 400);
+                    }
+                    break;
+                case 'getAllImage':
+                    if (isset($_GET['id']) && !empty($_GET['id'])) {
+                        $this->getAllImage($_GET['id']);
                     } else {
                         $this->sendResponse(['error' => 'ID du produit manquant'], 400);
                     }
@@ -74,6 +88,9 @@ class ApiProduit
                         return;
                     }
                     $this->handleResetValidation($data);
+                    break;
+                case 'addImages':
+                    $this->handleAddImages($data);
                     break;
                 default:
                     $this->sendResponse(['error' => 'Action non reconnue'], 400);
@@ -136,19 +153,26 @@ class ApiProduit
         $uploadFile = $uploadDir . $fileName;
 
         if (move_uploaded_file($_FILES['img']['tmp_name'], $uploadFile)) {
-            $addProduit = $this->ProduitController->addProduitToSell(
-                $id_user,
-                $nom,
-                $description,
-                $prix,
-                $quantite,
-                $uploadFile,
-                $category,
-                $actif
-            );
+            $stmt = $this->db->prepare("INSERT INTO products (user_id, title, description, price, quantite, image, category, actif) VALUES (:id_user, :nom, :description, :prix, :quantite, :img, :category, :actif)");
 
-            if ($addProduit) {
-                $this->sendResponse(['success' => true, 'message' => 'Produit ajouté avec succès']);
+            $stmt->bindValue(':id_user', $id_user);
+            $stmt->bindValue(':nom', $nom);
+            $stmt->bindValue(':description', $description);
+            $stmt->bindValue(':prix', $prix);
+            $stmt->bindValue(':quantite', $quantite);
+            $stmt->bindValue(':img', $uploadFile);
+            $stmt->bindValue(':category', $category);
+            $stmt->bindValue(':actif', $actif);
+
+            $result = $stmt->execute();
+
+            if ($result) {
+                $lastInsertId = $this->db->lastInsertId();
+                $this->sendResponse([
+                    'success' => true,
+                    'message' => 'Produit ajouté avec succès',
+                    'productId' => $lastInsertId
+                ]);
             } else {
                 $this->sendResponse(['success' => false, 'message' => 'Erreur lors de l\'ajout du produit']);
             }
@@ -262,6 +286,63 @@ class ApiProduit
         }
     }
 
+    private function handleAddImages($data)
+    {
+        // Debug log
+        error_log("POST data: " . print_r($_POST, true));
+        error_log("FILES data: " . print_r($_FILES, true));
+
+        // Vérifiez si productId et images sont fournis
+        if (empty($_POST['productId']) || !isset($_FILES['images'])) {
+            $this->sendResponse(['success' => false, 'message' => 'Données manquantes ou invalides'], 400);
+            return;
+        }
+
+        $productId = $_POST['productId'];
+        $uploadedImages = [];
+        $uploadDir = '../img/imgProduct/';
+
+        // Ensure upload directory exists
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        // Loop through each uploaded file
+        foreach ($_FILES['images'] as $key => $all) {
+            foreach ($all as $i => $val) {
+                $files[$i][$key] = $val;
+            }
+        }
+
+        foreach ($files as $file) {
+            if ($file['error'] === UPLOAD_ERR_OK) {
+                $fileName = uniqid(time(), true) . '_' . basename($file['name']);
+                $uploadFile = $uploadDir . $fileName;
+
+                if (move_uploaded_file($file['tmp_name'], $uploadFile)) {
+                    $uploadedImages[] = $uploadFile;
+                }
+            }
+        }
+
+        if (empty($uploadedImages)) {
+            $this->sendResponse(['success' => false, 'message' => 'Aucune image n\'a pu être téléchargée'], 400);
+            return;
+        }
+
+        // Save images to database
+        $result = $this->ProduitController->AddAllImgProduit($productId, $uploadedImages);
+
+        if ($result) {
+            $this->sendResponse([
+                'success' => true,
+                'message' => count($uploadedImages) . ' image(s) ajoutée(s) avec succès'
+            ]);
+        } else {
+            $this->sendResponse(['success' => false, 'message' => 'Erreur lors de l\'ajout des images'], 500);
+        }
+    }
+
     private function uploadImage($file)
     {
         $uploadDir = '../img/imgProduct/';
@@ -306,7 +387,30 @@ class ApiProduit
             ], 500);
         }
     }
+    private function getAllImage($id)
+    {
+        // Vérifier si l'id est valide
+        if (!$id || !is_numeric($id)) {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'ID de produit invalide'
+            ], 400);
+            return;
+        }
 
+        $images = $this->ProduitController->getAllImage($id);
+        if ($images) {
+            $this->sendResponse([
+                'success' => true,
+                'products' => $images
+            ]);
+        } else {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des images'
+            ], 500);
+        }
+    }
     private function getProduitById($id)
     {
         $produit = $this->ProduitController->getProduitById($id);

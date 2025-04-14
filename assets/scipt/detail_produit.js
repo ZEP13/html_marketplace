@@ -28,11 +28,103 @@ document.addEventListener("DOMContentLoaded", function (event) {
           "stock"
         ).innerHTML = `<p class="text-muted small" id="alertStock">${stockStatus}</p>`;
 
-        const imageSrc = produit.image
-          ? produit.image
-          : "../img/imgProduct/default.jpg";
-        document.getElementById("imgProduit").src = imageSrc;
-        document.getElementById("imgProduitModal").src = imageSrc;
+        // Récupérer toutes les images du produit
+        fetch(
+          `../public/index.php?api=produit&action=getAllImage&id=${produitId}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Erreur réseau");
+            }
+            return response.json();
+          })
+          .then((imageData) => {
+            const carouselInner = document.getElementById("carouselInner");
+            let images = [];
+
+            // Ajouter l'image principale en premier
+            images.push({
+              url: produit.image || "../img/imgProduct/default.jpg",
+              isMain: true,
+            });
+
+            // Ajouter les images supplémentaires
+            if (imageData.success && imageData.products) {
+              imageData.products.forEach((item) => {
+                if (item.image_url) {
+                  images.push({
+                    url: item.image_url,
+                    isMain: false,
+                  });
+                }
+              });
+            }
+
+            // Générer les éléments du carrousel et les miniatures
+            const thumbnailsRow = document.getElementById("thumbnailsRow");
+
+            images.forEach((image, index) => {
+              // Création des éléments du carrousel
+              const div = document.createElement("div");
+              div.className = `carousel-item ${index === 0 ? "active" : ""}`;
+              div.innerHTML = `
+                <img src="${image.url}" 
+                     class="d-block w-100" 
+                     alt="Image produit ${index + 1}"
+                     data-bs-toggle="modal" 
+                     data-bs-target="#imageModal"
+                     onclick="updateModalImage('${image.url}')">
+              `;
+              carouselInner.appendChild(div);
+
+              // Création des miniatures
+              const thumbnail = document.createElement("img");
+              thumbnail.src = image.url;
+              thumbnail.className = `thumbnail-img ${
+                index === 0 ? "active" : ""
+              }`;
+              thumbnail.alt = `Miniature ${index + 1}`;
+              thumbnail.setAttribute("data-bs-slide-to", index);
+              thumbnail.setAttribute("data-bs-target", "#productCarousel");
+              thumbnail.onclick = function () {
+                // Mettre à jour le carrousel
+                const carousel = bootstrap.Carousel.getInstance(
+                  document.getElementById("productCarousel")
+                );
+                carousel.to(index);
+                // Mettre à jour les classes active des miniatures
+                document
+                  .querySelectorAll(".thumbnail-img")
+                  .forEach((thumb) => thumb.classList.remove("active"));
+                this.classList.add("active");
+                // Mettre à jour l'image de la modal
+                updateModalImage(image.url);
+              };
+              thumbnailsRow.appendChild(thumbnail);
+            });
+
+            // Mettre à jour l'image initiale dans la modal
+            document.getElementById("imgProduitModal").src = images[0].url;
+          })
+          .catch((error) => {
+            console.error("Erreur lors de la récupération des images:", error);
+            // Afficher au moins l'image principale en cas d'erreur
+            const carouselInner = document.getElementById("carouselInner");
+            const mainImage = produit.image || "../img/imgProduct/default.jpg";
+            carouselInner.innerHTML = `
+              <div class="carousel-item active">
+                <img src="${mainImage}" 
+                     class="d-block w-100" 
+                     alt="Image produit principal"
+                     data-bs-toggle="modal" 
+                     data-bs-target="#imageModal"
+                     onclick="updateModalImage('${mainImage}')">
+              </div>`;
+          });
 
         document.getElementById("titleProduit").textContent = produit.title;
 
@@ -319,4 +411,8 @@ function contactVendeur() {
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>`;
     });
+}
+
+function updateModalImage(imageUrl) {
+  document.getElementById("imgProduitModal").src = imageUrl;
 }
