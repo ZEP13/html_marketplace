@@ -32,9 +32,28 @@ class ApiCommande
         }
     }
 
-    public function handlePostRequest()
+    private function handlePostRequest()
     {
         $data = json_decode(file_get_contents('php://input'), true);
+
+        if (isset($data['action']) && $data['action'] === 'addCommande') {
+            if (isset($_SESSION['user_id'])) {
+                $id_commande = $this->CommandeController->AddCommande($_SESSION['user_id']);
+                if ($id_commande) {
+                    $this->sendResponse([
+                        'success' => true,
+                        'id_commande' => $id_commande,
+                        'message' => 'Commande créée avec succès'
+                    ]);
+                } else {
+                    $this->sendResponse([
+                        'success' => false,
+                        'message' => 'Erreur lors de la création de la commande'
+                    ], 500);
+                }
+                return;
+            }
+        }
 
         if (!empty($data)) {
             if (isset($data['id'])) {
@@ -42,14 +61,6 @@ class ApiCommande
                 return;
             }
         }
-
-        // Handle form-data requests
-        if (isset($_POST['action'])) {
-            if ($_POST['action'] === 'addCommande') {
-                $this->handleAddCommande($_POST);
-            }
-        }
-
         $this->sendResponse(['error' => 'Invalid request'], 400);
     }
 
@@ -71,8 +82,8 @@ class ApiCommande
                     $this->sendResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 401);
                 }
                 break;
-            case 'getComandeByMostSell':
-                $commande = $this->CommandeController->getComandeByMostSell();
+            case 'getComandeById':
+                $commande = $this->CommandeController->getComandeById($_GET['id']);
                 if ($commande) {
                     $this->sendResponse(['success' => true, 'commande' => $commande]);
                 } else {
@@ -93,15 +104,6 @@ class ApiCommande
         }
     }
 
-    public function handleAddCommande($data)
-    {
-        $commande = $this->CommandeController->AddCommande($data['id_user'], $data['id_produit']);
-        if ($commande) {
-            $this->sendResponse(['success' => true, 'message' => 'Commande valide']);
-        } else {
-            $this->sendResponse(['success' => false, 'message' => 'impossible de passe commande'], 404);
-        }
-    }
 
     public function handleValideCommande($data)
     {

@@ -23,10 +23,11 @@ class CommandeController
         $commande = new Commande($this->db);
         return $commande->getCommandeByUser($id_user);
     }
-    public function AddCommande($id_user, $id_produit)
+
+    public function AddCommande($id_user)
     {
         $commande = new Commande($this->db);
-        return $commande->AddCommande($id_user, $id_produit);
+        return $commande->AddCommande($id_user);
     }
     public function valideCommande($id)
     {
@@ -37,5 +38,10 @@ class CommandeController
     {
         $commande = new Commande($this->db);
         return $commande->getAllCommandes();
+    }
+    public function getComandeById($id)
+    {
+        $commande = new Commande($this->db);
+        return $commande->getComandeById($id);
     }
 }

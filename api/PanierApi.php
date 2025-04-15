@@ -37,6 +37,10 @@ class ApiPanier
             $this->handleAddPanierRequest($data);
         } else if ($data['action'] === 'delete') {
             $this->handleClearPanierRequest($data);
+        } else if ($data['action'] === 'validePanier') {
+            $this->handleValidePanierRequest($data);
+        } else {
+            $this->sendResponse(['error' => 'Action non reconnue'], 400);
         }
     }
     private function handleGetPanierRequest()
@@ -76,6 +80,21 @@ class ApiPanier
                 $this->sendResponse(['success' => true, 'message' => 'Produit ajoute au panier']);
             } else {
                 $this->sendResponse(['success' => false, 'message' => 'Échec de l\'ajout au panier'], 500);
+            }
+        } else {
+            $this->sendResponse(['error' => 'Connectez vous pour ajoute au panier'], 401);
+        }
+    }
+    public function handleValidePanierRequest($data)
+    {
+        if (isset($_SESSION['user_id'])) {
+            $id_user = $_SESSION['user_id'];
+            $result = $this->PanierController->validePanier($id_user, $data['id_commande']);
+
+            if ($result) {
+                $this->sendResponse(['success' => true, 'message' => 'Produit valide au panier']);
+            } else {
+                $this->sendResponse(['success' => false, 'message' => 'Échec de la validation du produit au panier'], 500);
             }
         } else {
             $this->sendResponse(['error' => 'Connectez vous pour ajoute au panier'], 401);

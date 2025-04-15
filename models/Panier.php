@@ -115,4 +115,47 @@ WHERE panier.id_user = :id AND panier.id_commande_panier = 0
             return false;
         }
     }
+
+    public function validePanier($id_user, $id_commande)
+    {
+        try {
+            $this->db->beginTransaction();
+
+            // 1. Récupérer tous les articles du panier non achetés
+            $sql = 'SELECT id_produit, quantite_panier FROM panier 
+                    WHERE id_user = :id_user AND achete = 0';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id_user', $id_user, PDO::PARAM_INT);
+            $stmt->execute();
+            $panierItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // 2. Pour chaque article, mettre à jour le stock
+            foreach ($panierItems as $item) {
+                $sql = 'UPDATE products 
+                        SET quantite = quantite - :quantite_panier 
+                        WHERE id_produit = :id_produit';
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindValue(':quantite_panier', $item['quantite_panier'], PDO::PARAM_INT);
+                $stmt->bindValue(':id_produit', $item['id_produit'], PDO::PARAM_INT);
+                $stmt->execute();
+            }
+
+            // 3. Marquer les articles du panier comme achetés
+            $sql = 'UPDATE panier 
+                    SET achete = 1, 
+                        id_commande_panier = :id_commande 
+                    WHERE id_user = :id_user AND achete = 0';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id_user', $id_user, PDO::PARAM_INT);
+            $stmt->bindValue(':id_commande', $id_commande, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $this->db->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Erreur lors de la validation du panier : " . $e->getMessage());
+            return false;
+        }
+    }
 }

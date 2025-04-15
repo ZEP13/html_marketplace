@@ -77,9 +77,11 @@ class Commande
     public function AddCommande($id_user)
     {
         try {
-            $sql = "INSERT INTO commande (id_user_commande) VALUES (:id_user)";
+            $sql = "INSERT INTO commande (id_user_commande, statut, date_commande) 
+                VALUES (:id_user, :statut, NOW())";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id_user', $id_user, PDO::PARAM_INT);
+            $stmt->bindValue(':statut', 'En attente', PDO::PARAM_STR); // ou 'Payée', selon ton usage
             $stmt->execute();
             return $this->db->lastInsertId();
         } catch (PDOException $e) {
@@ -87,6 +89,7 @@ class Commande
             return false;
         }
     }
+
     public function valideCommande($id)
     {
         try {
@@ -96,6 +99,19 @@ class Commande
             return $stmt->execute();
         } catch (PDOException $e) {
             error_log("Erreur lors de la validation de la commande : " . $e->getMessage());
+            return false;
+        }
+    }
+    public function getComandeById($id)
+    {
+        try {
+            $sql = "SELECT * FROM commande WHERE id_commande = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération de la commande : " . $e->getMessage());
             return false;
         }
     }
