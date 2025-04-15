@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Derniers produits consultés</title>
+    <!-- CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      .recent-products {
+        display: block; /* Changer de 'none' à 'block' */
+        padding: 40px 0;
+        background-color: #fff;
+      }
+
+      .recent-products .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 15px;
+      }
+
+      .recent-products .section-title {
+        position: relative;
+        left: 30px;
+        color: #09234a;
+      }
+
+      .recent-products .carousel-container {
+        position: relative;
+        padding: 0 40px;
+        overflow: hidden;
+      }
+
+      .recent-products .products-grid {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 10px 0;
+      }
+
+      .recent-products .products-grid::-webkit-scrollbar {
+        display: none;
+      }
+
+      .recent-products .carousel-container::before,
+      .recent-products .carousel-container::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        width: 30px;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        opacity: 0;
+      }
+
+      .recent-products .carousel-container::after {
+        right: 40px;
+        background: linear-gradient(
+          to left,
+          #fff 0%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        opacity: 1;
+      }
+
+      .recent-products .carousel-container.show-fade-left::before {
+        left: 40px;
+        background: linear-gradient(
+          to right,
+          #fff 0%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        opacity: 1;
+      }
+
+      .recent-products .recent-card {
+        max-width: 200px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        height: 300px; /* Réduit de 350px à 300px */
+        display: flex;
+        flex-direction: column;
+        opacity: 1;
+        transition: opacity 0.5s ease;
+      }
+
+      .recent-products .recent-image {
+        height: 135px; /* 45% de la hauteur totale de la carte (300px) */
+        overflow: hidden;
+      }
+
+      .recent-products .recent-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px 8px 0 0;
+      }
+
+      .recent-products .recent-info {
+        padding: 8px; /* Réduit légèrement le padding pour compenser la hauteur d'image plus grande */
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .recent-products .card-title {
+        font-size: 1rem;
+        margin-bottom: 5px;
+        color: #333;
+      }
+
+      .recent-products .description {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 5px;
+      }
+
+      .recent-products .rating {
+        font-size: 0.8rem;
+        margin: 5px 0;
+      }
+
+      .recent-products .bottom-info {
+        margin-top: auto;
+      }
+
+      .recent-products .price {
+        font-size: 1.1rem;
+        color: #36afeb;
+        font-weight: bold;
+      }
+
+      .recent-products .btn-primary {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+      }
+
+      .recent-products .nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(54, 175, 235, 0.9);
+        border: none;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        z-index: 2;
+      }
+
+      .recent-products .prev-btn {
+        left: 0;
+      }
+
+      .recent-products .next-btn {
+        right: 0;
+      }
+
+      .recent-products .nav-btn:hover {
+        background: #09234a;
+      }
+
+      /* ----------- Responsive Queries ----------- */
+
+      /* Smartphones - portrait */
+      @media (max-width: 576px) {
+        .recent-products .recent-card {
+          flex: 0 0 80% !important; /* Réduit de 90% à 80% */
+          min-width: 200px !important; /* Réduit de 250px à 200px */
+          height: 280px !important; /* Réduit de auto à 280px */
+        }
+
+        .recent-products .carousel-container {
+          padding: 0 20px !important;
+        }
+
+        .recent-products .recent-info {
+          padding: 10px !important;
+        }
+
+        .recent-products .btn-primary {
+          font-size: 0.85rem !important;
+          padding: 6px 12px !important;
+        }
+
+        .recent-products .nav-btn {
+          width: 25px;
+          height: 25px;
+        }
+
+        .recent-products .carousel-container::before,
+        .recent-products .carousel-container::after {
+          width: 20px;
+        }
+      }
+
+      /* Petites tablettes / smartphone paysage */
+      @media (min-width: 577px) and (max-width: 768px) {
+        .recent-products .recent-card {
+          flex: 0 0 calc(50% - 10px);
+          min-width: 200px;
+          height: 320px;
+        }
+      }
+
+      /* Tablettes classiques */
+      @media (min-width: 769px) and (max-width: 992px) {
+        .recent-products .recent-card {
+          flex: 0 0 calc(33.333% - 15px);
+          min-width: 220px;
+          height: 340px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="recent-products">
+      <div class="container">
+        <h2 class="section-title">Derniers produits consultés</h2>
+        <div class="carousel-container">
+          <button class="nav-btn prev-btn">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="products-grid"></div>
+          <button class="nav-btn next-btn">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/scipt/vuRecement.js"></script>
+  </body>
+</html>

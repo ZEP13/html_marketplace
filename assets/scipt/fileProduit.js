@@ -275,3 +275,58 @@ function setupPagination(totalItems) {
     }
   });
 }
+
+function updateRecentProducts(productId) {
+  let recentProducts = JSON.parse(
+    localStorage.getItem("recentProducts") || "[]"
+  );
+  let recentProductsData = JSON.parse(
+    localStorage.getItem("recentProductsData") || "{}"
+  );
+
+  // Supprimer le produit s'il existe déjà
+  const index = recentProducts.indexOf(productId);
+  if (index > -1) {
+    recentProducts.splice(index, 1);
+  }
+
+  // Ajouter le produit au début
+  recentProducts.unshift(productId);
+
+  // Garder seulement les 10 derniers produits
+  if (recentProducts.length > 10) {
+    recentProducts = recentProducts.slice(0, 10);
+  }
+
+  // Mettre à jour le timestamp
+  recentProductsData[productId] = {
+    timestamp: new Date().getTime(),
+  };
+
+  // Sauvegarder dans le localStorage
+  localStorage.setItem("recentProducts", JSON.stringify(recentProducts));
+  localStorage.setItem(
+    "recentProductsData",
+    JSON.stringify(recentProductsData)
+  );
+
+  // Déclencher l'événement de mise à jour
+  document.dispatchEvent(new CustomEvent("recentProductsUpdated"));
+}
+
+// Ajouter l'appel à updateRecentProducts lors du clic sur un produit
+document.addEventListener("DOMContentLoaded", () => {
+  // ...existing code...
+
+  // Ajouter aux gestionnaires d'événements existants
+  document
+    .querySelectorAll(".product-card, .btn-primary")
+    .forEach((element) => {
+      element.addEventListener("click", (e) => {
+        const productId = e.currentTarget.getAttribute("data-product-id");
+        if (productId) {
+          updateRecentProducts(productId);
+        }
+      });
+    });
+});

@@ -1,7 +1,58 @@
 document.addEventListener("DOMContentLoaded", function (event) {
   event.preventDefault();
   const urlParams = new URLSearchParams(window.location.search);
-  const produitId = urlParams.get("id"); // Récupère l'ID correctement depuis l'URL
+  const produitId = urlParams.get("id");
+
+  // Fonction pour nettoyer les produits expirés
+  function cleanExpiredProducts() {
+    const currentTime = new Date().getTime();
+    const storedData = JSON.parse(
+      localStorage.getItem("recentProductsData") || "{}"
+    );
+    const cleanedProducts = [];
+
+    for (const item of Object.entries(storedData)) {
+      if (currentTime - item[1].timestamp < 60 * 60 * 1000) {
+        // 1 heures en millisecondes
+        cleanedProducts.push(item[0]);
+      }
+    }
+
+    // Mettre à jour le stockage avec uniquement les produits non expirés
+    const newStoredData = {};
+    cleanedProducts.forEach((productId) => {
+      newStoredData[productId] = storedData[productId];
+    });
+    localStorage.setItem("recentProductsData", JSON.stringify(newStoredData));
+    localStorage.setItem("recentProducts", JSON.stringify(cleanedProducts));
+  }
+
+  // Ajouter le produit aux produits récemment consultés avec timestamp
+  const recentProducts = JSON.parse(
+    localStorage.getItem("recentProducts") || "[]"
+  );
+  const storedData = JSON.parse(
+    localStorage.getItem("recentProductsData") || "{}"
+  );
+
+  if (!recentProducts.includes(produitId)) {
+    recentProducts.unshift(produitId);
+    if (recentProducts.length > 10) {
+      recentProducts.pop();
+    }
+
+    // Ajouter le timestamp
+    storedData[produitId] = {
+      timestamp: new Date().getTime(),
+    };
+
+    localStorage.setItem("recentProducts", JSON.stringify(recentProducts));
+    localStorage.setItem("recentProductsData", JSON.stringify(storedData));
+  }
+
+  // Nettoyer les produits expirés
+  cleanExpiredProducts();
+
   let idSeler;
   fetch(
     `../public/index.php?api=produit&action=getProduitsById&id=${produitId}`,
