@@ -87,6 +87,15 @@ function displayProducts(page, products = allProducts) {
           )}<span class="text-muted"> (${reviewCount} avis)</span></div>`
         : '<div class="text-muted">Aucun avis</div>';
 
+    const cartButton =
+      produit.quantite <= 0
+        ? `<a href="#" class="btn btn-secondary panier stop-propagation disabled" title="Produit en rupture de stock">
+             <i class="fas fa-cart-plus"></i>
+           </a>`
+        : `<a href="#" class="btn btn-secondary panier stop-propagation" data-id="${produit.id_produit}">
+             <i class="fas fa-cart-plus"></i>
+           </a>`;
+
     htmlContent += `
       <div class="col-12 col-md-4 pb-3" id="produitCard">
         <div class="product-card card product-details" data-id="${
@@ -121,11 +130,7 @@ function displayProducts(page, products = allProducts) {
             }" class="btn btn-primary stop-propagation">
               <i class="fas fa-heart"></i>
             </a>
-            <a href="#" class="btn btn-secondary panier stop-propagation" data-id="${
-              produit.id_produit
-            }">
-              <i class="fas fa-cart-plus"></i>
-            </a>
+            ${cartButton}
           </div>
         </div>
       </div>

@@ -35,8 +35,13 @@ class PanierController
         $panier = new Panier($this->db);
         return $panier->clearPanier($id_user, $id_produit);
     }
+
     public function validePanier($id_user, $id_commande)
     {
+        if (!is_numeric($id_user) || !is_numeric($id_commande)) {
+            return false;
+        }
+
         $panier = new Panier($this->db);
         return $panier->validePanier($id_user, $id_commande);
     }

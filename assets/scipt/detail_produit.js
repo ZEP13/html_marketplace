@@ -68,6 +68,35 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
         console.log(produit);
         idSeler = produit.id_user;
+
+        // Déclarer quantityInput une seule fois au début
+        const quantityInput = document.getElementById("quantity");
+        const addPanierBtn = document.getElementById("ajoutePanier");
+        const acheterMaintenantBtn =
+          document.getElementById("acheterMaintenant");
+
+        // Configuration initiale de l'input quantité
+        quantityInput.max = produit.quantite;
+        quantityInput.value = "1"; // Définir une valeur par défaut
+        quantityInput.setAttribute("data-stock", produit.quantite);
+
+        if (produit.quantite <= 0) {
+          // Désactiver les boutons et l'input
+          addPanierBtn.disabled = true;
+          acheterMaintenantBtn.disabled = true;
+          quantityInput.disabled = true;
+          quantityInput.value = "0";
+
+          // Ajouter des titres explicatifs
+          addPanierBtn.title = "Produit en rupture de stock";
+          acheterMaintenantBtn.title = "Produit en rupture de stock";
+
+          // Ajouter des classes pour le style
+          addPanierBtn.classList.add("disabled");
+          acheterMaintenantBtn.classList.add("disabled");
+        }
+
+        // Mettre à jour le message de stock
         const stockStatus =
           produit.quantite <= 0
             ? "Rupture de stock"
@@ -197,11 +226,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
           .getElementById("link_vend")
           .setAttribute("data-vendeur-id", produit.id_user);
 
-        // Ajouter la limitation de quantité sur l'input
-        const quantityInput = document.getElementById("quantity");
-        quantityInput.max = produit.quantite;
-        quantityInput.setAttribute("data-stock", produit.quantite);
-
         // Ajouter l'événement pour vérifier la quantité en temps réel
         quantityInput.addEventListener("input", function (e) {
           const stock = parseInt(this.getAttribute("data-stock"), 10);
@@ -295,6 +319,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
     const alertContainer = document.getElementById("alertContainerDetail");
     const quantite = parseInt(document.getElementById("quantity").value, 10);
 
+    // Vérifier si le produit est en stock
+    if (document.getElementById("quantity").disabled) {
+      alertContainer.innerHTML = `<div class="alert alert-danger">Ce produit est en rupture de stock.</div>`;
+      return;
+    }
+
     // Vérification de la validité de la quantité
     if (quantite < 1 || isNaN(quantite)) {
       alertContainer.innerHTML = `<div class="alert alert-danger">Quantité invalide.</div>`;
@@ -327,6 +357,18 @@ document.addEventListener("DOMContentLoaded", function (event) {
               .then((data) => {
                 if (data.success) {
                   alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                  // Mettre à jour le panier sans rechargement
+                  if (window.updatePanierContent) {
+                    window.updatePanierContent();
+                  }
+                  if (window.updateCartBadge) {
+                    window.updateCartBadge();
+                  }
+                  // Ouvrir le panier automatiquement
+                  const offcanvasRight = new bootstrap.Offcanvas(
+                    document.getElementById("offcanvasRight")
+                  );
+                  offcanvasRight.show();
                 } else {
                   alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
                 }
@@ -353,6 +395,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
     event.preventDefault();
     const alertContainer = document.getElementById("alertContainerDetail");
     const quantite = parseInt(document.getElementById("quantity").value, 10);
+
+    // Vérifier si le produit est en stock
+    if (document.getElementById("quantity").disabled) {
+      alertContainer.innerHTML = `<div class="alert alert-danger">Ce produit est en rupture de stock.</div>`;
+      return;
+    }
 
     // Vérification de la validité de la quantité
     if (quantite < 1 || isNaN(quantite)) {
