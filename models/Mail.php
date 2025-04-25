@@ -3,9 +3,9 @@
 namespace ModelMail;
 
 require_once '../config/Database.php';
-require_once '../mailler/src/PHPMailer.php';
-require_once '../mailler/src/SMTP.php';
-require_once '../mailler/src/Exception.php';
+// require_once '../mailler/src/PHPMailer.php';
+// require_once '../mailler/src/SMTP.php';
+// require_once '../mailler/src/Exception.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;

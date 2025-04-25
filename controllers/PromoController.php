@@ -43,8 +43,53 @@ class PromoController
         return $this->promoModel->deletePromo($id);
     }
 
-    public function togglePromoStatus($id, $active)
+    public function togglePromoStatus($id)
     {
-        return $this->promoModel->togglePromoStatus($id, $active);
+        return $this->promoModel->togglePromoStatus($id);
+    }
+
+    public function getVendorPromos()
+    {
+        return $this->promoModel->getVendorPromos();
+    }
+
+    public function validateVendorPromo($id)
+    {
+        return $this->promoModel->validateVendorPromo($id);
+    }
+
+    public function refuseVendorPromo($id)
+    {
+        return $this->promoModel->refuseVendorPromo($id);
+    }
+
+    public function resetVendorPromo($id)
+    {
+        return $this->promoModel->resetVendorPromo($id);
+    }
+
+    public function getUserPromos($userId)
+    {
+        return $this->promoModel->getUserPromos($userId);
+    }
+
+    public function createUserPromo($data, $userId)
+    {
+        return $this->promoModel->createUserPromo($data, $userId);
+    }
+
+    public function updateUserPromo($id, $data, $userId)
+    {
+        // Verify that the promo belongs to the user before updating
+        $promo = $this->getPromoById($id);
+        if (!$promo || $promo['vendeur_id'] != $userId) {
+            return false;
+        }
+        return $this->promoModel->updatePromo($id, $data);
+    }
+
+    public function isCodeUnique($code, $excludeId = null)
+    {
+        return $this->promoModel->isCodeUnique($code, $excludeId);
     }
 }

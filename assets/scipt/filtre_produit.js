@@ -39,14 +39,14 @@ function byLowerPrice(sortOrder = "asc") {
   })
     .then((response) => response.json())
     .then((data) => {
-      // Vérifier si data contient des produits
-      if (!Array.isArray(data)) {
+      // Vérifier si data contient des produits dans le nouveau format
+      if (!data.success || !Array.isArray(data.products)) {
         console.error("Les données ne sont pas dans le format attendu:", data);
         return;
       }
 
       // Sort based on the 'price' field
-      const sortedProduits = [...data].sort((a, b) => {
+      const sortedProduits = [...data.products].sort((a, b) => {
         if (sortOrder === "asc") {
           return parseFloat(a.price) - parseFloat(b.price);
         } else if (sortOrder === "desc") {
@@ -173,8 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch(`../public/index.php?api=produit&action=getAllProduits`)
       .then((response) => response.json())
       .then((data) => {
-        // Vérifier si data contient des produits
-        if (!Array.isArray(data)) {
+        if (!data.success || !Array.isArray(data.products)) {
           console.error(
             "Les données ne sont pas dans le format attendu:",
             data
@@ -182,18 +181,29 @@ document.addEventListener("DOMContentLoaded", function () {
           return;
         }
 
-        let filteredProducts = [...data];
+        let filteredProducts = [...data.products];
 
-        // Appliquer le filtre de notation
+        // Appliquer d'abord le filtre de recherche si une recherche existe
+        if (filters.search) {
+          filteredProducts = filteredProducts.filter(
+            (product) =>
+              product.title
+                ?.toLowerCase()
+                .includes(filters.search.toLowerCase()) ||
+              product.description
+                ?.toLowerCase()
+                .includes(filters.search.toLowerCase())
+          );
+        }
+
+        // Appliquer ensuite les autres filtres sur les résultats de recherche
         if (filters.rating > 0) {
           filteredProducts = filteredProducts.filter((product) => {
             const rating = parseFloat(product.average_rating) || 0;
-            // Retourne les produits avec une note égale ou supérieure jusqu'à la note suivante
             return rating >= filters.rating && rating < filters.rating + 1;
           });
         }
 
-        // Appliquer les autres filtres
         if (filters.category) {
           filteredProducts = filteredProducts.filter(
             (product) => product.category == filters.category
@@ -206,48 +216,43 @@ document.addEventListener("DOMContentLoaded", function () {
           );
         }
 
-        // Mettre à jour le max du range avec le prix le plus élevé des produits filtrés
+        // Mettre à jour le max du range avec le prix le plus élevé
         if (filteredProducts.length > 0) {
           const newMaxPrice = Math.ceil(
             Math.max(...filteredProducts.map((p) => parseFloat(p.price)))
           );
           priceRange.max = newMaxPrice;
-
-          // Mettre à jour le label avec le nouveau max
           const priceLabel = document.querySelector('label[for="priceRange"]');
           priceLabel.textContent = `Plage de prix: (0€ - ${newMaxPrice}€)`;
 
-          // Si le prix sélectionné est plus grand que le nouveau max, l'ajuster
           if (parseFloat(priceRange.value) > newMaxPrice) {
             priceRange.value = newMaxPrice;
             priceValueText.textContent = `${newMaxPrice}€`;
           }
         }
 
-        // Appliquer le filtre de prix après la mise à jour du max
         if (filters.maxPrice > 0) {
           filteredProducts = filteredProducts.filter(
             (product) => parseFloat(product.price) <= filters.maxPrice
           );
         }
 
-        // Vérifier s'il y a des résultats
+        // Gérer l'affichage des résultats
         if (filteredProducts.length === 0) {
           const container = document.querySelector(".card-container");
           container.innerHTML = `
             <div class="col-12 text-center">
               <div class="alert alert-info" role="alert">
-                Aucun produit ne correspond à vos critères de recherche.
+                ${
+                  filters.search
+                    ? `Aucun produit ne correspond à votre recherche "${filters.search}" avec les filtres sélectionnés.`
+                    : "Aucun produit ne correspond aux filtres sélectionnés."
+                }
               </div>
             </div>`;
-
-          // Cacher la pagination quand il n'y a pas de résultats
           document.querySelector(".pagination").style.display = "none";
           return;
         }
-
-        // Rendre la pagination visible s'il y a des résultats
-        document.querySelector(".pagination").style.display = "flex";
 
         // Appliquer le tri
         if (filters.sortBy) {

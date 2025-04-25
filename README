@@ -1,23 +1,12 @@
-pense a modifie la possibilite de filtre et faire une recherche depui le filtre et vice versa
 
 ahoute une ligne marque en db pour pour la marque du produit
 
-
-quand user passe commande, 
-      retire du stock la quandtite achete,
-      vide son panier
-      
-
-VIDE PANIER UNE FOIS COMMANDE valides
 
 page de remerciement et validation de commande apres payeemnt
 
 gama.app pour power point
 
-dans admi pnese a ajooute possibilite de cree code promo et implmente la logique au panier
 
-panier et commande = 1seul et meme tableu, passe de 1 - 0 si comande ou pas permet l'archivage du panier pour ne pas perdfre les info usser. 
-Pour acienne comande, juste affiche panier ou commande = 1
 
 file:///C:/xampp/apache/logs/error.log
 user:
@@ -428,3 +417,97 @@ Section de confiance : Icônes pour les avantages (paiement sécurisé, livraiso
 Produits récemment consultés (optionnel).
 Actualités ou blog (optionnel).
 Footer : Informations légales et liens utiles.
+
+
+
+
+
+
+
+ChatGPT a dit :
+Pour générer des images correspondant aux produits que tu as dans ta base de données, il serait plus simple d'utiliser un générateur d'images basé sur l'IA comme DALL·E (de OpenAI) ou un autre outil qui permet de créer des images réalistes à partir de descriptions textuelles.
+
+Je vais te fournir les prompts pour chaque produit afin que tu puisses générer les images correspondantes. Cependant, je ne peux pas générer ou uploader des fichiers directement dans ton dossier, mais je vais te fournir les descriptions des images à générer.
+
+Voici quelques exemples de prompts pour DALL·E ou un autre générateur d'images :
+
+Prompts pour la génération des images :
+PC Gamer RGB
+
+Prompt : "A high-end gaming PC with a sleek, modern design featuring RGB lighting, powered by an NVIDIA RTX 4080 graphics card. The PC case is transparent with colorful lights illuminating the components."
+
+Cafetière Expresso
+
+Prompt : "A professional espresso coffee machine with a built-in grinder, featuring a shiny stainless steel body and an elegant, compact design."
+
+Lego Star Wars
+
+Prompt : "A collector’s edition Lego Star Wars set, featuring iconic characters like Darth Vader, Luke Skywalker, and the Millennium Falcon in a detailed, vibrant setting."
+
+T-shirt Oversize
+
+Prompt : "A casual, oversized T-shirt made of soft cotton, with a simple, modern design in pastel colors. The T-shirt is laid out on a clean background, showcasing its relaxed fit."
+
+Livre de Recettes Vegan
+
+Prompt : "A cookbook with a vibrant cover showing colorful fruits, vegetables, and a variety of healthy dishes. The title 'Vegan Recipes' is displayed prominently."
+
+Smartphone Samsung Galaxy
+
+Prompt : "A sleek Samsung Galaxy smartphone with a large screen, featuring a 108 MP camera on the back, all in a glossy black finish with modern, minimalist design."
+
+Chaise de Bureau Ergonomique
+
+Prompt : "An ergonomic office chair with adjustable armrests, lumbar support, and a comfortable seat. The chair has a modern, professional design in black leather."
+
+Casque de Jeu Bluetooth
+
+Prompt : "A wireless Bluetooth gaming headset with a sleek, futuristic design, featuring noise-canceling ear cups and LED lighting."
+
+Montre Connectée
+
+Prompt : "A stylish smartwatch with a round face, featuring fitness tracking capabilities, notifications, and a leather strap. The screen displays health data and time."
+
+Sac à Dos en Cuir
+
+Prompt : "A premium leather backpack with multiple compartments, a vintage yet modern design in a rich brown color, perfect for both work and travel."
+
+Réfrigérateur Inox
+
+Prompt : "A large, stainless steel refrigerator with a modern design, featuring a French door and water dispenser. The sleek, shiny surface reflects light."
+
+Appareil Photo Reflex
+
+Prompt : "A professional DSLR camera with interchangeable lenses, featuring a sleek black design and a large, detailed viewfinder."
+
+Télévision 4K
+
+Prompt : "A 4K UHD television with a thin, bezel-less screen, displaying vibrant colors and sharp resolution. The TV is set on a modern stand in a cozy living room."
+
+Vélo de Montagne
+
+Prompt : "A rugged mountain bike with thick tires, suspension, and a lightweight aluminum frame, designed for off-road terrain. The bike is shown on a rocky trail."
+
+Planche de Surf
+
+Prompt : "A lightweight surfboard with vibrant colors and a sleek design, resting on the sand with large ocean waves in the background."
+
+Tapis de Yoga
+
+Prompt : "An eco-friendly yoga mat with a non-slip surface, rolled out on a clean wooden floor in a peaceful studio setting."
+
+Chaussures de Running
+
+Prompt : "A pair of lightweight running shoes with a sleek design, breathable mesh material, and a bright color scheme, positioned on a track."
+
+Jupe en Jean
+
+Prompt : "A casual denim skirt with a high waist and a relaxed fit, featuring light blue denim with frayed edges, displayed on a neutral background."
+
+Manteau en Laine
+
+Prompt : "A warm wool coat with a high collar, ideal for winter, in a deep navy color. The coat is neatly displayed on a mannequin with a snowy outdoor backdrop."
+
+Baskets Blanches
+
+Prompt : "A pair of stylish white sneakers with a minimalist design, featuring a smooth leather texture and rubber soles, displayed on a clean background."

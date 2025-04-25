@@ -11,8 +11,8 @@ require_once '../api/CategoryApi.php';
 require_once '../api/ReviewApi.php';
 require_once '../api/CommandeApi.php';
 require_once '../api/MessageApi.php';
-require_once '../api/PromoApi.php'; // Ensure the correct path to PromoApi.php
-require_once '../api/MailApi.php';
+require_once '../api/PromoApi.php';
+
 
 use Api\ApiUser;
 use ApiCategory\ApiCategory;
@@ -22,7 +22,7 @@ use ApiReview\ApiReview;
 use ApiCommande\ApiCommande;
 use ApiM\ApiMessage;
 use ApiPromo\PromoApi;
-use ApiMail\ApiMail;
+
 
 header('Content-Type: application/json');
 
@@ -36,7 +36,6 @@ $apis = [
     'commande' => new ApiCommande(),
     'message' => new ApiMessage(),
     'promo' => new PromoApi(), // Ensure PromoApi is included and initialized
-    'mail' => new ApiMail(),
 ];
 
 // Vérifier les paramètres pour router la requête

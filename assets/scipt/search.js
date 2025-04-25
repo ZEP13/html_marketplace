@@ -72,23 +72,43 @@ class SearchManager {
       const response = await fetch(
         "../public/index.php?api=produit&action=getAllProduits"
       );
-      this.products = await response.json();
+      const data = await response.json();
+
+      // Update to handle the new API response format
+      this.products =
+        data.success && Array.isArray(data.products) ? data.products : [];
+
+      if (!this.products.length) {
+        console.error("No products loaded:", data);
+      }
     } catch (error) {
-      console.error("Erreur chargement produits:", error);
+      console.error("Error loading products:", error);
+      this.products = [];
     }
   }
 
   showResults(query) {
+    if (!Array.isArray(this.products)) {
+      console.error("Products is not an array:", this.products);
+      return;
+    }
+
     const results = this.products
       .filter(
         (product) =>
           product.title?.toLowerCase().includes(query.toLowerCase()) ||
           product.description?.toLowerCase().includes(query.toLowerCase())
       )
-      .slice(0, 4); // Changed from 5 to 4
+      .slice(0, 4);
 
-    this.searchDropdown.classList.add("active");
-    this.displayResults(results);
+    if (results.length > 0) {
+      this.searchDropdown.classList.add("active");
+      this.displayResults(results);
+    } else {
+      this.searchDropdown.innerHTML =
+        '<div class="p-2">Aucun résultat trouvé</div>';
+      this.searchDropdown.classList.add("active");
+    }
   }
 
   displayResults(results) {
@@ -122,16 +142,23 @@ class SearchManager {
 
   async handleSearch() {
     const query = this.searchInput.value.trim();
-    if (!query) return;
 
-    // Vérifier d'abord s'il y a des résultats
+    // Si la recherche est vide, rediriger vers la page des produits sans paramètres
+    if (!query) {
+      window.location.href = "./file_produit.html";
+      return;
+    }
+
+    if (!Array.isArray(this.products) || this.products.length === 0) {
+      await this.loadProducts();
+    }
+
     const results = this.products.filter(
       (product) =>
         product.title?.toLowerCase().includes(query.toLowerCase()) ||
         product.description?.toLowerCase().includes(query.toLowerCase())
     );
 
-    // Rediriger avec un paramètre supplémentaire indiquant s'il y a des résultats
     window.location.href = `./file_produit.html?search=${encodeURIComponent(
       query
     )}&hasResults=${results.length > 0}`;

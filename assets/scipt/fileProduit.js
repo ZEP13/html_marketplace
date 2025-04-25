@@ -1,5 +1,5 @@
 let currentPage = 1;
-const itemsPerPage = 9;
+const itemsPerPage = 15;
 let allProducts = [];
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -61,8 +61,6 @@ function displayProducts(page, products = allProducts) {
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedItems = productsArray.slice(startIndex, endIndex);
-
-  console.log("Produits paginés:", paginatedItems); // Debug log
 
   let htmlContent = ""; // Accumulate HTML content
 
@@ -276,6 +274,18 @@ function setupPagination(totalItems) {
         currentPage = newPage;
         displayProducts(currentPage);
         setupPagination(totalItems);
+
+        // Scroll with offset
+        const container = document.querySelector(".hautdefil");
+        if (container) {
+          const offset = 150; // Ajustez cette valeur pour définir la distance au-dessus
+          const containerPosition =
+            container.getBoundingClientRect().top + window.pageYOffset;
+          window.scrollTo({
+            top: containerPosition - offset,
+            behavior: "smooth",
+          });
+        }
       }
     }
   });
