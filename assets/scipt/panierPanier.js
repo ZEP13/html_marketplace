@@ -1,8 +1,6 @@
 const alertContainer = document.getElementById("alertContainerPanier");
 
-document.addEventListener("DOMContentLoaded", function (event) {
-  event.preventDefault();
-
+document.addEventListener("DOMContentLoaded", function () {
   let cartData; // Define a variable to store the cart data
 
   fetch("../public/index.php?api=panier")
@@ -102,6 +100,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
       });
 
       setupPanierEventListeners(cartData); // Pass the data to the event handler
+
+      // Initialize promo code handlers
+      document
+        .getElementById("applyPromoBtn")
+        .addEventListener("click", applyPromoCode);
+      document
+        .getElementById("removePromoBtn")
+        ?.addEventListener("click", removePromoCode);
     });
 
   function setupPanierEventListeners(data) {
@@ -194,28 +200,155 @@ document.addEventListener("DOMContentLoaded", function (event) {
         if (!data.panier || data.panier.length === 0) {
           // Si le panier est vide
           document.getElementById("panierBox").innerHTML = `
-            <div class="text-center my-5">
-              <h3>Votre panier est vide</h3>
-              <p>Découvrez nos produits et commencez vos achats!</p>
-            </div>`;
+                  <div class="text-center my-5">
+                    <h3>Votre panier est vide</h3>
+                    <p>Découvrez nos produits et commencez vos achats!</p>
+                  </div>`;
           document.getElementById("total").textContent = "0.00 €";
           document.getElementById("fraisPort").textContent = "0.00 €";
           document.getElementById("totalPaye").textContent = "0.00 €";
           return;
         }
 
-        const total = data.panier.reduce(
-          (sum, produit) => sum + produit.price * produit.quantite_panier,
-          0
-        );
-        const fraisPort = total >= 80 ? 0 : 50;
-        const totalPaye = total + fraisPort;
+        // Group products by seller
+        const productsBySeller = data.panier.reduce((acc, product) => {
+          if (!acc[product.user_id]) {
+            acc[product.user_id] = [];
+          }
+          acc[product.user_id].push(product);
+          return acc;
+        }, {});
 
-        document.getElementById("total").textContent = total.toFixed(2) + " €";
-        document.getElementById("fraisPort").textContent =
-          fraisPort > 0 ? fraisPort + " €" : "Gratuit";
-        document.getElementById("totalPaye").textContent =
-          totalPaye.toFixed(2) + " €";
+        // Calculate subtotals by seller
+        let totalBeforePromo = 0;
+        Object.values(productsBySeller).forEach((sellerProducts) => {
+          const sellerSubtotal = sellerProducts.reduce(
+            (sum, product) => sum + product.price * product.quantite_panier,
+            0
+          );
+          totalBeforePromo += sellerSubtotal;
+        });
+
+        // Apply current promo if exists
+        let appliedPromoCode =
+          document.getElementById("appliedPromoCode").value;
+        if (appliedPromoCode) {
+          calculateTotalWithPromo(
+            totalBeforePromo,
+            productsBySeller,
+            appliedPromoCode
+          );
+        } else {
+          updateTotalDisplay(totalBeforePromo, 0);
+        }
       });
+  }
+
+  function applyPromoCode() {
+    const promoCode = document.getElementById("promoCodeInput").value.trim();
+    if (!promoCode) {
+      showAlert("Veuillez entrer un code promo", "warning");
+      return;
+    }
+
+    fetch("../public/index.php?api=promo&action=validatePromoCode", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code: promoCode,
+        panier: cartData.panier,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.success) {
+          document.getElementById("appliedPromoCode").value = promoCode;
+          document.getElementById("activePromo").style.display = "block";
+          document.getElementById("activePromoCode").textContent = promoCode;
+          document.getElementById("promoCodeInput").value = "";
+          updateTotalPanier();
+          showAlert("Code promo appliqué avec succès", "success");
+        } else {
+          showAlert(result.error || "Code promo invalide", "danger");
+        }
+      })
+      .catch((error) => {
+        showAlert("Erreur lors de l'application du code promo", "danger");
+      });
+  }
+
+  function removePromoCode() {
+    document.getElementById("appliedPromoCode").value = "";
+    document.getElementById("activePromo").style.display = "none";
+    document.getElementById("promoCodeInput").value = "";
+    updateTotalPanier();
+    showAlert("Code promo retiré", "success");
+  }
+
+  function calculateTotalWithPromo(
+    totalBeforePromo,
+    productsBySeller,
+    promoCode
+  ) {
+    fetch(
+      `../public/index.php?api=promo&action=getPromoDetails&code=${promoCode}`
+    )
+      .then((response) => response.json())
+      .then((promoDetails) => {
+        let reduction = 0;
+
+        if (promoDetails.est_globale) {
+          // Admin promo applies to all products
+          reduction = calculatePromoReduction(totalBeforePromo, promoDetails);
+        } else {
+          // Vendor promo applies only to vendor's products
+          Object.entries(productsBySeller).forEach(([sellerId, products]) => {
+            if (sellerId === promoDetails.vendeur_id) {
+              const sellerSubtotal = products.reduce(
+                (sum, product) => sum + product.price * product.quantite_panier,
+                0
+              );
+              reduction += calculatePromoReduction(
+                sellerSubtotal,
+                promoDetails
+              );
+            }
+          });
+        }
+
+        updateTotalDisplay(totalBeforePromo, reduction);
+      });
+  }
+
+  function calculatePromoReduction(amount, promo) {
+    if (amount < promo.condition_min) return 0;
+
+    let reduction = 0;
+    if (promo.type_reduction === "pourcentage") {
+      reduction = (amount * promo.reduction_value) / 100;
+      if (promo.montant_max && reduction > promo.montant_max) {
+        reduction = promo.montant_max;
+      }
+    } else if (promo.type_reduction === "montant") {
+      reduction = promo.reduction_value;
+    }
+
+    return reduction;
+  }
+
+  function updateTotalDisplay(totalBeforePromo, reduction) {
+    const fraisPort = totalBeforePromo >= 80 ? 0 : 50;
+    const totalFinal = totalBeforePromo - reduction + fraisPort;
+
+    document.getElementById("total").textContent =
+      totalBeforePromo.toFixed(2) + " €";
+    document.getElementById("reduction").textContent =
+      reduction > 0 ? "-" + reduction.toFixed(2) + " €" : "0.00 €";
+    document.getElementById("fraisPort").textContent =
+      fraisPort > 0 ? fraisPort + " €" : "Gratuit";
+    document.getElementById("totalPaye").textContent =
+      totalFinal.toFixed(2) + " €";
   }
 });
