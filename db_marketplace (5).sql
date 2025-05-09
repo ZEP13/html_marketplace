@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
--- Hôte : 127.0.0.1
--- Généré le : lun. 14 avr. 2025 à 14:56
+-- Hôte : localhost
+-- Généré le : ven. 09 mai 2025 à 14:44
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -39,7 +39,12 @@ CREATE TABLE `categorie` (
 INSERT INTO `categorie` (`id`, `category_name`) VALUES
 (1, 'Enfant'),
 (2, 'Sport'),
-(3, 'PC-Gaming');
+(3, 'PC-Gaming'),
+(4, 'Bricolage & Jardin'),
+(5, 'Vêtements Enfants'),
+(6, 'Beauté & Santé'),
+(7, 'Automobile'),
+(8, 'Musique & Instruments');
 
 -- --------------------------------------------------------
 
@@ -59,7 +64,10 @@ CREATE TABLE `commande` (
 --
 
 INSERT INTO `commande` (`id_commande`, `id_user_commande`, `statut`, `date_commande`) VALUES
-(1, 4, 'En attente', '2025-04-14 11:22:46');
+(1, 4, 'Envoye', '2025-04-14 17:12:12'),
+(2, 1, 'En attente', '2025-04-15 07:39:12'),
+(3, 1, 'En attente', '2025-04-15 07:48:19'),
+(4, 4, 'En attente', '2025-04-18 09:34:41');
 
 -- --------------------------------------------------------
 
@@ -151,27 +159,45 @@ CREATE TABLE `panier` (
   `id_produit` int(6) NOT NULL,
   `quantite_panier` int(100) NOT NULL,
   `achete` int(1) NOT NULL DEFAULT 0,
-  `id_commande` int(14) NOT NULL DEFAULT 0
+  `id_commande_panier` int(14) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `panier`
 --
 
-INSERT INTO `panier` (`id_panier`, `id_user`, `id_produit`, `quantite_panier`, `achete`, `id_commande`) VALUES
-(2, 2, 4, 3, 0, 1),
+INSERT INTO `panier` (`id_panier`, `id_user`, `id_produit`, `quantite_panier`, `achete`, `id_commande_panier`) VALUES
+(2, 2, 4, 3, 0, 0),
 (6, 5, 4, 1, 0, 0),
 (7, 5, 3, 3, 0, 0),
-(14, 4, 8, 5, 0, 0),
-(15, 4, 10, 4, 0, 0),
-(16, 4, 9, 2, 0, 0),
+(14, 4, 8, 5, 1, 1),
+(15, 4, 10, 4, 1, 4),
+(16, 4, 9, 2, 1, 1),
 (17, 4, 2, 1, 1, 1),
-(41, 4, 1, 1, 0, 0),
-(42, 4, 15, 1, 0, 0),
-(43, 4, 3, 2, 0, 0),
-(44, 4, 20, 1, 0, 0),
-(45, 1, 26, 1, 0, 0),
-(46, 1, 15, 1, 0, 0);
+(42, 4, 15, 1, 1, 4),
+(43, 4, 3, 2, 1, 1),
+(44, 4, 20, 1, 1, 1),
+(45, 1, 26, 1, 1, 2),
+(46, 1, 15, 1, 1, 2),
+(48, 1, 1, 3, 1, 3),
+(49, 1, 3, 5, 1, 3),
+(50, 4, 26, 1, 1, 4),
+(52, 4, 15, 3, 0, 0),
+(53, 1, 3, 1, 0, 0),
+(54, 1, 15, 1, 0, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `pourcentage`
+--
+
+CREATE TABLE `pourcentage` (
+  `id` int(11) NOT NULL,
+  `pourcentage` int(11) NOT NULL,
+  `categorie` int(11) NOT NULL DEFAULT 0,
+  `actif` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -200,12 +226,12 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id_produit`, `user_id`, `title`, `description`, `price`, `quantite`, `image`, `category`, `created_at`, `actif`, `valide`, `refuse`, `comm_refu`) VALUES
-(1, 4, 'gundam', 'maket de 200 pieces', 50.00, 3, '../img/imgProduct/produit1.png', '1', '2025-01-27 15:12:03', 0, 0, 0, ''),
-(3, 4, 'souris', 'souris gaming extra light', 12.00, 6, '../img/imgProduct/produit2.png', '2', '2025-02-27 17:52:00', 1, 1, 0, ''),
+(1, 4, 'gundam', 'maket de 200 pieces', 50.00, 0, '../img/imgProduct/produit1.png', '1', '2025-01-27 15:12:03', 1, 1, 0, ''),
+(3, 4, 'souris', 'souris gaming extra light', 12.00, 1, '../img/imgProduct/produit2.png', '2', '2025-02-27 17:52:00', 1, 1, 0, ''),
 (4, 1, 'Cookbook', 'Livre de cuisine gastro par le grand chef Clarisse', 37.52, 50, NULL, '1', '2025-03-02 08:46:45', 1, 0, 0, ''),
 (5, 3, 'Gourde inox', 'Gourde en inox de 1.5L parfaite pour la rando ou toutes activités en pleine aire', 11.50, 50, NULL, '3', '2025-03-02 09:12:11', 1, 0, 0, ''),
 (13, 5, 'banane', 'banane de course', 13.50, 1, '', '1', '2025-03-05 13:27:55', 1, 0, 0, ''),
-(15, 5, 'Tour gaming', '4080 ca va chier et fam tt c noob', 1450.00, 5, '', '3', '2025-03-06 16:16:54', 1, 1, 0, ''),
+(15, 5, 'Tour gaming', '4080 ca va chier et fam tt c noob', 1450.00, 4, '', '3', '2025-03-06 16:16:54', 1, 1, 0, ''),
 (16, 5, 'banane', 'utkjdetykt', 123.00, 0, '', '1', '2025-03-06 16:23:19', 0, 0, 1, '123$ la bananes ?'),
 (17, 4, 'Tour gaming', 'Super set up pour des soiree gamin entre pote avec la nouvelle 4080 et t pas le seul a la vouloir donc ne trainne pas', 1200.78, 25, '', '3', '2025-03-06 16:43:55', 1, 1, 0, ''),
 (18, 4, 'Carte clash royal', 'Superrrrr carte pour des 1v1 de fou', 8.75, 15, '../img/imgProduct/174341768767ea71575c8cf6.07080686.jpg', '1', '2025-03-31 10:41:27', 1, 0, 1, ''),
@@ -216,7 +242,27 @@ INSERT INTO `products` (`id_produit`, `user_id`, `title`, `description`, `price`
 (23, 1, 'test01', 'sodbviazebvazve', 10.25, 120, '../img/imgProduct/174462300767fcd59f57cbe9.42532067.jpg', '1', '2025-04-14 09:30:07', 1, 0, 1, 'Produit non conforme aux critères de la plateforme'),
 (24, 1, 'test02', 'SSDVzpeivnZV', 1520.20, 15, '../img/imgProduct/174462337767fcd711a13623.82643562.jpg', '1', '2025-04-14 09:36:17', 1, 0, 1, 'Produit non conforme aux critères de la plateforme'),
 (25, 1, 'test03', 'avaerbaerbae\r\n', 160.00, 1520, '../img/imgProduct/174462353467fcd7ae69a4f9.71670900.jpg', '2', '2025-04-14 09:38:54', 0, 0, 0, ''),
-(26, 1, 'test04', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed at ante vel neque vehicula pharetra. Nulla facilisi. Integer ac suscipit metus. Curabitur auctor, lorem vitae tincidunt convallis, metus nisi convallis neque, nec lacinia purus turpis in tortor. Fusce ac velit non eros malesuada gravida. Cras sed mi ut neque malesuada convallis. Mauris non nisi sit amet ante cursus tempor. In efficitur, nisi eu condimentum lobortis, orci nunc varius ante, at convallis turpis ante a ante. Proin tincidunt dui et justo lacinia cursus. Ut id nunc vitae justo luctus pretium non et nulla.', 0.00, 116, '../img/imgProduct/174462366067fcd82c3a0118.96431126.jpg', '2', '2025-04-14 09:41:00', 1, 1, 0, '');
+(26, 1, 'test04', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed at ante vel neque vehicula pharetra. Nulla facilisi. Integer ac suscipit metus. Curabitur auctor, lorem vitae tincidunt convallis, metus nisi convallis neque, nec lacinia purus turpis in tortor. Fusce ac velit non eros malesuada gravida. Cras sed mi ut neque malesuada convallis. Mauris non nisi sit amet ante cursus tempor. In efficitur, nisi eu condimentum lobortis, orci nunc varius ante, at convallis turpis ante a ante. Proin tincidunt dui et justo lacinia cursus. Ut id nunc vitae justo luctus pretium non et nulla.', 0.00, 115, '../img/imgProduct/174462366067fcd82c3a0118.96431126.jpg', '2', '2025-04-14 09:41:00', 1, 1, 0, ''),
+(67, 1, 'PC Gamer RGB', 'PC ultra performant avec RTX 4080, idéal pour le gaming et le streaming.', 1899.99, 5, '../img/imgProduct/pc_gamer_rgb.jpg', '1', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(68, 2, 'Cafetière Expresso', 'Cafetière avec broyeur intégré pour un café digne des pros.', 249.90, 10, '../img/imgProduct/cafetiere_expresso.jpg', '2', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(69, 3, 'Lego Star Wars', 'Un set collector Lego Star Wars pour les fans de la saga.', 129.00, 15, '../img/imgProduct/lego_star_wars.jpg', '3', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(70, 4, 'T-shirt Oversize', 'T-shirt stylé et confortable, parfait pour un look casual.', 24.99, 100, '../img/imgProduct/tshirt_oversize.jpg', '4', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(71, 1, 'Livre de recettes vegan', 'Des recettes saines et gourmandes pour tous les jours.', 17.50, 30, '../img/imgProduct/livre_recettes_vegan.jpg', '6', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(72, 2, 'Smartphone Samsung Galaxy', 'Un smartphone dernier cri avec une caméra de 108 MP et une batterie de 5000 mAh.', 799.99, 50, '../img/imgProduct/samsung_galaxy.jpg', '7', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(73, 3, 'Chaise de bureau ergonomique', 'Chaise ergonomique pour un confort optimal durant les longues sessions de travail.', 149.90, 20, '../img/imgProduct/chaise_bureau.jpg', '2', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(74, 4, 'Casque de jeu Bluetooth', 'Casque sans fil avec réduction de bruit et son surround 7.1.', 129.90, 30, '../img/imgProduct/casque_jeu_bluetooth.jpg', '1', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(75, 1, 'Montre connectée', 'Montre intelligente avec suivi de santé et notifications push.', 89.90, 50, '../img/imgProduct/montre_connectee.jpg', '7', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(76, 2, 'Sac à dos en cuir', 'Sac à dos en cuir premium avec plusieurs compartiments.', 99.90, 40, '../img/imgProduct/sac_cuir.jpg', '4', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(77, 3, 'Réfrigérateur inox', 'Réfrigérateur de grande capacité avec un design moderne en inox.', 799.00, 15, '../img/imgProduct/refrigerateur_inox.jpg', '2', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(78, 4, 'Appareil photo reflex', 'Appareil photo reflex avec objectif interchangeable et haute définition.', 1199.99, 10, '../img/imgProduct/appareil_photo_reflex.jpg', '7', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(79, 1, 'Télévision 4K', 'Télévision UHD 4K avec connectivité Smart TV.', 499.99, 25, '../img/imgProduct/television_4k.jpg', '7', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(80, 2, 'Vélo de montagne', 'Vélo tout terrain avec suspensions et cadre en aluminium.', 349.00, 10, '../img/imgProduct/velo_montagne.jpg', '8', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(81, 3, 'Planche de surf', 'Planche de surf légère et résistante, idéale pour les vagues fortes.', 299.90, 12, '../img/imgProduct/planche_surf.jpg', '8', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(82, 4, 'Tapis de yoga', 'Tapis de yoga antidérapant et écologique, parfait pour toutes les séances.', 29.90, 100, '../img/imgProduct/tapis_yoga.jpg', '8', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(83, 1, 'Chaussures de running', 'Chaussures de running légères et confortables, avec une excellente adhérence.', 79.90, 50, '../img/imgProduct/chaussures_running.jpg', '4', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(84, 2, 'Jupe en jean', 'Jupe en jean taille haute, style décontracté.', 39.99, 60, '../img/imgProduct/jupe_jean.jpg', '5', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(85, 3, 'Manteau en laine', 'Manteau en laine épaisse pour l’hiver, avec un col haut.', 129.90, 40, '../img/imgProduct/manteau_laine.jpg', '5', '2025-04-18 13:00:06', 1, 1, 0, ''),
+(86, 4, 'Baskets blanches', 'Baskets tendance avec un design épuré et moderne.', 69.90, 120, '../img/imgProduct/baskets_blanches.jpg', '5', '2025-04-18 13:00:06', 1, 1, 0, '');
 
 -- --------------------------------------------------------
 
@@ -276,16 +322,16 @@ CREATE TABLE `promotions` (
 --
 
 INSERT INTO `promotions` (`id`, `code`, `nom_promo`, `description`, `date_debut`, `date_fin`, `reduction_value`, `type_reduction`, `montant_max`, `condition_min`, `actif`, `refuse`, `ajoute_par_admin`, `validé_par_admin`, `vendeur_id`, `est_globale`, `date_creation`, `date_modification`, `nbreUtilisationCode`) VALUES
-(1, 'HELLOW', 'promo bienvenu', 'zebvzbezrfbeqrbe', '2025-04-21', '2025-04-25', 10.00, 'pourcentage', 50.00, 100.00, 0, 0, 1, 0, NULL, 0, '2025-04-12 19:45:50', '2025-04-12 21:16:44', 0),
-(2, 'VEND10', NULL, NULL, NULL, NULL, NULL, '', 30.00, NULL, 0, 1, 0, 0, 1, 0, '2025-04-12 19:47:18', '2025-04-12 20:29:32', 0),
-(3, 'SPRING20', '20€ dès 150€', 'Réduction de 20€ pour les achats de plus de 150€', '2025-04-01', '2025-04-30', 20.00, 'pourcentage', 100.00, 150.00, 0, 0, 0, 1, 2, 0, '2025-04-12 19:47:18', '2025-04-12 20:43:23', 0),
-(5, 'VEND50', '5€ de réduction', 'Petite réduc chez le vendeur 3', '2025-05-01', '2025-06-01', 50.00, 'montant', 0.00, 30.00, 0, 1, 0, 0, 3, 0, '2025-04-12 19:47:18', '2025-04-12 20:43:39', 0),
-(6, 'BLACKFRIDAY', 'Promo Black Friday', 'Offre spéciale expirée', '2024-11-20', '2024-11-30', 30.00, 'montant', 50.00, 200.00, 0, 0, 0, 1, NULL, 1, '2025-04-12 19:47:18', '2025-04-12 19:47:18', 0),
-(7, 'FREEDELIV123', 'Livraison Gratuite', 'Livraison offerte par le vendeur 2', '2025-04-10', '2025-05-10', 0.00, 'livraison gratuite', NULL, 0.00, 1, 0, 0, 1, 2, 0, '2025-04-12 19:47:18', '2025-04-12 19:47:18', 0),
+(1, 'HELLOW', 'promo bienvenu', 'zebvzbezrfbeqrbe', '2025-04-21', '2025-04-25', 10.00, 'pourcentage', 50.00, 100.00, 0, 1, 1, 0, NULL, 0, '2025-04-12 19:45:50', '2025-04-25 08:24:17', 0),
+(3, 'SPRING2025', '20€ dès 150€', 'Réduction de 20€ pour les achats de plus de 150€', '2025-04-01', '2025-04-30', 20.00, 'pourcentage', 100.00, 150.00, 0, 0, 0, 1, 2, 0, '2025-04-12 19:47:18', '2025-04-25 07:50:08', 0),
+(5, 'VEND50', '5€ de réduction', 'Petite réduc chez le vendeur 3', '2025-05-01', '2025-06-01', 50.00, 'montant', 0.00, 30.00, 1, 0, 0, 1, 3, 0, '2025-04-12 19:47:18', '2025-04-25 08:13:55', 0),
+(6, 'BLACKFRIDAY2', 'Promo Black Friday', 'Offre spéciale expirée', '2024-11-20', '2024-11-30', 30.00, 'montant', 50.00, 200.00, 0, 0, 0, 1, NULL, 1, '2025-04-12 19:47:18', '2025-04-25 07:49:55', 0),
+(7, 'FREEDELIV123', 'Livraison Gratuite', 'Livraison offerte par le vendeur 2', '2025-04-10', '2025-05-10', 0.00, 'livraison gratuite', NULL, 0.00, 1, 0, 0, 1, 2, 0, '2025-04-12 19:47:18', '2025-04-25 07:47:17', 0),
 (8, 'VEND30', '30% à partir du 1er mai', 'Promo pour préparer les soldes', '2025-05-01', '2025-05-10', 30.00, 'pourcentage', 100.00, 50.00, 0, 0, 1, 1, 1, 0, '2025-04-12 19:47:18', '2025-04-12 21:16:24', 0),
 (9, 'BIGSAVE', 'Gros panier = grosse réduction', '20% sur les paniers > 500€', '2025-04-09', '2025-04-10', 20.00, 'pourcentage', 150.00, 500.00, 0, 0, 0, 1, NULL, 1, '2025-04-12 19:47:18', '2025-04-12 21:01:46', 0),
 (10, 'VENDPROMO', 'Promo flash vendeur 4', 'Offre limitée à ses produits', '2025-04-10', '2025-04-15', 8.00, 'montant', NULL, 0.00, 1, 0, 0, 1, 4, 0, '2025-04-12 19:47:18', '2025-04-12 19:47:18', 0),
-(11, 'SUPERCODE2025', 'Super code 2025', 'Utilisable sur toute la marketplace', '2025-04-01', '2025-12-31', 25.00, 'montant', NULL, 0.00, 1, 0, 0, 1, NULL, 1, '2025-04-12 19:47:18', '2025-04-12 19:47:18', 100);
+(11, 'SUPERCODE2025', 'Super code 2025', 'Utilisable sur toute la marketplace', '2025-04-01', '2025-12-31', 25.00, '', 15.00, 0.00, 0, 0, 0, 1, 1, 1, '2025-04-12 19:47:18', '2025-04-25 09:08:14', 100),
+(16, 'test123', 'suoertesrt', 'asfvaz jvaozej rvoae rvaerv', '2025-04-10', '2025-05-02', 152.00, 'montant', NULL, 400.00, 1, 0, 0, 1, 1, 0, '2025-04-25 09:15:16', '2025-04-25 09:19:00', 0);
 
 -- --------------------------------------------------------
 
@@ -380,6 +426,12 @@ ALTER TABLE `panier`
   ADD PRIMARY KEY (`id_panier`);
 
 --
+-- Index pour la table `pourcentage`
+--
+ALTER TABLE `pourcentage`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Index pour la table `products`
 --
 ALTER TABLE `products`
@@ -422,13 +474,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT pour la table `categorie`
 --
 ALTER TABLE `categorie`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT pour la table `commande`
 --
 ALTER TABLE `commande`
-  MODIFY `id_commande` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_commande` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT pour la table `liked_produit`
@@ -446,13 +498,19 @@ ALTER TABLE `messages`
 -- AUTO_INCREMENT pour la table `panier`
 --
 ALTER TABLE `panier`
-  MODIFY `id_panier` int(6) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id_panier` int(6) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+
+--
+-- AUTO_INCREMENT pour la table `pourcentage`
+--
+ALTER TABLE `pourcentage`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id_produit` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id_produit` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
 
 --
 -- AUTO_INCREMENT pour la table `product_images`
@@ -464,7 +522,7 @@ ALTER TABLE `product_images`
 -- AUTO_INCREMENT pour la table `promotions`
 --
 ALTER TABLE `promotions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT pour la table `reviews_produit`
