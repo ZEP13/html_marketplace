@@ -20,8 +20,9 @@ class Promo
     public function getAllPromos()
     {
         try {
+            // Modifier la requête pour inclure toutes les promos actives
             $query = "SELECT * FROM promotions 
-                      WHERE ajoute_par_admin = 1 
+                      WHERE actif = 1 AND validé_par_admin = 1 
                       ORDER BY date_creation DESC";
             $stmt = $this->db->prepare($query);
             $stmt->execute();

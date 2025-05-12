@@ -21,15 +21,15 @@ document
   .getElementById("formCommande")
   .addEventListener("submit", function (event) {
     event.preventDefault();
-    //pense ajoute verification pour numéro de tel et code postal et adresse
-    dataForm = {
+
+    const dataForm = {
       tel: document.getElementById("tel").value,
       rue: document.getElementById("rue").value,
       numero: document.getElementById("numeroMaison").value,
       code: document.getElementById("codePostal").value,
       city: document.getElementById("city").value,
     };
-    console.log(dataForm);
+
     fetch("../public/index.php?api=user&action=addInfo", {
       method: "POST",
       headers: {
@@ -37,9 +37,14 @@ document
       },
       body: JSON.stringify(dataForm),
     })
-      .then((reponse) => reponse.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erreur réseau");
+        }
+        return response.json();
+      })
       .then((data) => {
-        console.log(data);
+        console.log("Réponse reçue:", data);
         if (data.success) {
           alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
           window.location.href = "../views/paiement.html";
@@ -48,6 +53,7 @@ document
         }
       })
       .catch((error) => {
-        console.error("Erreur lors de la requête:", error);
+        console.error("Erreur:", error);
+        alertContainer.innerHTML = `<div class="alert alert-danger">Erreur lors de l'envoi du formulaire</div>`;
       });
   });

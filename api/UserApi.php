@@ -117,14 +117,56 @@ class ApiUser
     }
     private function handleAddInfoUser($data)
     {
-        if (isset($_SESSION['user_id'])) {
-            $id = $_SESSION['user_id'];
-            $user = $this->UserController->addUserData($id, $data['tel'], $data['rue'], $data['numero'], $data['code'], $data['city']);
-            if ($user) {
-                $this->sendResponse(['success' => true, 'message' => 'donne user commande ajoute']);
-            } else {
-                $this->sendResponse(['success' => false, 'message' => 'echec ajout donne user commande']);
+        if (!isset($_SESSION['user_id'])) {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Utilisateur non connecté'
+            ], 401);
+            return;
+        }
+
+        // Récupérer le contenu JSON brut
+        $jsonData = json_decode(file_get_contents('php://input'), true);
+
+        if (!$jsonData) {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Données invalides'
+            ], 400);
+            return;
+        }
+
+        // Vérifier que toutes les données requises sont présentes
+        $requiredFields = ['tel', 'rue', 'numero', 'code', 'city'];
+        foreach ($requiredFields as $field) {
+            if (!isset($jsonData[$field]) || empty($jsonData[$field])) {
+                $this->sendResponse([
+                    'success' => false,
+                    'message' => "Le champ $field est requis"
+                ], 400);
+                return;
             }
+        }
+
+        $result = $this->UserController->addUserData(
+            $_SESSION['user_id'],
+            $jsonData['tel'],
+            $jsonData['rue'],
+            $jsonData['numero'],
+            $jsonData['code'],
+            $jsonData['city']
+        );
+
+        if ($result) {
+            $this->sendResponse([
+                'success' => true,
+                'message' => 'Informations de commande ajoutées avec succès'
+            ]);
+        } else {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Échec de l\'ajout des informations'
+            ], 500);
         }
     }
     private function handleLoginRequest($data)

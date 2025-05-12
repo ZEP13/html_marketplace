@@ -3,7 +3,11 @@
 namespace ApiPromo;
 
 require_once '../controllers/PromoController.php';
+require_once '../config/Database.php';
 
+
+use PDOException;
+use Exception;
 use ControllersPromo\PromoController;
 
 class PromoApi

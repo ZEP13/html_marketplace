@@ -37,22 +37,37 @@ class ApiCommande
         $data = json_decode(file_get_contents('php://input'), true);
 
         if (isset($data['action']) && $data['action'] === 'addCommande') {
-            if (isset($_SESSION['user_id'])) {
-                $id_commande = $this->CommandeController->AddCommande($_SESSION['user_id']);
-                if ($id_commande) {
-                    $this->sendResponse([
-                        'success' => true,
-                        'id_commande' => $id_commande,
-                        'message' => 'Commande créée avec succès'
-                    ]);
-                } else {
-                    $this->sendResponse([
-                        'success' => false,
-                        'message' => 'Erreur lors de la création de la commande'
-                    ], 500);
-                }
+            if (!isset($_SESSION['user_id'])) {
+                $this->sendResponse([
+                    'success' => false,
+                    'message' => 'Utilisateur non connecté'
+                ], 401);
                 return;
             }
+
+            // Clean promo_id input
+            $promo_id = isset($data['promo_id']) &&
+                is_numeric($data['promo_id']) ?
+                intval($data['promo_id']) : null;
+
+            $id_commande = $this->CommandeController->AddCommande(
+                $_SESSION['user_id'],
+                $promo_id
+            );
+
+            if ($id_commande) {
+                $this->sendResponse([
+                    'success' => true,
+                    'id_commande' => $id_commande,
+                    'message' => 'Commande créée avec succès'
+                ]);
+            } else {
+                $this->sendResponse([
+                    'success' => false,
+                    'message' => 'Erreur lors de la création de la commande'
+                ], 500);
+            }
+            return;
         }
 
         if (!empty($data)) {

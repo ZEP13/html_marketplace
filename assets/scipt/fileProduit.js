@@ -3,8 +3,43 @@ const itemsPerPage = 15;
 let allProducts = [];
 
 document.addEventListener("DOMContentLoaded", function () {
-  const searchQuery = new URLSearchParams(window.location.search).get("search");
-  if (searchQuery) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const categoryId = urlParams.get("category");
+  const searchQuery = urlParams.get("search");
+
+  if (categoryId) {
+    // Charger d'abord tous les produits
+    fetch(`../public/index.php?api=produit&action=getValidProducts`)
+      .then((response) => response.json())
+      .then((data) => {
+        allProducts = data.products || [];
+
+        // Attendre que les catégories soient chargées
+        waitForElement("#selectCategoryProduit")
+          .then(() => {
+            const selectCategory = document.getElementById(
+              "selectCategoryProduit"
+            );
+            selectCategory.value = categoryId;
+
+            // Filtrer les produits par catégorie
+            const filteredProducts = allProducts.filter((product) => {
+              // Convertir les deux valeurs en chaînes pour la comparaison
+              return String(product.category) === String(categoryId);
+            });
+
+            console.log("Produits filtrés:", filteredProducts); // Debug
+            console.log("Catégorie recherchée:", categoryId); // Debug
+
+            // Mettre à jour l'affichage
+            setupPagination(filteredProducts.length);
+            displayProducts(1, filteredProducts);
+          })
+          .catch((error) =>
+            console.error("Erreur lors de l'application du filtre:", error)
+          );
+      });
+  } else if (searchQuery) {
     // Utiliser la nouvelle route API qui filtre les produits actifs et validés
     fetch(`../public/index.php?api=produit&action=getValidProducts`)
       .then((response) => response.json())
@@ -345,3 +380,24 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 });
+
+// Ajouter cette fonction utilitaire
+function waitForElement(selector) {
+  return new Promise((resolve) => {
+    if (document.querySelector(selector)) {
+      return resolve();
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      if (document.querySelector(selector)) {
+        observer.disconnect();
+        resolve();
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  });
+}

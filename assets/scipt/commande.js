@@ -1,12 +1,23 @@
 document.addEventListener("DOMContentLoaded", function () {
-  fetch("../public/index.php?api=commande&action=getCommandeByUser", {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(data);
+  // Fetch commandes and promos in parallel
+  Promise.all([
+    fetch("../public/index.php?api=commande&action=getCommandeByUser", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    }),
+    fetch("../public/index.php?api=promo&action=getPromo", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }),
+  ])
+    .then(([commandesResponse, promosResponse]) =>
+      Promise.all([commandesResponse.json(), promosResponse.json()])
+    )
+    .then(([commandesData, promosData]) => {
+      console.log("Commandes:", commandesData);
+      console.log("Promos:", promosData);
+
       const currentOrdersTable = document.querySelector(
         ".commandeEnCour tbody"
       );
@@ -15,11 +26,20 @@ document.addEventListener("DOMContentLoaded", function () {
       currentOrdersTable.innerHTML = "";
       pastOrdersTable.innerHTML = "";
 
-      if (data && data.commande && data.commande.length > 0) {
+      if (
+        commandesData &&
+        commandesData.commande &&
+        commandesData.commande.length > 0
+      ) {
         let hasCurrentOrders = false;
         let hasPastOrders = false;
 
-        data.commande.forEach((commande) => {
+        commandesData.commande.forEach((commande) => {
+          // Find associated promo if exists
+          const promo = commande.promo_id
+            ? promosData.promos.find((p) => p.id === commande.promo_id)
+            : null;
+
           const products = commande.products.split(",");
           const prices = commande.prices.split(",");
           const quantities = commande.quantities.split(",");
@@ -32,28 +52,60 @@ document.addEventListener("DOMContentLoaded", function () {
             year: "numeric",
           });
 
+          // Calculate final price with promo
+          const totalBeforePromo = parseFloat(commande.total_price);
+          let reduction = 0;
+
+          if (promo) {
+            if (promo.type_reduction === "pourcentage") {
+              reduction = totalBeforePromo * (promo.reduction_value / 100);
+            } else if (promo.type_reduction === "montant") {
+              reduction = promo.reduction_value;
+            }
+          }
+
+          const finalTotal = totalBeforePromo - reduction;
+
           const row = document.createElement("tr");
+          const commandeData = {
+            ...commande,
+            formattedDate,
+            promo,
+            reduction,
+            finalTotal,
+            productsDetails: products.map((product, index) => ({
+              name: product,
+              price: prices[index],
+              quantity: quantities[index],
+              image: images[index] || "../img/imgProduct/default.jpg",
+            })),
+          };
+
           row.innerHTML = `
             <td>${commande.id_commande}</td>
             <td>${formattedDate}</td>
             <td>${commande.statut || "Non spécifié"}</td>
-            <td>€${parseFloat(commande.total_price).toFixed(2)}</td>
             <td>
-              <button class="btn btn-primary btn-sm" onclick='showOrderDetails(${JSON.stringify(
-                {
-                  ...commande,
-                  formattedDate,
-                  productsDetails: products.map((product, index) => ({
-                    name: product,
-                    price: prices[index],
-                    quantity: quantities[index],
-                    image: images[index] || "../img/imgProduct/default.jpg",
-                  })),
-                }
-              )})'>Voir</button>
+              ${
+                promo
+                  ? `
+                <span class="text-muted text-decoration-line-through">€${totalBeforePromo.toFixed(
+                  2
+                )}</span><br>
+                <span class="text-success">€${finalTotal.toFixed(2)}</span>
+                <small class="d-block text-muted">(Code: ${promo.code})</small>
+              `
+                  : `€${totalBeforePromo.toFixed(2)}`
+              }
+            </td>
+            <td>
+              <button class="btn btn-primary btn-sm" data-commande='${JSON.stringify(
+                commandeData
+              ).replace(/'/g, "&#39;")}'>Voir</button>
             </td>
           `;
 
+          // Add click event listener to the button after adding the row to the DOM
           if (commande.statut === "En attente") {
             currentOrdersTable.appendChild(row);
             hasCurrentOrders = true;
@@ -61,6 +113,13 @@ document.addEventListener("DOMContentLoaded", function () {
             pastOrdersTable.appendChild(row);
             hasPastOrders = true;
           }
+
+          // Add click event listener
+          const button = row.querySelector("button");
+          button.addEventListener("click", function () {
+            const commandeData = JSON.parse(this.getAttribute("data-commande"));
+            showOrderDetails(commandeData);
+          });
         });
 
         // Afficher le message si aucune commande en cours
@@ -141,9 +200,28 @@ function showOrderDetails(commande) {
     `;
   });
 
+  // Calculer le total avec promo
+  const totalBeforePromo = parseFloat(commande.total_price);
+  let reduction = 0;
+
+  if (commande.promo) {
+    // S'assurer que reduction_value est un nombre
+    const reductionValue = parseFloat(commande.promo.reduction_value);
+
+    if (commande.promo.type_reduction === "pourcentage") {
+      reduction = totalBeforePromo * (reductionValue / 100);
+    } else if (commande.promo.type_reduction === "montant") {
+      reduction = reductionValue;
+    }
+  }
+
+  // S'assurer que reduction est un nombre
+  reduction = parseFloat(reduction) || 0;
+  const finalTotal = totalBeforePromo - reduction;
+
   const modalHtml = `
     <div class="modal fade" id="orderDetails" tabindex="-1">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Détails de la commande #${
@@ -152,16 +230,39 @@ function showOrderDetails(commande) {
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <p>Date: ${commande.formattedDate}</p>
-            <p>Statut: ${commande.statut}</p>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <p class="mb-1"><strong>Date:</strong> ${
+                  commande.formattedDate
+                }</p>
+                <p class="mb-1"><strong>Statut:</strong> ${commande.statut}</p>
+              </div>
+            </div>
             <h6>Produits:</h6>
             <ul class="list-group mb-3">
               ${productsHtml}
+              ${
+                commande.promo
+                  ? `
+                <li class="list-group-item d-flex justify-content-between text-muted">
+                  <span>Sous-total</span>
+                  <span>€${totalBeforePromo.toFixed(2)}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between text-success">
+                  <span>Réduction (${commande.promo.code})</span>
+                  <span>-€${reduction.toFixed(2)}</span>
+                </li>
+              `
+                  : ""
+              }
               <li class="list-group-item d-flex justify-content-between">
-                <strong>Total</strong>
-                <strong>€${parseFloat(commande.total_price).toFixed(2)}</strong>
+                <strong>Total final</strong>
+                <strong>€${finalTotal.toFixed(2)}</strong>
               </li>
             </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
           </div>
         </div>
       </div>
@@ -177,8 +278,9 @@ function showOrderDetails(commande) {
   // Add new modal to the document
   document.body.insertAdjacentHTML("beforeend", modalHtml);
 
-  // Show the modal
-  const modal = new bootstrap.Modal(document.getElementById("orderDetails"));
+  // Initialize and show the modal
+  const modalElement = document.getElementById("orderDetails");
+  const modal = new bootstrap.Modal(modalElement);
   modal.show();
 }
 

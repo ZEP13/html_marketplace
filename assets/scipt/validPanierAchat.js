@@ -6,7 +6,15 @@ document.addEventListener("DOMContentLoaded", function () {
     messageDiv.innerHTML =
       "<div class='alert alert-info'>Traitement de votre commande...</div>";
 
-    // Étape 1: Créer la commande
+    // Get the promo ID from localStorage
+    const activePromoId = localStorage.getItem("activePromoId");
+
+    // Convert to number or null
+    const promoId = activePromoId ? Number(activePromoId) : null;
+
+    console.log("Using promo ID:", promoId);
+
+    // Étape 1: Créer la commande avec l'ID de la promo
     fetch("../public/index.php?api=commande", {
       method: "POST",
       headers: {
@@ -14,6 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: JSON.stringify({
         action: "addCommande",
+        promo_id: promoId, // Send as null if no promo
       }),
     })
       .then((response) => {
@@ -24,6 +33,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!data.success || !data.id_commande) {
           throw new Error(data.message || "Erreur de création de commande");
         }
+
+        // Clear promo data after successful order
+        localStorage.removeItem("activePromoId");
+
         // Étape 2: Mettre à jour le panier avec l'ID de commande
         return fetch("../public/index.php?api=panier", {
           method: "POST",
@@ -72,7 +85,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       })
       .catch((error) => {
-        messageDiv.innerHTML = `<div class='alert alert-danger'>${error.message}</div>`;
+        console.error("Error:", error);
+        messageDiv.innerHTML = `<div class='alert alert-danger'>Erreur: ${error.message}</div>`;
       });
   }
 

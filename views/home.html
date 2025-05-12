@@ -3,167 +3,225 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Marketplace - Accueil</title>
-
-    <!-- Lien vers Bootstrap 5 -->
+    <title>AMAZOUZ - Votre Marketplace</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      integrity="sha384-KyZXEJ01M5S1P1fD9Dh0l8n16fGHUJEFS1d5X0C9jQe/F2gQkF3z6KHvF3Uye9Gv"
-      crossorigin="anonymous"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      .hero-section {
+        background: linear-gradient(135deg, #09234a, #36afeb);
+        color: white;
+        padding: 100px 0;
+        margin-bottom: 50px;
+      }
 
-    <!-- Fichier CSS personnalisé -->
-    <link rel="stylesheet" href="../assets/style/home.css" />
+      .feature-card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .promotion-section {
+        background-color: #f8f9fa;
+        padding: 50px 0;
+        margin: 50px 0;
+      }
+
+      .stats-card {
+        text-align: center;
+        padding: 30px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .category-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 15px;
+        height: 200px;
+      }
+
+      .category-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+
+      .category-card:hover img {
+        transform: scale(1.1);
+      }
+
+      .category-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        padding: 20px;
+        color: white;
+      }
+    </style>
   </head>
   <body>
-    <!-- Section Promotions -->
-    <section id="promotions" class="container mt-5">
-      <h2 class="text-center mb-4">Promotions du moment</h2>
-      <div class="row row-cols-1 row-cols-md-3 g-4">
-        <!-- Promotion 1 -->
-        <div class="col">
-          <div class="card shadow-sm border-light">
-            <img
-              src="https://via.placeholder.com/400x200"
-              class="card-img-top"
-              alt="Promotion 1"
-            />
-            <div class="card-body">
-              <h5 class="card-title">Smartphones - Jusqu'à -50%</h5>
-              <p class="card-text">
-                Profitez de réductions exceptionnelles sur les derniers modèles
-                de smartphones.
-              </p>
-              <a href="#" class="btn btn-primary">Voir plus</a>
+    <div id="navContainer"></div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container text-center">
+        <h1 class="display-4 mb-4">Bienvenue sur AMAZOUZ</h1>
+        <p class="lead mb-4">
+          La marketplace qui connecte acheteurs et vendeurs passionnés
+        </p>
+        <a href="./file_produit.html" class="btn btn-light btn-lg"
+          >Découvrir nos produits</a
+        >
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="m-4">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="feature-card card h-100">
+            <div class="card-body text-center">
+              <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+              <h3>Achats Sécurisés</h3>
+              <p>Paiements sécurisés et protection des données garantie</p>
             </div>
           </div>
         </div>
-        <!-- Promotion 2 -->
-        <div class="col">
-          <div class="card shadow-sm border-light">
-            <img
-              src="https://via.placeholder.com/400x200"
-              class="card-img-top"
-              alt="Promotion 2"
-            />
-            <div class="card-body">
-              <h5 class="card-title">Meubles - Jusqu'à -30%</h5>
-              <p class="card-text">
-                Aménagez votre intérieur avec style grâce à nos promotions sur
-                les meubles.
-              </p>
-              <a href="#" class="btn btn-primary">Voir plus</a>
+        <div class="col-md-4">
+          <div class="feature-card card h-100">
+            <div class="card-body text-center">
+              <i class="fas fa-truck fa-3x text-primary mb-3"></i>
+              <h3>Livraison Rapide</h3>
+              <p>Livraison gratuite dès 80€ d'achats</p>
             </div>
           </div>
         </div>
-        <!-- Promotion 3 -->
-        <div class="col">
-          <div class="card shadow-sm border-light">
-            <img
-              src="https://via.placeholder.com/400x200"
-              class="card-img-top"
-              alt="Promotion 3"
-            />
-            <div class="card-body">
-              <h5 class="card-title">Mode - Livraison gratuite</h5>
-              <p class="card-text">
-                Profitez de la livraison gratuite sur toutes vos commandes de
-                vêtements ce week-end.
-              </p>
-              <a href="#" class="btn btn-primary">Voir plus</a>
+        <div class="col-md-4">
+          <div class="feature-card card h-100">
+            <div class="card-body text-center">
+              <i class="fas fa-undo fa-3x text-primary mb-3"></i>
+              <h3>Retours Faciles</h3>
+              <p>30 jours pour changer d'avis</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Section Produits à la une -->
-    <section id="produits-une" class="container mt-5">
-      <h2 class="text-center mb-4">Produits à la une</h2>
-      <div class="row row-cols-1 row-cols-md-4 g-4">
-        <!-- Produit 1 -->
-        <div class="col">
-          <div class="card shadow-sm border-light">
-            <img
-              src="https://via.placeholder.com/400x200"
-              class="card-img-top"
-              alt="Produit 1"
-            />
-            <div class="card-body">
-              <h5 class="card-title">Montre Connectée</h5>
-              <p class="card-text">
-                Suivez votre activité et vos notifications directement à votre
-                poignet.
-              </p>
-              <a href="#" class="btn btn-secondary">Ajouter au panier</a>
+    <!-- Categories Section -->
+    <section class="m-5">
+      <h2 class="text-center mb-4">Nos Catégories Populaires</h2>
+      <div class="row g-4" id="categoriesContainer">
+        <!-- Categories will be loaded dynamically -->
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="promotion-section">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-md-3">
+            <div class="stats-card">
+              <h3 class="text-primary">10K+</h3>
+              <p>Produits</p>
             </div>
           </div>
-        </div>
-        <!-- Produit 2 -->
-        <div class="col">
-          <div class="card shadow-sm border-light">
-            <img
-              src="https://via.placeholder.com/400x200"
-              class="card-img-top"
-              alt="Produit 2"
-            />
-            <div class="card-body">
-              <h5 class="card-title">Casque Sans Fil</h5>
-              <p class="card-text">
-                Profitez d'un son de haute qualité sans être gêné par les fils.
-              </p>
-              <a href="#" class="btn btn-secondary">Ajouter au panier</a>
+          <div class="col-md-3">
+            <div class="stats-card">
+              <h3 class="text-primary">5K+</h3>
+              <p>Vendeurs</p>
             </div>
           </div>
-        </div>
-        <!-- Produit 3 -->
-        <div class="col">
-          <div class="card shadow-sm border-light">
-            <img
-              src="https://via.placeholder.com/400x200"
-              class="card-img-top"
-              alt="Produit 3"
-            />
-            <div class="card-body">
-              <h5 class="card-title">Sac à Dos en Cuir</h5>
-              <p class="card-text">
-                Un sac élégant et pratique pour tous vos déplacements.
-              </p>
-              <a href="#" class="btn btn-secondary">Ajouter au panier</a>
+          <div class="col-md-3">
+            <div class="stats-card">
+              <h3 class="text-primary">50K+</h3>
+              <p>Clients satisfaits</p>
             </div>
           </div>
-        </div>
-        <!-- Produit 4 -->
-        <div class="col">
-          <div class="card shadow-sm border-light">
-            <img
-              src="https://via.placeholder.com/400x200"
-              class="card-img-top"
-              alt="Produit 4"
-            />
-            <div class="card-body">
-              <h5 class="card-title">Chaussures de Sport</h5>
-              <p class="card-text">
-                Les dernières tendances en matière de confort et de performance.
-              </p>
-              <a href="#" class="btn btn-secondary">Ajouter au panier</a>
+          <div class="col-md-3">
+            <div class="stats-card">
+              <h3 class="text-primary">24/7</h3>
+              <p>Support client</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Intégration de Bootstrap JS et Popper.js -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-      integrity="sha384-oBqDVmMz4fnFO9gybB3vsJg7h7W0WQhsieI+9KT6vnF6/B6L+VXJyk+H8A4HnCuJ"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"
-      integrity="sha384-pzjw8f+ua7Kw1TIq0Fd7Rbw9F4rFfb/yoP4huNxGxpy+cA6pQkfuGpN4Pggq5J2d"
-      crossorigin="anonymous"
-    ></script>
+    <!-- Trending Products Section -->
+    <section class="m-5">
+      <h2 class="text-center mb-4">Tendances du Moment</h2>
+      <div class="row g-4" id="trendingProducts">
+        <!-- Products will be loaded dynamically -->
+      </div>
+    </section>
+
+    <!-- Current Promotions -->
+    <section
+      class="container-fluid py-5"
+      style="background: linear-gradient(135deg, #36afeb20, #09234a20)"
+    >
+      <div class="container">
+        <h2 class="text-center mb-4">Promotions du Moment</h2>
+        <div class="row g-4" id="promoContainer">
+          <!-- Promotions will be loaded dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- New Sellers Spotlight -->
+    <section class="container my-5">
+      <h2 class="text-center mb-4">Nos Nouveaux Vendeurs</h2>
+      <div class="row g-4">
+        <div class="col-md-3">
+          <div class="feature-card card text-center h-100">
+            <div class="card-body">
+              <div
+                class="rounded-circle overflow-hidden mx-auto mb-3"
+                style="width: 100px; height: 100px"
+              >
+                <img
+                  src="../img/imgUserProfil/defaultPP.png"
+                  class="img-fluid"
+                  alt="Seller"
+                  onerror="this.src='../img/imgUserProfil/defaultPP.png'"
+                />
+              </div>
+              <h5 class="card-title">Boutique Name</h5>
+              <p class="card-text">Spécialisé en électronique</p>
+              <div class="d-flex justify-content-center gap-2">
+                <span class="badge bg-success">4.8 ★</span>
+                <span class="badge bg-primary">Nouveau</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Repeat for 3 more sellers -->
+      </div>
+    </section>
+
+    <div id="footerContainer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/scipt/navbar-init.js"></script>
+    <script src="../assets/scipt/footer-init.js"></script>
+    <script src="../assets/scipt/home.js"></script>
   </body>
 </html>

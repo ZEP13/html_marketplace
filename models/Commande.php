@@ -74,14 +74,30 @@ class Commande
         }
     }
 
-    public function AddCommande($id_user)
+    public function AddCommande($id_user, $promo_id = null)
     {
         try {
-            $sql = "INSERT INTO commande (id_user_commande, statut, date_commande) 
-                VALUES (:id_user, :statut, NOW())";
+            // First verify if the promo exists if promo_id is provided
+            if ($promo_id !== null) {
+                $checkPromo = "SELECT id FROM promotions WHERE id = :promo_id";
+                $stmt = $this->db->prepare($checkPromo);
+                $stmt->bindParam(':promo_id', $promo_id, PDO::PARAM_INT);
+                $stmt->execute();
+
+                if (!$stmt->fetch()) {
+                    error_log("Invalid promo_id: $promo_id");
+                    $promo_id = null; // Reset to null if promo doesn't exist
+                }
+            }
+
+            $sql = "INSERT INTO commande (id_user_commande, statut, promo_id, date_commande) 
+                    VALUES (:id_user, :statut, :promo_id, NOW())";
+
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id_user', $id_user, PDO::PARAM_INT);
-            $stmt->bindValue(':statut', 'En attente', PDO::PARAM_STR); // ou 'Payée', selon ton usage
+            $stmt->bindParam(':promo_id', $promo_id, PDO::PARAM_INT);
+            $stmt->bindValue(':statut', 'En attente', PDO::PARAM_STR);
+
             $stmt->execute();
             return $this->db->lastInsertId();
         } catch (PDOException $e) {

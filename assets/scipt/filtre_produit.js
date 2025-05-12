@@ -159,29 +159,41 @@ document.addEventListener("DOMContentLoaded", function () {
     applyFilters();
   });
 
+  // Rendre la fonction accessible globalement
+  window.applyFilters = applyFilters;
+
   function applyFilters() {
+    const selectCategory = document.getElementById("selectCategoryProduit");
+    if (!selectCategory) return; // Protection contre les appels trop précoces
+
     const filters = {
-      maxPrice: parseFloat(priceRange.value),
+      maxPrice: parseFloat(document.getElementById("priceRange").value),
       category: selectCategory.value,
-      sortBy: sortSelect.value,
-      inStock: stockCheckbox.checked,
-      mostSold: mostSoldCheckbox.checked,
-      rating: parseInt(ratingSelect.value) || 0,
-      search: new URLSearchParams(window.location.search).get("search") || "",
+      sortBy: document.querySelector('select[name="like"]')?.value || "",
+      inStock: document.getElementById("flexCheckDefault")?.checked || false,
+      mostSold: document.getElementById("flexCheckChecked")?.checked || false,
+      rating:
+        parseInt(document.querySelector('select[name="rating"]')?.value) || 0,
     };
 
-    fetch(`../public/index.php?api=produit&action=getAllProduits`)
-      .then((response) => response.json())
+    fetch(`../public/index.php?api=produit&action=getValidProducts`)
+      .then((response) => {
+        if (!response.ok) throw new Error("Erreur réseau");
+        return response.json();
+      })
       .then((data) => {
         if (!data.success || !Array.isArray(data.products)) {
-          console.error(
-            "Les données ne sont pas dans le format attendu:",
-            data
-          );
-          return;
+          throw new Error("Format de données invalide");
         }
 
         let filteredProducts = [...data.products];
+
+        // Appliquer le filtre de catégorie en premier si présent
+        if (filters.category) {
+          filteredProducts = filteredProducts.filter(
+            (product) => product.category == filters.category
+          );
+        }
 
         // Appliquer d'abord le filtre de recherche si une recherche existe
         if (filters.search) {
@@ -202,12 +214,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const rating = parseFloat(product.average_rating) || 0;
             return rating >= filters.rating && rating < filters.rating + 1;
           });
-        }
-
-        if (filters.category) {
-          filteredProducts = filteredProducts.filter(
-            (product) => product.category == filters.category
-          );
         }
 
         if (filters.inStock) {
@@ -284,12 +290,14 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch((error) => {
         console.error("Erreur lors du filtrage:", error);
         const container = document.querySelector(".card-container");
-        container.innerHTML = `
-          <div class="col-12 text-center">
-            <div class="alert alert-danger" role="alert">
-              Une erreur est survenue lors de la recherche des produits.
-            </div>
-          </div>`;
+        if (container) {
+          container.innerHTML = `
+            <div class="col-12">
+              <div class="alert alert-danger text-center">
+                Une erreur est survenue lors du filtrage des produits
+              </div>
+            </div>`;
+        }
       });
   }
 
