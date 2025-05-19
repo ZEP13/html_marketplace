@@ -77,6 +77,10 @@ class Commande
     public function AddCommande($id_user, $promo_id = null)
     {
         try {
+            // Start transaction
+            $this->db->beginTransaction();
+
+            $promo_value = null;
             // First verify if the promo exists if promo_id is provided
             if ($promo_id !== null) {
                 $checkPromo = "SELECT id FROM promotions WHERE id = :promo_id";
@@ -84,23 +88,32 @@ class Commande
                 $stmt->bindParam(':promo_id', $promo_id, PDO::PARAM_INT);
                 $stmt->execute();
 
-                if (!$stmt->fetch()) {
+                if ($stmt->fetch()) {
+                    $promo_value = $promo_id;
+                } else {
                     error_log("Invalid promo_id: $promo_id");
-                    $promo_id = null; // Reset to null if promo doesn't exist
                 }
             }
 
+            // Modified SQL query to handle NULL promo_id
             $sql = "INSERT INTO commande (id_user_commande, statut, promo_id, date_commande) 
                     VALUES (:id_user, :statut, :promo_id, NOW())";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id_user', $id_user, PDO::PARAM_INT);
-            $stmt->bindParam(':promo_id', $promo_id, PDO::PARAM_INT);
+            $stmt->bindParam(':promo_id', $promo_value, $promo_value === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
             $stmt->bindValue(':statut', 'En attente', PDO::PARAM_STR);
 
             $stmt->execute();
-            return $this->db->lastInsertId();
+            $lastId = $this->db->lastInsertId();
+
+            // Commit transaction
+            $this->db->commit();
+
+            return $lastId;
         } catch (PDOException $e) {
+            // Rollback on error
+            $this->db->rollBack();
             error_log("Error creating commande: " . $e->getMessage());
             return false;
         }

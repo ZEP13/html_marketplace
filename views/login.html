@@ -12,62 +12,63 @@
   </head>
   <body>
     <!-- ajouter la navbar -->
-    
+
     <div class="auth-container">
       <div class="form-toggle">
         <button id="showLogin" class="active">Login</button>
         <button id="showRegister">Register</button>
       </div>
-  
+
       <div class="form-wrapper">
         <!-- Login Form -->
-        <form id="loginForm" class="auth-form active">
+        <form action="#" method="post" id="loginForm" class="auth-form active">
           <h2>Welcome Back</h2>
-  
+          <div id="alertContainerLOG"></div>
           <div class="input-box">
             <i class="bx bxs-user"></i>
             <input
-            type="text"
-            placeholder="Usermail"
-            id="logmail"
-            autocomplete="current-password"
-            required
-          />
+              type="text"
+              placeholder="Usermail"
+              id="logmail"
+              autocomplete="current-password"
+              required
+            />
           </div>
-  
+
           <div class="input-box">
             <i
-            style="cursor: pointer"
-            onclick="togglePassword('loginPassword', 'loginShowPassword')"
-            id="loginShowPassword"
-            class="bx bxs-lock-alt"
-          ></i> 
+              style="cursor: pointer"
+              onclick="togglePassword('loginPassword', 'loginShowPassword')"
+              id="loginShowPassword"
+              class="bx bxs-lock-alt"
+            ></i>
             <input
-            type="password"
-            placeholder="Password"
-            autocomplete="current-password"
-            id="loginPassword"
-            required
-          />
+              type="password"
+              placeholder="Password"
+              autocomplete="current-password"
+              id="loginPassword"
+              required
+            />
           </div>
           <a href="#" class="forgot-link">Forgot Password?</a>
-          <button type="submit" class="btn">Login</button>
+          <button type="submit" class="login-btn">Login</button>
         </form>
-  
+
         <!-- Register Form -->
-        <form id="registerForm" class="auth-form">
+        <form action="#" method="post" id="registerForm" class="auth-form">
           <h2>Create Account</h2>
-  
+          <div id="alertContainerREGISTER"></div>
+
           <div class="input-box">
             <input type="text" placeholder="Nom" id="Nom" required />
             <i class="bx bxs-user"></i>
           </div>
-  
+
           <div class="input-box">
             <input type="text" placeholder="Prenom" id="Prenom" required />
             <i class="bx bxs-user"></i>
           </div>
-  
+
           <div class="input-box">
             <input
               type="email"
@@ -78,7 +79,7 @@
             />
             <i class="bx bxs-envelope"></i>
           </div>
-  
+
           <div class="input-box">
             <input
               type="password"
@@ -109,25 +110,25 @@
               class="bx bxs-lock-alt"
             ></i>
           </div>
-  
-          <button type="submit" class="btn">Register</button>
+
+          <button type="submit" class="register-btn">Register</button>
         </form>
       </div>
     </div>
-  
+
     <script>
       const loginForm = document.getElementById("loginForm");
       const registerForm = document.getElementById("registerForm");
       const showLogin = document.getElementById("showLogin");
       const showRegister = document.getElementById("showRegister");
-  
+
       showLogin.addEventListener("click", () => {
         showLogin.classList.add("active");
         showRegister.classList.remove("active");
         loginForm.classList.add("active");
         registerForm.classList.remove("active");
       });
-  
+
       showRegister.addEventListener("click", () => {
         showRegister.classList.add("active");
         showLogin.classList.remove("active");
@@ -135,6 +136,6 @@
         loginForm.classList.remove("active");
       });
     </script>
+    <script src="../assets/main.js"></script>
   </body>
-  </html>
-  
+</html>

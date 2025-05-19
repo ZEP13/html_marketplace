@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
           });
 
         document.getElementById("titleProduit").textContent = produit.title;
-
+        document.getElementById("marqueProduit").innerHTML = produit.marque;
         document.getElementById("descriptionProduit").textContent =
           produit.description;
         document.getElementById("prixProduit").textContent = produit.price;
@@ -225,6 +225,25 @@ document.addEventListener("DOMContentLoaded", function (event) {
         document
           .getElementById("link_vend")
           .setAttribute("data-vendeur-id", produit.id_user);
+
+        // Mise à jour du lien de la marque
+        const marqueLink = document.getElementById("marqueLink");
+        const marqueProduit = document.getElementById("marqueProduit");
+
+        if (marqueLink && marqueProduit && produit.marque) {
+          marqueProduit.textContent = produit.marque;
+          marqueLink.href = `file_produit.html?search=${encodeURIComponent(
+            produit.marque
+          )}`;
+
+          // Ajouter un gestionnaire d'événements pour le clic
+          marqueLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            window.location.href = `file_produit.html?search=${encodeURIComponent(
+              produit.marque
+            )}&filter=marque`;
+          });
+        }
 
         // Ajouter l'événement pour vérifier la quantité en temps réel
         quantityInput.addEventListener("input", function (e) {

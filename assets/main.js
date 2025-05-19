@@ -1,5 +1,5 @@
 // js pour login style
-const container = document.querySelector(".container");
+const container = document.querySelector(".auth-container");
 const registerBtn = document.querySelector(".register-btn");
 const loginBtn = document.querySelector(".login-btn");
 
@@ -32,15 +32,24 @@ document
   .getElementById("registerForm")
   .addEventListener("submit", function (event) {
     event.preventDefault();
+
+    const alertContainerREGISTER = document.getElementById(
+      "alertContainerREGISTER"
+    );
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    if (confirmPassword !== document.getElementById("registerPassword").value) {
+      alertContainerREGISTER.innerHTML = `<div class="alert alert-danger">Les mots de passe ne correspondent pas</div>`;
+      return;
+    }
+
     const dataForm = {
-      action: "register",
       nom: document.getElementById("Nom").value,
       prenom: document.getElementById("Prenom").value,
       mail: document.getElementById("registermail").value,
       password: document.getElementById("registerPassword").value,
     };
     console.log(dataForm);
-    fetch("../public/index.php", {
+    fetch("../public/index.php?api=user&action=register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49,22 +58,39 @@ document
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Réponse du serveur:", data); // Affiche la réponse brute du serveur
-        const alertContainer = document.getElementById(
-          "alertContainerREGISTER"
-        );
+        console.log("Réponse du serveur:", data);
         if (data.success) {
-          alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-          window.location.href = "../views/user.html";
+          alertContainerREGISTER.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+
+          // Faire un login automatique avec les données d'inscription
+          const loginData = {
+            action: "login",
+            mail: document.getElementById("registermail").value,
+            password: document.getElementById("registerPassword").value,
+          };
+
+          // Login automatique après inscription réussie
+          fetch("../public/index.php?api=user&action=login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(loginData),
+          })
+            .then((response) => response.json())
+            .then((loginData) => {
+              if (loginData.success) {
+                window.location.href = "../views/user.html";
+              } else {
+                throw new Error("Échec de la connexion automatique");
+              }
+            });
         } else {
-          alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+          alertContainerREGISTER.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
         }
       })
       .catch((error) => {
-        const alertContainer = document.getElementById(
-          "alertContainerREGISTER"
-        );
-        alertContainer.innerHTML = `<div class="alert alert-danger">Erreur lors de la requête: ${error.message}</div>`;
+        alertContainerREGISTER.innerHTML = `<div class="alert alert-danger">Erreur lors de la requête: ${error.message}</div>`;
         console.error("Erreur lors de la requête:", error);
       });
   });

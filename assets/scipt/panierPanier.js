@@ -10,6 +10,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  function showPromoMessage(message, type) {
+    const messageDiv = document.getElementById("promoMessage");
+    messageDiv.className = `alert alert-${type}`;
+    messageDiv.textContent = message;
+    messageDiv.classList.remove("d-none");
+
+    // Auto-hide après 5 secondes
+    setTimeout(() => {
+      messageDiv.classList.add("d-none");
+    }, 50000);
+  }
+
   function calculateTotalBeforePromo(productsBySeller) {
     let total = 0;
     // Calculate total for all products
@@ -301,59 +313,60 @@ document.addEventListener("DOMContentLoaded", function () {
     const promoCode = document.getElementById("promoCodeInput").value.trim();
 
     if (!promoCode) {
-      showAlert("Veuillez entrer un code promo", "warning");
+      showPromoMessage("Veuillez entrer un code promo", "warning");
       return;
     }
 
     fetch(`../public/index.php?api=promo&action=getPromo`)
       .then((response) => response.json())
       .then((data) => {
-        console.log("Réponse API complète:", data);
-
         if (!data.promos || !Array.isArray(data.promos)) {
-          console.error("Format de réponse invalide:", data);
-          showAlert("Erreur lors de la récupération des promos", "danger");
+          showPromoMessage(
+            "Erreur lors de la vérification du code promo",
+            "danger"
+          );
           return;
         }
 
-        // Recherche du code promo (insensible à la casse)
         const promo = data.promos.find(
           (p) => p.code.toLowerCase() === promoCode.toLowerCase()
         );
 
-        console.log("Code recherché:", promoCode);
-        console.log("Promo trouvée:", promo);
-
         if (!promo) {
-          showAlert("Code promo invalide", "warning");
+          showPromoMessage("Code promo invalide", "danger");
           return;
         }
 
-        // Vérifier si c'est une promo vendeur
+        // Vérification de la date de validité
+        const now = new Date();
+        const startDate = new Date(promo.date_debut);
+        const endDate = new Date(promo.date_fin);
+
+        if (now < startDate) {
+          showPromoMessage("Ce code promo n'est pas encore actif", "warning");
+          return;
+        }
+
+        if (now > endDate) {
+          showPromoMessage("Ce code promo a expiré", "danger");
+          return;
+        }
+
+        // Vérification si c'est une promo vendeur
         if (Number(promo.ajoute_par_admin) !== 1) {
           const vendeurId = Number(promo.vendeur_id);
-
-          // Vérifier les produits du vendeur dans le panier
-          const vendeurProducts = cartData.panier.filter((product) => {
-            const productVendeurId = Number(product.user_id);
-            console.log("Comparaison:", {
-              productId: product.id_produit,
-              productVendeurId,
-              vendeurId,
-              match: productVendeurId === vendeurId,
-            });
-            return productVendeurId === vendeurId;
-          });
+          const vendeurProducts = cartData.panier.filter(
+            (product) => Number(product.user_id) === vendeurId
+          );
 
           if (vendeurProducts.length === 0) {
-            showAlert(
-              "Aucun produit de ce vendeur dans votre panier",
+            showPromoMessage(
+              "Ce code promo n'est pas applicable aux produits de votre panier",
               "warning"
             );
             return;
           }
 
-          // Calculer le total des produits du vendeur
           const vendeurTotal = vendeurProducts.reduce(
             (sum, product) =>
               sum + Number(product.price) * Number(product.quantite_panier),
@@ -364,28 +377,42 @@ document.addEventListener("DOMContentLoaded", function () {
             promo.condition_min &&
             vendeurTotal < Number(promo.condition_min)
           ) {
-            showAlert(
-              `Montant minimum de ${promo.condition_min}€ requis pour ce code promo`,
+            showPromoMessage(
+              `Montant minimum requis: ${promo.condition_min}€`,
               "warning"
             );
             return;
           }
-
-          const reduction = calculatePromoReduction(vendeurTotal, promo);
-          applyPromoToDisplay(promoCode, promo, reduction);
-          updateTotalDisplay(
-            calculateTotalBeforePromo(groupProductsByVendor(cartData.panier)),
-            reduction
-          );
-        } else {
-          // ... code pour les promos admin ...
         }
 
-        showAlert("Code promo appliqué avec succès", "success");
+        // Si on arrive ici, le code promo est valide
+        localStorage.setItem("activePromoId", promo.id);
+
+        // Afficher le message de succès avec les détails de la réduction
+        const reductionInfo =
+          promo.type_reduction === "pourcentage"
+            ? `${promo.reduction_value}%`
+            : `${promo.reduction_value}€`;
+        showPromoMessage(
+          `Code promo appliqué ! Réduction de ${reductionInfo}`,
+          "success"
+        );
+
+        // Mettre à jour l'affichage du panier
+        const productsBySeller = groupProductsByVendor(cartData.panier);
+        const totalBeforePromo = calculateTotalBeforePromo(productsBySeller);
+        const reduction = calculatePromoReduction(totalBeforePromo, promo);
+        updateTotalDisplay(totalBeforePromo, reduction);
+
+        // Vider le champ de saisie
+        document.getElementById("promoCodeInput").value = "";
       })
       .catch((error) => {
         console.error("Error:", error);
-        showAlert("Erreur lors de la validation du code promo", "danger");
+        showPromoMessage(
+          "Erreur lors de la vérification du code promo",
+          "danger"
+        );
       });
   }
 

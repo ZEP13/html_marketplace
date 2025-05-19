@@ -19,6 +19,7 @@ class Produit
     public $prix;
     public $actif;
     public $img;
+    public $marque;
     private $db;
 
     public function __construct($db)
@@ -70,11 +71,11 @@ class Produit
         }
     }
 
-    public function addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif)
+    public function addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif, $marque)
     {
         try {
-            $query = "INSERT INTO products (user_id, title, description, price, quantite, image, category, actif) 
-                      VALUES (:id_user, :nom, :description, :price, :quantite, :img, :category, :actif)";
+            $query = "INSERT INTO products (user_id, title, description, price, quantite, image, category, actif, marque)
+                      VALUES (:id_user, :nom, :description, :price, :quantite, :img, :category, :actif, :marque)";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':id_user', $id_user);
             $stmt->bindValue(':nom', $nom);
@@ -84,6 +85,7 @@ class Produit
             $stmt->bindValue(':img', $img);
             $stmt->bindValue(':category', $category);
             $stmt->bindValue(':actif', $actif);
+            $stmt->bindValue(':marque', $marque);
             return $stmt->execute();
         } catch (PDOException $e) {
             error_log("Error: " . $e->getMessage());
@@ -129,7 +131,7 @@ WHERE products.user_id = :id_user;
         }
     }
 
-    public function updateProduit($id, $user_id, $title, $description, $price, $quantite, $image, $category, $actif)
+    public function updateProduit($id, $user_id, $title, $description, $price, $quantite, $image, $category, $actif, $marque)
     {
         try {
             // Si aucune nouvelle image n'est fournie, on garde l'image existante
@@ -158,6 +160,7 @@ WHERE products.user_id = :id_user;
                             actif = :actif,
                             valide = 0,
                             refuse = 0,
+                            marque = :marque,
                             comm_refu = NULL
                         WHERE id_produit = :id";
             }
@@ -174,6 +177,7 @@ WHERE products.user_id = :id_user;
             $stmt->bindValue(':category', $category);
             $stmt->bindValue(':actif', $actif);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->bindValue(':marque', $marque);
 
             return $stmt->execute();
         } catch (PDOException $e) {

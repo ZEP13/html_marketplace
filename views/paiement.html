@@ -283,10 +283,6 @@
     </style>
   </head>
   <body>
-    <div class="tips">
-      Payment card number: (4) VISA, (51 -> 55) MasterCard,(34-37) American
-      Express
-    </div>
     <div class="container">
       <div class="col1">
         <div class="card">
@@ -337,11 +333,11 @@
           maxlength="3"
           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
         />
-        <button class="buy">Pay --.-- €</button>
+        <button id="validate-cart-btn" class="buy">
+          Pay <span id="total"></span>€
+        </button>
       </div>
     </div>
-
-    <button id="validate-cart-btn">Valider le panier</button>
     <div id="message"></div>
     <script src="../assets/scipt/validPanierAchat.js"></script>
     <script>
