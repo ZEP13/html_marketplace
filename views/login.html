@@ -12,57 +12,62 @@
   </head>
   <body>
     <!-- ajouter la navbar -->
-    <!-- login with an actived account -->
-    <div class="container">
-      <div class="form-box login">
-        <form action="#" method="POST" id="loginForm">
-          <div id="alertContainerLOG"></div>
-          <h1>Login</h1>
+    
+    <div class="auth-container">
+      <div class="form-toggle">
+        <button id="showLogin" class="active">Login</button>
+        <button id="showRegister">Register</button>
+      </div>
+  
+      <div class="form-wrapper">
+        <!-- Login Form -->
+        <form id="loginForm" class="auth-form active">
+          <h2>Welcome Back</h2>
+  
           <div class="input-box">
-            <input
-              type="text"
-              placeholder="Usermail"
-              id="logmail"
-              autocomplete="current-password"
-              required
-            />
             <i class="bx bxs-user"></i>
-          </div>
-          <div class="input-box">
             <input
-              type="password"
-              placeholder="Password"
-              autocomplete="current-password"
-              id="loginPassword"
-              required
-            />
+            type="text"
+            placeholder="Usermail"
+            id="logmail"
+            autocomplete="current-password"
+            required
+          />
+          </div>
+  
+          <div class="input-box">
             <i
-              style="cursor: pointer"
-              onclick="togglePassword('loginPassword', 'loginShowPassword')"
-              id="loginShowPassword"
-              class="bx bxs-lock-alt"
-            ></i>
+            style="cursor: pointer"
+            onclick="togglePassword('loginPassword', 'loginShowPassword')"
+            id="loginShowPassword"
+            class="bx bxs-lock-alt"
+          ></i> 
+            <input
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password"
+            id="loginPassword"
+            required
+          />
           </div>
-          <div class="forgot-link">
-            <a href="#">Forgot Password?</a>
-          </div>
+          <a href="#" class="forgot-link">Forgot Password?</a>
           <button type="submit" class="btn">Login</button>
         </form>
-      </div>
-
-      <!-- create a new account -->
-      <div class="form-box register">
-        <form action="#" method="POST" id="registerForm">
-          <div id="alertContainerREGISTER"></div>
-          <h1>Registration</h1>
+  
+        <!-- Register Form -->
+        <form id="registerForm" class="auth-form">
+          <h2>Create Account</h2>
+  
           <div class="input-box">
             <input type="text" placeholder="Nom" id="Nom" required />
             <i class="bx bxs-user"></i>
           </div>
+  
           <div class="input-box">
             <input type="text" placeholder="Prenom" id="Prenom" required />
             <i class="bx bxs-user"></i>
           </div>
+  
           <div class="input-box">
             <input
               type="email"
@@ -73,6 +78,7 @@
             />
             <i class="bx bxs-envelope"></i>
           </div>
+  
           <div class="input-box">
             <input
               type="password"
@@ -88,27 +94,47 @@
               class="bx bxs-lock-alt"
             ></i>
           </div>
+          <div class="input-box">
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              id="confirmPassword"
+              autocomplete="current-password"
+              required
+            />
+            <i
+              style="cursor: pointer"
+              onclick="togglePassword('confirmPassword', 'confirmShowPassword')"
+              id="confirmShowPassword"
+              class="bx bxs-lock-alt"
+            ></i>
+          </div>
+  
           <button type="submit" class="btn">Register</button>
         </form>
       </div>
-
-      <div class="toggle-box">
-        <div class="toggle-panel toggle-left">
-          <h1>Hello, Welcome!</h1>
-          <p>Don't have an account?</p>
-          <button class="btn register-btn">Register</button>
-        </div>
-
-        <div class="toggle-panel toggle-right">
-          <h1>Welcome Back!</h1>
-          <p>Already have an account?</p>
-          <button class="btn login-btn">Login</button>
-        </div>
-      </div>
     </div>
-
-    <!-- ajouter le footer-->
-
-    <script src="../assets/main.js"></script>
+  
+    <script>
+      const loginForm = document.getElementById("loginForm");
+      const registerForm = document.getElementById("registerForm");
+      const showLogin = document.getElementById("showLogin");
+      const showRegister = document.getElementById("showRegister");
+  
+      showLogin.addEventListener("click", () => {
+        showLogin.classList.add("active");
+        showRegister.classList.remove("active");
+        loginForm.classList.add("active");
+        registerForm.classList.remove("active");
+      });
+  
+      showRegister.addEventListener("click", () => {
+        showRegister.classList.add("active");
+        showLogin.classList.remove("active");
+        registerForm.classList.add("active");
+        loginForm.classList.remove("active");
+      });
+    </script>
   </body>
-</html>
+  </html>
+  
