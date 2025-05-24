@@ -42,6 +42,24 @@ class ApiReview
 
     private function handleGetRequest()
     {
+        if (isset($_GET['action'])) {
+            switch ($_GET['action']) {
+                case 'checkUserReview':
+
+                    if (isset($_GET['productId'])) {
+                        if (!isset($_SESSION['user_id'])) {
+                            $this->sendResponse(['hasReview' => false]);
+                            return;
+                        }
+                        $hasReview = $this->ReviewController->checkUserReview($_SESSION['user_id'], $_GET['productId']);
+                        $this->sendResponse(['hasReview' => $hasReview]);
+                        return;
+                    }
+                    break;
+                    // ...existing code...
+            }
+        }
+
         if (isset($_GET['id']) && !empty($_GET['id'])) {
             $this->getReveiwByProduct($_GET['id']);
         }
@@ -71,7 +89,29 @@ class ApiReview
         }
     }
 
-    private function AddReview() {}
+    private function AddReview()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            $this->sendResponse(['success' => false, 'error' => 'Utilisateur non connecté'], 401);
+            return;
+        }
+
+        if (!isset($_POST['productId']) || !isset($_POST['rating']) || !isset($_POST['comment'])) {
+            $this->sendResponse(['success' => false, 'error' => 'Données manquantes'], 400);
+            return;
+        }
+
+        $id_user = $_SESSION['user_id'];
+        $id_produit = $_POST['productId'];
+        $rating = $_POST['rating'];
+        $commentaire = $_POST['comment'];
+
+        if ($this->ReviewController->AddReview($id_user, $id_produit, $rating, $commentaire)) {
+            $this->sendResponse(['success' => true, 'message' => 'Avis ajouté avec succès']);
+        } else {
+            $this->sendResponse(['success' => false, 'message' => 'Erreur lors de l\'ajout de l\'avis'], 500);
+        }
+    }
 
     private function sendResponse($data, $statusCode = 200)
     {

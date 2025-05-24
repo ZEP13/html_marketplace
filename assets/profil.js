@@ -120,6 +120,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Déplacer la fonction logout à l'intérieur du DOMContentLoaded pour avoir accès à alertContainer
   function logout() {
+    // Supprimer le cookie "remember me"
+    document.cookie =
+      "sessionId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
     fetch("../public/index.php?api=user&action=logout", {
       method: "POST",
       headers: {
@@ -129,6 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
+          // Rediriger vers la page de login après déconnexion
           window.location.href = "../views/login.html";
         } else {
           alertContainer.innerHTML = `<div class="alert alert-danger">Échec de la déconnexion</div>`;

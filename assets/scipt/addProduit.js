@@ -169,11 +169,18 @@ document
       "category",
       document.getElementById("selectCategory").value
     );
+    formData.append("marque", document.getElementById("productMarque").value); // Ajout de la marque
     formData.append("img", document.getElementById("productImage").files[0]);
     formData.append(
       "actif",
       document.getElementById("actifProduit").checked ? "1" : "0"
     );
+
+    // Vérification des champs obligatoires
+    if (!document.getElementById("productMarque").value) {
+      alertContainer.innerHTML = `<div class="alert alert-danger">La marque est obligatoire</div>`;
+      return;
+    }
 
     fetch("../public/index.php?api=produit&action=addProduit", {
       method: "POST",

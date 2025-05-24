@@ -89,9 +89,10 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch(`../public/index.php?api=produit&action=getAllProduits`)
       .then((response) => response.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        const products = data.success && data.products ? data.products : [];
+        if (products.length > 0) {
           const maxPrice = Math.ceil(
-            Math.max(...data.map((p) => parseFloat(p.price)))
+            Math.max(...products.map((p) => parseFloat(p.price)))
           );
 
           // Mise à jour des attributs du range
@@ -120,7 +121,11 @@ document.addEventListener("DOMContentLoaded", function () {
   initializePriceRange();
 
   function resetFilters() {
-    // Réinitialiser les valeurs des filtres
+    // Récupérer les paramètres d'URL actuels
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get("search");
+
+    // Réinitialiser les filtres
     const maxPrice = priceRange.getAttribute("max");
     priceRange.value = maxPrice;
     priceValueText.textContent = maxPrice + "€";
@@ -129,23 +134,80 @@ document.addEventListener("DOMContentLoaded", function () {
     stockCheckbox.checked = false;
     mostSoldCheckbox.checked = false;
 
-    // Recharger tous les produits
-    fetch(`../public/index.php?api=produit&action=getAllProduits`)
+    // Réinitialiser les notes
+    if (ratingSelect) {
+      ratingSelect.value = "0";
+    }
+
+    // Réinitialiser l'affichage des produits en préservant la recherche
+    fetch(`../public/index.php?api=produit&action=getValidProducts`)
       .then((response) => response.json())
       .then((data) => {
-        if (!Array.isArray(data)) {
-          console.error(
-            "Les données ne sont pas dans le format attendu:",
-            data
-          );
-          return;
+        if (data.success && Array.isArray(data.products)) {
+          let filteredProducts = [...data.products];
+
+          // Appliquer le filtre de recherche si une recherche existe
+          if (searchQuery) {
+            filteredProducts = filteredProducts.filter(
+              (product) =>
+                product.title
+                  ?.toLowerCase()
+                  .includes(searchQuery.toLowerCase()) ||
+                product.description
+                  ?.toLowerCase()
+                  .includes(searchQuery.toLowerCase())
+            );
+          }
+
+          // Mettre à jour l'affichage
+          displayProducts(1, filteredProducts);
+          setupPagination(filteredProducts.length);
+
+          // Forcer le rafraîchissement de la pagination
+          document.querySelector(".pagination").style.display = "flex";
+
+          // Réinitialiser la classe active sur les boutons de filtre
+          document.querySelectorAll(".filter-btn").forEach((btn) => {
+            btn.classList.remove("active");
+          });
+
+          // Afficher le message de confirmation avec mention de la recherche active
+          const container = document.querySelector(".card-container");
+          if (container) {
+            const alertDiv = document.createElement("div");
+            alertDiv.className =
+              "alert alert-success alert-dismissible fade show";
+            alertDiv.innerHTML = `
+                        Filtres réinitialisés ${
+                          searchQuery
+                            ? `(recherche active : "${searchQuery}")`
+                            : ""
+                        }
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+            container.insertAdjacentElement("beforebegin", alertDiv);
+
+            // Auto-supprimer l'alerte après 3 secondes
+            setTimeout(() => {
+              alertDiv.remove();
+            }, 3000);
+          }
         }
-        // Afficher tous les produits sans filtre
-        displayProducts(1, data);
-        setupPagination(data.length);
       })
       .catch((error) => {
         console.error("Erreur lors de la réinitialisation:", error);
+        const container = document.querySelector(".card-container");
+        if (container) {
+          container.insertAdjacentHTML(
+            "beforebegin",
+            `
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        Erreur lors de la réinitialisation des filtres
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `
+          );
+        }
       });
   }
   // Update price text when range changes

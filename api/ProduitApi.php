@@ -59,6 +59,13 @@ class ApiProduit
                         $this->sendResponse(['error' => 'ID du produit manquant'], 400);
                     }
                     break;
+                case 'getByMarque':
+                    if (isset($_GET['marque'])) {
+                        $this->getProduitsByMarque($_GET['marque']);
+                    } else {
+                        $this->sendResponse(['error' => 'Marque manquante'], 400);
+                    }
+                    break;
                 default:
                     $this->sendResponse(['error' => 'Action non reconnue'], 400);
             }
@@ -109,21 +116,16 @@ class ApiProduit
         }
 
         $id_user = $_SESSION['user_id'];
-
-        // Pour FormData, les données sont dans $_POST et les fichiers dans $_FILES
         $nom = isset($_POST['nom']) ? $_POST['nom'] : null;
         $description = isset($_POST['description']) ? $_POST['description'] : null;
         $prix = isset($_POST['prix']) ? $_POST['prix'] : null;
         $quantite = isset($_POST['quantite']) ? $_POST['quantite'] : null;
         $category = isset($_POST['category']) ? $_POST['category'] : null;
+        $marque = isset($_POST['marque']) ? $_POST['marque'] : null; // Ajout de la marque
         $actif = isset($_POST['actif']) ? $_POST['actif'] : 0;
 
-        // Debug
-        error_log("Données reçues: " . print_r($_POST, true));
-        error_log("Fichiers reçus: " . print_r($_FILES, true));
-
-        // Vérifier les données obligatoires
-        if (!$nom || !$description || !$prix || !$quantite || !$category) {
+        // Vérifier les données obligatoires y compris la marque
+        if (!$nom || !$description || !$prix || !$quantite || !$category || !$marque) {
             $this->sendResponse([
                 'success' => false,
                 'message' => 'Des informations sont manquantes pour le produit',
@@ -132,7 +134,8 @@ class ApiProduit
                     'description' => $description,
                     'prix' => $prix,
                     'quantite' => $quantite,
-                    'category' => $category
+                    'category' => $category,
+                    'marque' => $marque
                 ]
             ], 400);
             return;
@@ -153,25 +156,23 @@ class ApiProduit
         $uploadFile = $uploadDir . $fileName;
 
         if (move_uploaded_file($_FILES['img']['tmp_name'], $uploadFile)) {
-            $stmt = $this->db->prepare("INSERT INTO products (user_id, title, description, price, quantite, image, category, actif) VALUES (:id_user, :nom, :description, :prix, :quantite, :img, :category, :actif)");
-
-            $stmt->bindValue(':id_user', $id_user);
-            $stmt->bindValue(':nom', $nom);
-            $stmt->bindValue(':description', $description);
-            $stmt->bindValue(':prix', $prix);
-            $stmt->bindValue(':quantite', $quantite);
-            $stmt->bindValue(':img', $uploadFile);
-            $stmt->bindValue(':category', $category);
-            $stmt->bindValue(':actif', $actif);
-
-            $result = $stmt->execute();
+            $result = $this->ProduitController->addProduitToSell(
+                $id_user,
+                $nom,
+                $description,
+                $prix,
+                $quantite,
+                $uploadFile,
+                $category,
+                $actif,
+                $marque // Ajout de la marque
+            );
 
             if ($result) {
-                $lastInsertId = $this->db->lastInsertId();
                 $this->sendResponse([
                     'success' => true,
                     'message' => 'Produit ajouté avec succès',
-                    'productId' => $lastInsertId
+                    'productId' => $result
                 ]);
             } else {
                 $this->sendResponse(['success' => false, 'message' => 'Erreur lors de l\'ajout du produit']);
@@ -190,6 +191,7 @@ class ApiProduit
         $price = isset($_POST['price']) ? $_POST['price'] : null;
         $quantite = isset($_POST['quantite']) ? $_POST['quantite'] : null;
         $category = isset($_POST['category']) ? $_POST['category'] : null;
+        $marque = isset($_POST['marque']) ? $_POST['marque'] : null; // Ajout de la marque
         $actif = isset($_POST['actif']) ? $_POST['actif'] : 0;
 
         // Debug
@@ -203,7 +205,7 @@ class ApiProduit
         }
 
         // Vérifier les données obligatoires
-        if (!$id || !$title || !$description || !$price || !$quantite || !$category) {
+        if (!$id || !$title || !$description || !$price || !$quantite || !$category || !$marque) {
             $this->sendResponse([
                 'success' => false,
                 'message' => 'Des informations sont manquantes pour le produit',
@@ -213,7 +215,8 @@ class ApiProduit
                     'description' => $description,
                     'price' => $price,
                     'quantite' => $quantite,
-                    'category' => $category
+                    'category' => $category,
+                    'marque' => $marque
                 ]
             ], 400);
             return;
@@ -237,7 +240,8 @@ class ApiProduit
             $quantite,
             $image,
             $category,
-            $actif
+            $actif,
+            $marque
         );
 
         if ($updated) {
@@ -462,5 +466,21 @@ class ApiProduit
         http_response_code($statusCode);
         echo json_encode($data);
         exit();
+    }
+
+    private function getProduitsByMarque($marque)
+    {
+        $products = $this->ProduitController->getProduitsByMarque($marque);
+        if ($products) {
+            $this->sendResponse([
+                'success' => true,
+                'products' => $products
+            ]);
+        } else {
+            $this->sendResponse([
+                'success' => false,
+                'message' => 'Aucun produit trouvé pour cette marque'
+            ]);
+        }
     }
 }

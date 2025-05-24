@@ -100,12 +100,15 @@ document
   .getElementById("loginForm")
   .addEventListener("submit", function (event) {
     event.preventDefault();
+    const rememberMe = document.getElementById("rememberMe").checked;
+
     const dataFormlog = {
       action: "login",
       mail: document.getElementById("logmail").value,
       password: document.getElementById("loginPassword").value,
+      rememberMe: rememberMe,
     };
-    console.log(dataFormlog);
+
     fetch("../public/index.php?api=user&action=login", {
       method: "POST",
       headers: {
@@ -115,9 +118,16 @@ document
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Réponse du serveur:", data); // Affiche la réponse brute du serveur
         const alertContainer = document.getElementById("alertContainerLOG");
         if (data.success) {
+          if (rememberMe) {
+            // Créer un cookie qui expire dans 30 jours
+            const d = new Date();
+            d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000);
+            document.cookie = `sessionId=${
+              data.sessionId
+            };expires=${d.toUTCString()};path=/`;
+          }
           alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
           window.location.href = "../views/user.html";
         } else {

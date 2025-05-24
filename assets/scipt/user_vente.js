@@ -1,5 +1,45 @@
 document.addEventListener("DOMContentLoaded", function () {
   loadUserProducts();
+
+  // Gérer le clic sur le bouton d'ajout de produit
+  const addProductBtn = document.getElementById("addProductBtn");
+  addProductBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+
+    // Vérifier si l'utilisateur a déjà des produits
+    fetch("../public/index.php?api=produit&action=getProduitsByUser", {
+      credentials: "include",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!Array.isArray(data) || data.length === 0) {
+          // Premier produit : afficher le modal des conditions
+          const termsModal = new bootstrap.Modal(
+            document.getElementById("sellerTermsModal")
+          );
+          termsModal.show();
+        } else {
+          // A déjà des produits : redirection directe
+          window.location.href = "./ajoute_produit.html";
+        }
+      })
+      .catch((error) => {
+        showNotification("danger", "Une erreur est survenue");
+      });
+  });
+
+  // Gérer l'acceptation des conditions pour les nouveaux vendeurs
+  document
+    .getElementById("acceptTerms")
+    .addEventListener("change", function () {
+      document.getElementById("confirmTerms").disabled = !this.checked;
+    });
+
+  document
+    .getElementById("confirmTerms")
+    .addEventListener("click", function () {
+      window.location.href = "./ajoute_produit.html";
+    });
 });
 
 function loadUserProducts() {

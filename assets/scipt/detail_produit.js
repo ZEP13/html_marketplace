@@ -232,16 +232,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
         if (marqueLink && marqueProduit && produit.marque) {
           marqueProduit.textContent = produit.marque;
-          marqueLink.href = `file_produit.html?search=${encodeURIComponent(
-            produit.marque
-          )}`;
 
-          // Ajouter un gestionnaire d'événements pour le clic
           marqueLink.addEventListener("click", function (e) {
             e.preventDefault();
-            window.location.href = `file_produit.html?search=${encodeURIComponent(
+            window.location.href = `file_produit.html?marque=${encodeURIComponent(
               produit.marque
-            )}&filter=marque`;
+            )}`;
           });
         }
 

@@ -6,8 +6,32 @@ document.addEventListener("DOMContentLoaded", function () {
   const urlParams = new URLSearchParams(window.location.search);
   const categoryId = urlParams.get("category");
   const searchQuery = urlParams.get("search");
+  const marqueQuery = urlParams.get("marque");
 
-  if (categoryId) {
+  if (marqueQuery) {
+    // Utiliser la nouvelle route API pour les produits filtrés par marque
+    fetch(
+      `../public/index.php?api=produit&action=getByMarque&marque=${encodeURIComponent(
+        marqueQuery
+      )}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.products)) {
+          allProducts = data.products;
+          setupPagination(allProducts.length);
+          displayProducts(1, allProducts);
+        } else {
+          const container = document.querySelector(".card-container");
+          if (container) {
+            container.innerHTML = `
+              <div class="text-center my-5">
+                <h3>Aucun produit trouvé pour la marque : "${marqueQuery}"</h3>
+              </div>`;
+          }
+        }
+      });
+  } else if (categoryId) {
     // Charger d'abord tous les produits
     fetch(`../public/index.php?api=produit&action=getValidProducts`)
       .then((response) => response.json())

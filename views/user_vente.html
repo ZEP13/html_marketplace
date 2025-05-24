@@ -96,11 +96,9 @@
             <!-- Les produits seront chargés dynamiquement ici -->
           </tbody>
         </table>
-        <a href="./ajoute_produit.html"
-          ><button class="btn btn-danger mt-3">
-            Ajoute un produit à la vente
-          </button></a
-        >
+        <button id="addProductBtn" class="btn btn-danger mt-3">
+          Ajoute un produit à la vente
+        </button>
       </div>
     </div>
 
@@ -325,6 +323,64 @@
               data-bs-dismiss="modal"
             >
               OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Conditions de Vente -->
+    <div
+      class="modal fade"
+      id="sellerTermsModal"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      tabindex="-1"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Bienvenue dans l'espace vendeur</h5>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>
+              Avant de mettre votre premier produit en vente, veuillez prendre
+              connaissance de nos conditions.
+            </div>
+            <div class="terms-content">
+              <h6 class="mb-3">Conditions de vente :</h6>
+              <ol class="mb-4">
+                <li>Les produits doivent être conformes à la législation</li>
+                <li>
+                  Les photos doivent être authentiques et de bonne qualité
+                </li>
+                <li>Les prix doivent être raisonnables et justifiés</li>
+                <li>
+                  Chaque produit sera validé par nos équipes avant mise en ligne
+                </li>
+                <li>Vous êtes responsable de la livraison de vos produits</li>
+              </ol>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="acceptTerms"
+                />
+                <label class="form-check-label" for="acceptTerms">
+                  J'ai lu et j'accepte les conditions de vente
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="confirmTerms"
+              disabled
+            >
+              Accepter et commencer à vendre
             </button>
           </div>
         </div>

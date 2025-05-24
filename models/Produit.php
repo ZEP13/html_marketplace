@@ -10,15 +10,19 @@ use PDOException;
 
 class Produit
 {
-    public $id;
+    public $id_produit;
     public $user_id;
     public $title;
     public $description;
-    public $categorie;
+    public $price;
     public $quantite;
-    public $prix;
+    public $image;
+    public $category;
+    public $created_at;
     public $actif;
-    public $img;
+    public $valide;
+    public $refuse;
+    public $comm_refu;
     public $marque;
     private $db;
 
@@ -74,8 +78,8 @@ class Produit
     public function addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif, $marque)
     {
         try {
-            $query = "INSERT INTO products (user_id, title, description, price, quantite, image, category, actif, marque)
-                      VALUES (:id_user, :nom, :description, :price, :quantite, :img, :category, :actif, :marque)";
+            $query = "INSERT INTO products (user_id, title, description, price, quantite, image, category, actif, marque, valide, refuse, comm_refu)
+                      VALUES (:id_user, :nom, :description, :price, :quantite, :img, :category, :actif, :marque, 0, 0, NULL)";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':id_user', $id_user);
             $stmt->bindValue(':nom', $nom);
@@ -230,7 +234,7 @@ WHERE products.user_id = :id_user;
                     LEFT JOIN users u ON p.user_id = u.id_user
                     LEFT JOIN categorie c ON p.category = c.id
                     LEFT JOIN reviews_produit r ON p.id_produit = r.id_produit
-                    WHERE p.actif = 1 AND p.valide = 1
+                    WHERE p.actif = 1 AND p.valide = 1 AND p.refuse = 0
                     GROUP BY p.id_produit';
 
             $stmt = $this->db->prepare($sql);
@@ -280,6 +284,40 @@ WHERE products.user_id = :id_user;
         } catch (PDOException $e) {
             $this->db->rollBack();
             error_log("Erreur lors de l'ajout des images : " . $e->getMessage());
+            return false;
+        }
+    }
+    public function getProduitsByMarque($marque)
+    {
+        try {
+            $sql = 'SELECT p.*, u.user_nom, u.user_prenom, c.category_name,
+                    COUNT(r.id_review) as review_count,
+                    AVG(r.rating) as average_rating
+                    FROM products p
+                    LEFT JOIN users u ON p.user_id = u.id_user
+                    LEFT JOIN categorie c ON p.category = c.id
+                    LEFT JOIN reviews_produit r ON p.id_produit = r.id_produit
+                    WHERE p.actif = 1 
+                    AND p.valide = 1 
+                    AND p.refuse = 0
+                    AND LOWER(p.marque) = LOWER(:marque)
+                    GROUP BY p.id_produit
+                    ORDER BY p.created_at DESC';
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':marque', trim($marque));
+            $stmt->execute();
+
+            // Debug log
+            error_log("Recherche pour marque : " . $marque);
+            error_log("Requête SQL : " . $sql);
+
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Nombre de résultats : " . count($results));
+
+            return $results;
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des produits par marque : " . $e->getMessage());
             return false;
         }
     }

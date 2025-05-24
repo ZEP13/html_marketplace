@@ -30,8 +30,12 @@ class ApiUser
                 $this->handlegetSessionId();
             } else if ($action === 'getAllUsers') {
                 $this->getAllUsers();
+            } else if ($action === 'getVentesUser') {
+                $this->handleGetVentesUser();
             } else if ($action === 'checkChatBan') {
                 $this->handleCheckChatBan();
+            } else if ($action === 'promoStat') {
+                $this->handlePromoStat();
             } else if ($action === 'checkAdminRole') {
                 $isAdmin = $this->UserController->checkAdminRole();
                 $this->sendResponse([
@@ -408,6 +412,41 @@ class ApiUser
         ]);
     }
 
+    private function handleGetVentesUser()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            $this->sendResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 401);
+            return;
+        }
+
+        $ventes = $this->UserController->getVentesUser($_SESSION['user_id']);
+        if ($ventes) {
+            $this->sendResponse([
+                'success' => true,
+                'ventes' => $ventes
+            ]);
+        } else {
+            $this->sendResponse(['success' => false, 'message' => 'Aucune vente trouvée'], 404);
+        }
+    }
+
+    private function handlePromoStat()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            $this->sendResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 401);
+            return;
+        }
+
+        $promoStat = $this->UserController->getUserPromoUseStat($_SESSION['user_id']);
+        if ($promoStat) {
+            $this->sendResponse([
+                'success' => true,
+                'promoStat' => $promoStat
+            ]);
+        } else {
+            $this->sendResponse(['success' => false, 'message' => 'Aucune statistique de promotion trouvée'], 404);
+        }
+    }
     private function sendResponse($data, $statusCode = 200)
     {
         header('Content-Type: application/json');

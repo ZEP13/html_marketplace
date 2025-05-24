@@ -18,10 +18,10 @@ class ProduitController
         $this->db = $database->getConnection();
     }
 
-    public function addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif)
+    public function addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif, $marque)
     {
         $produit = new Produit($this->db);
-        $result = $produit->addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif);
+        $result = $produit->addProduitToSell($id_user, $nom, $description, $price, $quantite, $img, $category, $actif, $marque);
         if ($result) {
             return $this->db->lastInsertId();
         }
@@ -43,10 +43,10 @@ class ProduitController
         $produit = new Produit($this->db);
         return $produit->deleteProduit($id);
     }
-    public function updateProduit($id, $user_id, $title, $description, $price, $quantite, $image, $category, $actif)
+    public function updateProduit($id, $user_id, $title, $description, $price, $quantite, $image, $category, $actif, $marque)
     {
         $produit = new Produit($this->db);
-        return $produit->updateProduit($id, $user_id, $title, $description, $price, $quantite, $image, $category, $actif);
+        return $produit->updateProduit($id, $user_id, $title, $description, $price, $quantite, $image, $category, $actif, $marque);
     }
     public function getProduitByIdUser($id_user)
     {
@@ -84,5 +84,10 @@ class ProduitController
     {
         $produit = new Produit($this->db);
         return $produit->AddAllImgProduit($id, $images);
+    }
+    public function getProduitsByMarque($marque)
+    {
+        $produit = new Produit($this->db);
+        return $produit->getProduitsByMarque($marque);
     }
 }

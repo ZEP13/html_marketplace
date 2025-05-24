@@ -58,17 +58,38 @@ class Review
             return false;
         }
     }
+    public function checkUserReview($id_user, $id_produit)
+    {
+        try {
+            $query = "SELECT COUNT(*) FROM reviews_produit WHERE id_user = :id_user AND id_produit = :id_produit";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':id_user', $id_user, PDO::PARAM_INT);
+            $stmt->bindParam(':id_produit', $id_produit, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
+    }
+
     public function AddReview($id_user, $id_produit, $rating, $commentaire)
     {
         try {
+            // Vérifier si une review existe déjà
+            if ($this->checkUserReview($id_user, $id_produit)) {
+                return false;
+            }
+
             $query = "INSERT INTO reviews_produit (id_user, id_produit, rating, commentaire) VALUES (:id_user, :id_produit, :rating, :commentaire)";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':id_user', $id_user);
             $stmt->bindValue(':id_produit', $id_produit);
             $stmt->bindValue(':rating', $rating);
             $stmt->bindValue(':commentaire', $commentaire);
+            return $stmt->execute();
         } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
+            error_log("Error in AddReview: " . $e->getMessage());
             return false;
         }
     }

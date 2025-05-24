@@ -267,4 +267,33 @@ class User
             return false;
         }
     }
+
+    public function venteUser($id)
+    {
+        try {
+            $query = "SELECT COUNT(*) as vente_count FROM panier JOIN products ON panier.id_produit = products.id_produit WHERE products.user_id = :id and panier.achete = 1";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? (int)$result['vente_count'] : 0;
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des ventes de l'utilisateur : " . $e->getMessage());
+            return false;
+        }
+    }
+    public function getUserPromoUseStat($id)
+    {
+        try {
+            $query = "SELECT COUNT(*) as promo_count FROM commande JOIN promotions ON commande.promo_id = promotions.id WHERE promotions.vendeur_id = :id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? (int)$result['promo_count'] : 0;
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des statistiques d'utilisation des promotions de l'utilisateur : " . $e->getMessage());
+            return false;
+        }
+    }
 }

@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("productPrice").value = produit.price;
         document.getElementById("currentImage").value = produit.image;
         document.getElementById("actifProduit").checked = produit.actif === 1;
+        document.getElementById("productMarque").value = produit.marque; // Ajout de la marque
 
         // Pré-remplir la catégorie
         const selectCategory = document.getElementById("selectCategory");
@@ -95,6 +96,7 @@ document
     const actifProduit = document.getElementById("actifProduit").checked
       ? 1
       : 0;
+    const productMarque = document.getElementById("productMarque").value;
     const selectCategory = document.getElementById("selectCategory").value;
     const alertContainer = document.getElementById("alertContainerEdit");
 
@@ -104,7 +106,8 @@ document
       !productPrice ||
       !productQuantite ||
       !productDescription ||
-      !selectCategory
+      !selectCategory ||
+      !productMarque // Ajout de la vérification de la marque
     ) {
       alertContainer.innerHTML = `<div class="alert alert-danger">Tous les champs sont obligatoires</div>`;
       return;
@@ -118,6 +121,7 @@ document
     formData.append("price", productPrice);
     formData.append("category", selectCategory);
     formData.append("actif", actifProduit);
+    formData.append("marque", productMarque); // Ajout de la marque
 
     // Gestion de l'image
     const newImage = document.getElementById("productImage").files[0];

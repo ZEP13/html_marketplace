@@ -137,4 +137,15 @@ class UserController
     {
         return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Admin';
     }
+
+    public function getVentesUser($userId)
+    {
+        $user = new User($this->db);
+        return $user->venteUser($userId);
+    }
+    public function getUserPromoUseStat($id)
+    {
+        $user = new User($this->db);
+        return $user->getUserPromoUseStat($id);
+    }
 }

@@ -146,7 +146,7 @@ function initCarouselNavigation() {
     });
 
     productGrid.addEventListener("scroll", () => {
-      if (productGrid.scrollLeft > 5) {
+      if (productGrid.scrollLeft > 4) {
         carouselContainer.classList.add("show-fade-left");
       } else {
         carouselContainer.classList.remove("show-fade-left");

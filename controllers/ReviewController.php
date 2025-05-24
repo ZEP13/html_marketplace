@@ -34,4 +34,9 @@ class ReviewController
         $review = new Review($this->db);
         return $review->AddReview($id_user, $id_produit, $rating, $commentaire);
     }
+    public function checkUserReview($id_user, $id_produit)
+    {
+        $review = new Review($this->db);
+        return $review->checkUserReview($id_user, $id_produit);
+    }
 }
