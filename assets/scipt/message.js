@@ -2,7 +2,18 @@ let sessionId;
 let currentContactId = null;
 let isChatBanned = false;
 let isReceiverBanned = false; // Nouvelle variable pour le statut du destinataire
+function goBack() {
+  // Récupérer l'URL précédente
+  const previousPage = document.referrer;
 
+  // Si on vient d'une page de notre site
+  if (previousPage.includes("detail_produit.html")) {
+    window.history.back();
+  } else {
+    // Sinon, rediriger vers la page des produits par défaut
+    window.location.href = "./user.html";
+  }
+}
 document.addEventListener("DOMContentLoaded", function () {
   // Vérifier d'abord si l'utilisateur est banni
   fetch("../public/index.php?api=user&action=checkChatBan")

@@ -89,15 +89,24 @@ class ApiPanier
     {
         if (isset($_SESSION['user_id'])) {
             $id_user = $_SESSION['user_id'];
+
+            // Vérifier si un code promo est réellement appliqué
+            $promoId = isset($data['promo_id']) ? $data['promo_id'] : null;
+
+            // Si pas de promo_id dans la requête, mettre à 0 ou null
+            if (!$promoId) {
+                $data['promo_id'] = null;
+            }
+
             $result = $this->PanierController->validePanier($id_user, $data['id_commande']);
 
             if ($result) {
-                $this->sendResponse(['success' => true, 'message' => 'Produit valide au panier']);
+                $this->sendResponse(['success' => true, 'message' => 'Panier validé avec succès']);
             } else {
-                $this->sendResponse(['success' => false, 'message' => 'Échec de la validation du produit au panier'], 500);
+                $this->sendResponse(['success' => false, 'message' => 'Échec de la validation du panier'], 500);
             }
         } else {
-            $this->sendResponse(['error' => 'Connectez vous pour ajoute au panier'], 401);
+            $this->sendResponse(['error' => 'Connectez-vous pour valider votre panier'], 401);
         }
     }
     private function handleClearPanierRequest($data)

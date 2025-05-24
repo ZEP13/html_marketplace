@@ -64,12 +64,13 @@ function displayProducts(products) {
 
   products.forEach((product) => {
     const statusBadge = getStatusBadge(product);
+    const quantityBadge = getQuantityBadge(product.quantite);
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${product.title}</td>
       <td>${product.description.substring(0, 50)}...</td>
       <td>${product.price}€</td>
-      <td>${product.quantite}</td>
+      <td>${quantityBadge}</td>
       <td>
         <img src="${product.image || "../img/imgProduct/default.jpg"}" 
              alt="produit" class="product-img-small">
@@ -95,6 +96,16 @@ function displayProducts(products) {
     `;
     tbody.appendChild(tr);
   });
+}
+
+function getQuantityBadge(quantity) {
+  if (quantity <= 0) {
+    return `<span class="badge bg-danger">Rupture de stock</span>`;
+  } else if (quantity <= 5) {
+    return `<span class="badge bg-warning">Stock faible : ${quantity}</span>`;
+  } else {
+    return `<span class="badge bg-success">${quantity} en stock</span>`;
+  }
 }
 
 function getStatusBadge(product) {
@@ -135,6 +146,16 @@ function showProductDetails(productId) {
         ).textContent = `Catégorie: ${product.category_name}`;
 
         // Afficher le statut et le message de refus si nécessaire
+        const validationStatus = document.getElementById("validationStatus");
+        if (
+          (validationStatus.textContent = product.actif && product.valide === 1)
+        ) {
+          validationStatus.innerHTML = `<span class="badge bg-success">Validé</span>`;
+        } else if (product.refuse === 1) {
+          validationStatus.innerHTML = `<span class="badge bg-danger">Refusé</span>`;
+        } else {
+          validationStatus.innerHTML = `<span class="badge bg-warning">Non validé</span>`;
+        }
         const rejectionDiv = document.getElementById("rejectionReason");
         if (product.refuse === 1) {
           rejectionDiv.style.display = "block";

@@ -3,11 +3,21 @@ const itemsPerPage = 15;
 let allProducts = [];
 
 document.addEventListener("DOMContentLoaded", function () {
+  // Afficher le loader
+  const loader = document.getElementById("loader");
+  loader.classList.remove("loader-hidden");
+
   const urlParams = new URLSearchParams(window.location.search);
   const categoryId = urlParams.get("category");
   const searchQuery = urlParams.get("search");
   const marqueQuery = urlParams.get("marque");
 
+  // Fonction pour cacher le loader
+  function hideLoader() {
+    loader.classList.add("loader-hidden");
+  }
+
+  // Modifier les fetch existants pour gérer le loader
   if (marqueQuery) {
     // Utiliser la nouvelle route API pour les produits filtrés par marque
     fetch(
@@ -30,6 +40,9 @@ document.addEventListener("DOMContentLoaded", function () {
               </div>`;
           }
         }
+      })
+      .finally(() => {
+        hideLoader();
       });
   } else if (categoryId) {
     // Charger d'abord tous les produits
@@ -62,6 +75,9 @@ document.addEventListener("DOMContentLoaded", function () {
           .catch((error) =>
             console.error("Erreur lors de l'application du filtre:", error)
           );
+      })
+      .finally(() => {
+        hideLoader();
       });
   } else if (searchQuery) {
     // Utiliser la nouvelle route API qui filtre les produits actifs et validés
@@ -78,6 +94,9 @@ document.addEventListener("DOMContentLoaded", function () {
         );
         setupPagination(filteredProducts.length);
         displayProducts(1, filteredProducts);
+      })
+      .finally(() => {
+        hideLoader();
       });
   } else {
     // Utiliser la nouvelle route API pour le chargement normal
@@ -87,12 +106,31 @@ document.addEventListener("DOMContentLoaded", function () {
         allProducts = data.products || [];
         setupPagination(allProducts.length);
         displayProducts(1);
+      })
+      .finally(() => {
+        hideLoader();
       });
   }
 });
 
 function openDetailProduit(id) {
   document.location.href = `detail_produit.html?id=${id}`;
+}
+
+// Ajouter la fonction checkSession
+function checkSession() {
+  return fetch("../public/index.php?api=user&action=getSessionId", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (!data.success) {
+        window.location.href = "../views/login.html";
+        return false;
+      }
+      return true;
+    });
 }
 
 function displayProducts(page, products = allProducts) {
@@ -182,7 +220,7 @@ function displayProducts(page, products = allProducts) {
             </div>
           </div>
           <div class="btn-container">
-            <a href="./detail_product.php?id=${
+            <a href="./detail_produit.html?id=${
               produit.id_produit
             }" class="btn btn-primary stop-propagation">
               <i class="fas fa-heart"></i>
@@ -210,13 +248,15 @@ function displayProducts(page, products = allProducts) {
   const alertContainer = document.getElementById("alertContainerfilproduit");
 
   cartButtons.forEach((button) => {
-    button.addEventListener("click", function (event) {
-      event.stopPropagation(); // This prevents the click from bubbling up to the card
+    button.addEventListener("click", async function (event) {
+      event.stopPropagation();
       event.preventDefault();
 
-      const produitId = this.getAttribute("data-id"); // Récupérer l'ID du produit
+      const hasSession = await checkSession();
+      if (!hasSession) return;
 
-      // Appel de la fonction d'ajout au panier
+      const produitId = this.getAttribute("data-id");
+
       fetch("../public/index.php?api=panier", {
         method: "POST",
         headers: {
@@ -231,15 +271,12 @@ function displayProducts(page, products = allProducts) {
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            // Mettre à jour le panier sans rechargement
             if (window.updatePanierContent) {
               window.updatePanierContent();
             }
             if (window.updateCartBadge) {
-              // Ajouter cette condition
               window.updateCartBadge();
             }
-            // Ouvrir le panier automatiquement
             const offcanvasRight = new bootstrap.Offcanvas(
               document.getElementById("offcanvasRight")
             );

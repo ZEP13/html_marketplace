@@ -100,16 +100,26 @@ document
     const selectCategory = document.getElementById("selectCategory").value;
     const alertContainer = document.getElementById("alertContainerEdit");
 
-    // Vérification des champs obligatoires
-    if (
-      !productName ||
-      !productPrice ||
-      !productQuantite ||
-      !productDescription ||
-      !selectCategory ||
-      !productMarque // Ajout de la vérification de la marque
-    ) {
-      alertContainer.innerHTML = `<div class="alert alert-danger">Tous les champs sont obligatoires</div>`;
+    // Validation améliorée avec messages d'erreur spécifiques
+    const errors = [];
+    if (!productName.trim()) errors.push("Le nom du produit est requis");
+    if (!productDescription.trim()) errors.push("La description est requise");
+    if (!productPrice) errors.push("Le prix est requis");
+    if (productPrice <= 0) errors.push("Le prix doit être supérieur à 0");
+    if (!productQuantite) errors.push("La quantité est requise");
+    if (productQuantite < 0)
+      errors.push("La quantité ne peut pas être négative");
+    if (!selectCategory) errors.push("La catégorie est requise");
+    if (!productMarque.trim()) errors.push("La marque est requise");
+
+    if (errors.length > 0) {
+      alertContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <strong>Veuillez corriger les erreurs suivantes :</strong>
+                <ul class="mb-0 mt-2">
+                    ${errors.map((error) => `<li>${error}</li>`).join("")}
+                </ul>
+            </div>`;
       return;
     }
 

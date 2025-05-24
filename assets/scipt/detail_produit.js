@@ -1,3 +1,20 @@
+function goBack() {
+  // Récupérer l'URL précédente
+  const previousPage = document.referrer;
+
+  // Si on vient d'une page de notre site
+  if (
+    previousPage.includes("commande.html") ||
+    previousPage.includes("user_vente.html") ||
+    previousPage.includes("panier.html")
+  ) {
+    window.history.back();
+  } else {
+    // Sinon, rediriger vers la page des produits par défaut
+    window.location.href = "./file_produit.html";
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function (event) {
   event.preventDefault();
   const urlParams = new URLSearchParams(window.location.search);
@@ -328,9 +345,27 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
   // Ajout de l'event listener pour le panier
   const addPanierBtn = document.getElementById("ajoutePanier");
+  const acheterMaintenantBtn = document.getElementById("acheterMaintenant");
 
-  addPanierBtn.addEventListener("click", function (event) {
+  function checkSession() {
+    return fetch("../public/index.php?api=user&action=getSessionId", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.success) {
+          window.location.href = "../views/login.html";
+          return false;
+        }
+        return true;
+      });
+  }
+
+  addPanierBtn.addEventListener("click", async function (event) {
     event.preventDefault();
+    const hasSession = await checkSession();
+    if (!hasSession) return;
     const alertContainer = document.getElementById("alertContainerDetail");
     const quantite = parseInt(document.getElementById("quantity").value, 10);
 
@@ -404,10 +439,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
   });
 
   // Ajout de l'event listener pour l'achat immédiat
-  const acheterMaintenantBtn = document.getElementById("acheterMaintenant");
-
-  acheterMaintenantBtn.addEventListener("click", function (event) {
+  acheterMaintenantBtn.addEventListener("click", async function (event) {
     event.preventDefault();
+    const hasSession = await checkSession();
+    if (!hasSession) return;
     const alertContainer = document.getElementById("alertContainerDetail");
     const quantite = parseInt(document.getElementById("quantity").value, 10);
 

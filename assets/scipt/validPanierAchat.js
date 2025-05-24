@@ -58,9 +58,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
   function handleValidation() {
-    messageDiv.innerHTML =
-      "<div class='alert alert-info'>Traitement de votre commande...</div>";
-
     // Get the promo ID from localStorage
     const activePromoId = localStorage.getItem("activePromoId");
 
@@ -112,32 +109,38 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!data.success) {
           throw new Error(data.message || "Échec de validation du panier");
         }
-        // Étape 3: Utiliser la nouvelle API mail au lieu de l'API commande
-        return fetch("../public/index.php?api=mail", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action: "sendOrderConfirmation",
-            id_commande: data.id_commande,
-          }),
-        });
-      })
-      .then((response) => {
-        if (!response.ok) throw new Error("Erreur réseau");
-        return response.json();
-      })
-      .then((data) => {
-        if (data.success) {
-          messageDiv.innerHTML =
-            "<div class='alert alert-success'>Commande validée avec succès! Un email de confirmation vous a été envoyé.</div>";
-          setTimeout(() => (window.location.href = "user_commande.html"), 2000);
-        } else {
-          throw new Error(
-            data.message || "Erreur lors de l'envoi de l'email de confirmation"
-          );
-        }
+
+        const paymentModal = document.getElementById("paymentModal");
+        const failureModal = document.getElementById("failureModal");
+
+        // Simuler une probabilité de 90% de succès
+        const isSuccess = Math.random() < 0.9;
+
+        paymentModal.style.display = "flex";
+
+        setTimeout(() => {
+          if (isSuccess) {
+            const paymentStatus = document.getElementById("paymentStatus");
+            paymentStatus.innerHTML = `
+              <div class="success-step">
+                <i class="fas fa-check-circle" style="font-size: 3rem; color: #28a745; margin-bottom: 1rem;"></i>
+                <h4>Merci pour votre achat !</h4>
+                <p>Vous allez être redirigé vers vos commandes...</p>
+              </div>
+            `;
+
+            setTimeout(() => {
+              window.location.href = "user_commande.html";
+            }, 5000);
+          } else {
+            paymentModal.style.display = "none";
+            failureModal.style.display = "flex";
+
+            setTimeout(() => {
+              window.location.href = "panier.html";
+            }, 3000);
+          }
+        }, 2000);
       })
       .catch((error) => {
         console.error("Error:", error);

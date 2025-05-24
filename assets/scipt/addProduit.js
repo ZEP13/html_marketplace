@@ -154,23 +154,53 @@ document
     const alertContainer = document.getElementById("alertContainerAdd");
     const formData = new FormData();
 
-    // Collect product data
-    formData.append("nom", document.getElementById("productName").value);
-    formData.append(
-      "description",
-      document.getElementById("productDescription").value
-    );
-    formData.append("prix", document.getElementById("productPrice").value);
-    formData.append(
-      "quantite",
-      document.getElementById("productQuantite").value
-    );
-    formData.append(
-      "category",
-      document.getElementById("selectCategory").value
-    );
-    formData.append("marque", document.getElementById("productMarque").value); // Ajout de la marque
-    formData.append("img", document.getElementById("productImage").files[0]);
+    // Récupération des valeurs des champs
+    const productName = document.getElementById("productName").value.trim();
+    const productDescription = document
+      .getElementById("productDescription")
+      .value.trim();
+    const productPrice = document.getElementById("productPrice").value;
+    const productQuantite = document.getElementById("productQuantite").value;
+    const productCategory = document.getElementById("selectCategory").value;
+    const productMarque = document.getElementById("productMarque").value.trim();
+    const productImage = document.getElementById("productImage").files[0];
+
+    // Tableau pour stocker les messages d'erreur
+    const errors = [];
+
+    // Validation détaillée de chaque champ
+    if (!productName) errors.push("Le nom du produit est requis");
+    if (!productDescription) errors.push("La description est requise");
+    if (!productPrice) errors.push("Le prix est requis");
+    if (parseFloat(productPrice) <= 0)
+      errors.push("Le prix doit être supérieur à 0");
+    if (!productQuantite) errors.push("La quantité est requise");
+    if (parseInt(productQuantite) < 0)
+      errors.push("La quantité ne peut pas être négative");
+    if (!productCategory) errors.push("La catégorie est requise");
+    if (!productMarque) errors.push("La marque est requise");
+    if (!productImage) errors.push("Une image principale est requise");
+
+    // Afficher les erreurs s'il y en a
+    if (errors.length > 0) {
+      alertContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <strong>Veuillez corriger les erreurs suivantes :</strong>
+                <ul class="mb-0 mt-2">
+                    ${errors.map((error) => `<li>${error}</li>`).join("")}
+                </ul>
+            </div>`;
+      return;
+    }
+
+    // Si pas d'erreur, continuer avec l'envoi du formulaire
+    formData.append("nom", productName);
+    formData.append("description", productDescription);
+    formData.append("prix", productPrice);
+    formData.append("quantite", productQuantite);
+    formData.append("category", productCategory);
+    formData.append("marque", productMarque);
+    formData.append("img", productImage);
     formData.append(
       "actif",
       document.getElementById("actifProduit").checked ? "1" : "0"
@@ -197,7 +227,6 @@ document
         if (data.success) {
           alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
           const productId = data.productId; // Assume backend returns the product ID
-
           // Call the addImages function to upload multiple images
           addImages(productId);
         } else {

@@ -767,3 +767,34 @@ document.head.appendChild(successCheckmarkStyle);
 function redirect(id) {
   window.location.href = "../views/detail_produit.html?id=" + id;
 }
+
+function displayOrderInTable(commande, tbody) {
+  const tr = document.createElement("tr");
+  const total = calculateOrderTotal(commande);
+
+  let promoInfo = "";
+  if (
+    commande.promo_id &&
+    commande.promo_id !== "0" &&
+    commande.promo_id !== "null"
+  ) {
+    promoInfo = `<br><small class="text-muted">Code promo appliqué</small>`;
+  }
+
+  tr.innerHTML = `
+    <td>${commande.id_commande}</td>
+    <td>${formatDate(commande.date_commande)}</td>
+    <td><span class="badge ${getStatusBadgeClass(commande.statut)}">${
+    commande.statut
+  }</span></td>
+    <td>${total.toFixed(2)}€ ${promoInfo}</td>
+    <td>
+      <button class="btn btn-sm btn-info" onclick="viewOrderDetails(${
+        commande.id_commande
+      })">
+        Voir détails
+      </button>
+    </td>
+  `;
+  tbody.appendChild(tr);
+}

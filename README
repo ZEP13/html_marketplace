@@ -12,6 +12,40 @@ ajoute un syste de retriction/de signalement pour les user qui non pas encore ve
 
 
 
+
+
+
+        //   // Étape 3: Utiliser la nouvelle API mail au lieu de l'API commande
+        //   return fetch("../public/index.php?api=mail", {
+        //     method: "POST",
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify({
+        //       action: "sendOrderConfirmation",
+        //       id_commande: data.id_commande,
+        //     }),
+        //   });
+        // })
+        // .then((response) => {
+        //   if (!response.ok) throw new Error("Erreur réseau");
+        //   return response.json();
+        // })
+        // .then((data) => {
+        //   if (data.success) {
+        //     messageDiv.innerHTML =
+        //       "<div class='alert alert-success'>Commande validée avec succès! Un email de confirmation vous a été envoyé.</div>";
+        //     setTimeout(() => (window.location.href = "user_commande.html"), 2000);
+        //   } else {
+        //     throw new Error(
+        //       data.message || "Erreur lors de l'envoi de l'email de confirmation"
+        //     );
+        //   }
+        // })
+        // .catch((error) => {
+        //   console.error("Error:", error);
+        //   messageDiv.innerHTML = `<div class='alert alert-danger'>Erreur: ${error.message}</div>`;
+trouve pourquoi certain detaille produit on le retour en arrire et pas d'autre 
 file:///C:/xampp/apache/logs/error.log
 user:
 

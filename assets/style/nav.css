@@ -44,9 +44,13 @@
     height: 100vh; /* Take full height of the viewport */
   }
   .buy {
-    margin-top: auto; /* Push this section to the bottom */
+    margin-top: auto; 
     position: sticky;
     bottom: 0; /* Stick to the bottom of the sidebar */
+  }
+  .buy a{
+    text-decoration: none;
+    color: white;
   }
   .nav-item {
     margin-right: 10px;

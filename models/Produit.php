@@ -79,7 +79,7 @@ class Produit
     {
         try {
             $query = "INSERT INTO products (user_id, title, description, price, quantite, image, category, actif, marque, valide, refuse, comm_refu)
-                      VALUES (:id_user, :nom, :description, :price, :quantite, :img, :category, :actif, :marque, 0, 0, NULL)";
+                      VALUES (:id_user, :nom, :description, :price, :quantite, :img, :category, :actif, :marque, 0, 0, '')";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':id_user', $id_user);
             $stmt->bindValue(':nom', $nom);

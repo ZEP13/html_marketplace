@@ -42,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
       console.log(data);
 
       let htmlContent = "";
+      const btnCheckout = document.getElementById("btn-checkout");
       const panierBox = document.getElementById("panierBox");
       const totalPanier = document.getElementById("total");
       const totalPaye = document.getElementById("totalPaye");
@@ -58,6 +59,9 @@ document.addEventListener("DOMContentLoaded", function () {
         totalPanier.textContent = "0.00 €";
         fraisPortBox.textContent = "0.00 €";
         totalPaye.textContent = "0.00 €";
+        btnCheckout.classList.add("disabled");
+        btnCheckout.setAttribute("aria-disabled", "true");
+        btnCheckout.style.pointerEvents = "none";
         return;
       }
 
@@ -68,32 +72,34 @@ document.addEventListener("DOMContentLoaded", function () {
       // Générer le contenu du panier
       data.panier.forEach((produit) => {
         htmlContent += `
-            <div class="cart-item d-flex justify-content-between align-items-center" data-id="${
-              produit.id
-            }">
-              <div class="d-flex align-items-center">
-                <img src="${
-                  produit.image || "../img/imgProduct/default.jpg"
-                }" alt="Image produit" class="img-fluid me-3" />
-                <div>
-                  <div class="item-title">${produit.title}</div>
-                  <div class="item-price">${produit.price} €</div>
-                </div>
-              </div>
-              <div class="d-flex align-items-center">
-                <input type="number" 
-                  max="${produit.quantite}" 
-                  class="form-control item-quantity" 
-                  value="${produit.quantite_panier}" 
-                  min="1" 
-                  data-id="${produit.id_produit}"
-                  data-stock="${produit.quantite}" />
-                <span class="remove-btn ms-3" data-id="${
-                  produit.id_produit
-                }">Supprimer</span>
-              </div>
-            </div>
-          `;
+    <div class="cart-item d-flex justify-content-between align-items-center" data-id="${
+      produit.id
+    }">
+      <div class="d-flex align-items-center" style="cursor: pointer;" onclick="window.location.href='./detail_produit.html?id=${
+        produit.id_produit
+      }'">
+        <img src="${
+          produit.image || "../img/imgProduct/default.jpg"
+        }" alt="Image produit" class="img-fluid me-3" />
+        <div>
+          <div class="item-title">${produit.title}</div>
+          <div class="item-price">${produit.price} €</div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <input type="number" 
+          max="${produit.quantite}" 
+          class="form-control item-quantity" 
+          value="${produit.quantite_panier}" 
+          min="1" 
+          data-id="${produit.id_produit}"
+          data-stock="${produit.quantite}" />
+        <span class="remove-btn ms-3" data-id="${
+          produit.id_produit
+        }">Supprimer</span>
+      </div>
+    </div>
+  `;
       });
 
       panierBox.innerHTML = htmlContent;
@@ -162,16 +168,56 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.success) {
               const productRow = e.target.closest(".cart-item");
               productRow.remove(); // Supprimer l'élément du DOM
-              alertContainer.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-              updateTotalPanier();
+
+              // Recalculer et mettre à jour les totaux
+              fetch("../public/index.php?api=panier")
+                .then((response) => response.json())
+                .then((updatedData) => {
+                  cartData = updatedData; // Mettre à jour les données du panier
+                  if (!updatedData.panier || updatedData.panier.length === 0) {
+                    // Panier vide
+                    document.getElementById("total").textContent = "0.00 €";
+                    document.getElementById("fraisPort").textContent = "0.00 €";
+                    document.getElementById("totalPaye").textContent = "0.00 €";
+                    document.getElementById("reduction").textContent = "0.00 €";
+                    panierBox.innerHTML = `
+                    <div class="text-center my-5">
+                      <h3>Votre panier est vide</h3>
+                      <p>Découvrez nos produits et commencez vos achats!</p>
+                    </div>`;
+                  } else {
+                    // Recalculer avec le code promo si présent
+                    const productsBySeller = groupProductsByVendor(
+                      updatedData.panier
+                    );
+                    const totalBeforePromo =
+                      calculateTotalBeforePromo(productsBySeller);
+                    const appliedPromoCode =
+                      document.getElementById("appliedPromoCode")?.value;
+
+                    if (appliedPromoCode) {
+                      calculateTotalWithPromo(
+                        totalBeforePromo,
+                        productsBySeller,
+                        appliedPromoCode
+                      );
+                    } else {
+                      updateTotalDisplay(totalBeforePromo, 0);
+                    }
+                  }
+                });
+
+              showAlert(data.message, "success");
             } else {
-              console.error("Error while deleting the product:", data.message);
-              alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+              showAlert(
+                data.message || "Erreur lors de la suppression",
+                "danger"
+              );
             }
           })
           .catch((error) => {
             console.error("Error while deleting the product:", error);
-            alertContainer.innerHTML = `<div class="alert alert-danger">Error deleting the product.</div>`;
+            showAlert("Erreur lors de la suppression du produit", "danger");
           });
       }
     });
@@ -640,10 +686,12 @@ document.addEventListener("DOMContentLoaded", function () {
       totalPaye: document.getElementById("totalPaye"),
     };
 
-    // Vérifier que tous les éléments existent
-    if (!Object.values(elements).every((el) => el)) {
-      console.error("Missing elements for display update");
-      return;
+    // S'assurer qu'il n'y a pas de réduction si aucun code promo n'est actif
+    const activePromoId = localStorage.getItem("activePromoId");
+    const appliedPromoCode = document.getElementById("appliedPromoCode")?.value;
+
+    if (!activePromoId && !appliedPromoCode) {
+      reduction = 0;
     }
 
     const fraisPort = totalBeforePromo >= 80 ? 0 : 5;
