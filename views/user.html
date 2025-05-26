@@ -12,8 +12,191 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
     />
-    <link rel="stylesheet" href="../assets/style/user.css" />
+    
     <title>User</title>
+    <style>
+      /* ----- GLOBAL RESET & BASE ----- */
+body {
+  background: linear-gradient(135deg, #ece9e6, #ffffff);
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #2c3e50;
+}
+
+/* ----- TITLE ----- */
+.title h1 {
+  font-weight: 700;
+  font-size: 2.8rem;
+  color: #2c3e50;
+}
+
+/* ----- SETTINGS ICON ----- */
+.settings-icon {
+  position: absolute;
+  top: 10%;
+  right: 30px;
+  font-size: 1.8rem;
+  color: #36afeb;
+  cursor: pointer;
+  transition: transform 0.3s ease, color 0.3s;
+}
+
+.settings-icon:hover {
+  transform: rotate(90deg) scale(1.1);
+  color: #09234a;
+}
+
+/* ----- PROFILE CARD ----- */
+.profile-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  gap: 40px;
+  transition: all 0.3s ease;
+}
+
+/* ----- PROFILE IMAGE ----- */
+.img img {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid #36afeb;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.img img:hover {
+  transform: scale(1.05);
+}
+
+/* ----- USER INFO ----- */
+.info p {
+  font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+  color: #34495e;
+}
+
+.info i {
+  margin-left: 8px;
+  color: #7f8c8d;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.info i:hover {
+  color: #36afeb;
+}
+
+/* ----- ACTION LINKS ----- */
+.actions a {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+  font-weight: 500;
+  color: #2c3e50;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.actions a i {
+  margin-right: 10px;
+  font-size: 1.3rem;
+  color: #36afeb;
+  transition: transform 0.3s ease;
+}
+
+.actions a:hover {
+  background-color: rgba(52, 152, 219, 0.1);
+  transform: translateX(5px);
+}
+
+.actions a:hover i {
+  transform: scale(1.2);
+}
+
+/* ----- MODAL BUTTONS ----- */
+.modal-footer .btn,
+#settingsModal .btn {
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+  background: #36afeb;
+  border: none;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background: #09234a;
+}
+
+.btn-danger {
+  background: #ff4d4f !important;
+  border-color: #ff4d4f !important;
+  border: none;
+}
+
+.btn-danger:hover, .btn-danger:focus {
+  background: #c82333 !important;
+}
+/* ----- FILE INPUT ----- */
+input[type="file"] {
+  font-size: 1rem;
+  color: #555;
+}
+input, input[type="file"] {
+  border: solid #36afeb 1.2px;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 1em;
+  background: #f8fbff;
+  color: #09234a;
+  margin-bottom: 8px;
+  width: 100%;
+  transition: border 0.2s;
+}
+
+input:focus, input[type="file"]:focus {
+  border-color: #09234a;
+  outline: none;
+}
+/* ----- RESPONSIVE ----- */
+@media (max-width: 576px) {
+  .profile-card {
+    padding: 25px;
+    margin: 10px;
+  }
+
+  .settings-icon {
+    right: 20px;
+    font-size: 1.5rem;
+  }
+
+  .actions a {
+    font-size: 0.95rem;
+    padding: 8px 12px;
+  }
+  .img{
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  h1{
+    font-size:25px !important;
+  }
+}
+
+    </style>
   </head>
   <body>
     <div id="navContainer"></div>
@@ -36,7 +219,7 @@
             <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal2">
               <img src="" id="imgPhotoProfil" alt="profile picture"
             /></a>
-            <div class="info mt-3">
+            <div class="info mt-5">
               <p>
                 <strong>Username :</strong> <span id="usernameprofil"></span>
               </p>
@@ -121,7 +304,7 @@
     >
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header" style="background-color: rgba(54, 175, 235, 0.11);">
             <h5 class="modal-title" id="settingsModalLabel">Paramètres</h5>
             <button
               type="button"
@@ -151,7 +334,7 @@
     >
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header" style="background-color: rgba(54, 175, 235, 0.11);">
             <h5 class="modal-title" id="exampleModalLabel2">
               Modifier photo de profil
             </h5>
@@ -174,7 +357,7 @@
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary">
-                Save changes
+                Enregistrer
               </button>
             </div>
           </form>
