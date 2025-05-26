@@ -70,9 +70,44 @@
 .badge {
     font-size: 0.8rem;
 }
+      .btn-outline-primary{
+        position: absolute;
+        top: 4%;
+        left: 10%;
+      }
+      .btn-primary,.btn-outline-primary{
+      background-color: #09234a;
+      border: none;
+      color: white;
+      }
+    .btn-primary:hover,.btn-outline-primary:hover{
+    transition: 2sec;
+    background-color: #36afeb;
+    }
+    @media  (max-width: 768px) {
+      .btn-outline-primary {
+        position: static;
+        margin-bottom: 10px;
+      }}
   </style>
   <body>
     <div class="container mt-4">
+            <a href="./user.html"
+          ><button class="btn btn-outline-primary">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-arrow-left"
+              viewBox="0 0 16 16"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
+              />
+            </svg></button
+        ></a>
         <h1 class="text-center mb-4">Mes Favoris</h1>
         <div id="alertContainerLike"></div>
         <section class="like-section">

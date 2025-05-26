@@ -11,7 +11,7 @@ class Database
     private $host = 'localhost';
     private $dbname = 'db_marketplace';
     private $username = 'root';
-    private $password = '';
+    private $password = 'root';
     private $db;
 
     public function __construct()
