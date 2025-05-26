@@ -191,6 +191,10 @@ function displayProducts(page, products = allProducts) {
              <i class="fas fa-cart-plus"></i>
            </a>`;
 
+    const likeButton = `<a href="#" class="btn btn-primary like stop-propagation" data-product-id="${produit.id_produit}">
+      <i class="fas fa-heart"></i>
+    </a>`;
+
     htmlContent += `
       <div class="col-12 col-md-4 pb-3" id="produitCard">
         <div class="product-card card product-details" data-id="${
@@ -219,12 +223,8 @@ function displayProducts(page, products = allProducts) {
               </div>
             </div>
           </div>
-          <div class="btn-container">
-            <a href="./detail_produit.html?id=${
-              produit.id_produit
-            }" class="btn btn-primary stop-propagation">
-              <i class="fas fa-heart"></i>
-            </a>
+          <div class="btn-container">              
+            ${likeButton}
             ${cartButton}
           </div>
         </div>
@@ -240,6 +240,45 @@ function displayProducts(page, products = allProducts) {
     card.addEventListener("click", function () {
       const productId = this.getAttribute("data-id");
       openDetailProduit(productId);
+    });
+  });
+
+  cartLikes = container.querySelectorAll(".like");
+
+  cartLikes.forEach((button) => {
+    button.addEventListener("click", async function (event) {
+      event.stopPropagation();
+      event.preventDefault();
+
+      const hasSession = await checkSession();
+      if (!hasSession) return;
+
+      const produitId = this.getAttribute("data-product-id");
+      fetch("../public/index.php?api=like&action=addLike", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "addLike",
+          id_produit_like: produitId,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const alertContainer = document.getElementById(
+            "alertContainerfilproduit"
+          );
+          console.log("Réponse du serveur :", data); // Debug log
+          if (data.success) {
+            alertContainer.innerHTML = `<div class="alert alert-success">${data.message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+          } else {
+            alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+          }
+        })
+        .catch((error) => {
+          console.error("Erreur lors de l'ajout au like :", error);
+        });
     });
   });
 
