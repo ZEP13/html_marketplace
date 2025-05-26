@@ -82,6 +82,15 @@
         justify-content: center;
         cursor: pointer;
       }
+      .btn-primary,.btn-outline-primary{
+      background-color: #09234a;
+      border: none;
+      color: white;
+      }
+    .btn-primary:hover,.btn-outline-primary:hover{
+    transition: 2sec;
+    background-color: #36afeb;
+    }
     </style>
     <title>Vendre produit</title>
   </head>
@@ -91,23 +100,23 @@
     <!-- Formulaire pour ajouter un produit -->
     <div class="container mt-5">
       <div class="d-flex align-items-center justify-content-between">
-        <button class="btn btn-outline-primary">
-          <a href="./user_vente.html">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              class="bi bi-arrow-left"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
-              /></svg
-          ></a>
-        </button>
-        <div class="title text-center flex-grow-1">
+              <a href="./user_vente.html"
+        ><button class="btn btn-outline-primary">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-arrow-left"
+            viewBox="0 0 16 16"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
+            />
+          </svg></button
+      ></a>
+        <div class="title text-center flex-grow-1 mb-3">
           <h1>Ajouter un produit</h1>
         </div>
       </div>
@@ -192,11 +201,11 @@
           </div>
           <div id="gallery" class="mt-3 d-flex flex-wrap"></div>
         </div>
-        <div class="mb-3">
-          <input type="checkbox" name="actif" id="actifProduit" />
+        <div class="mb-3 align-items-baseline d-flex">
+          <input type="checkbox" name="actif" id="actifProduit" style="margin-right: 5px;"/>
           <label for="actif">Rendre le produit disponible à l'achat</label>
         </div>
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-primary mb-3">
           Ajouter le produit
         </button>
       </form>

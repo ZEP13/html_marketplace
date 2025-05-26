@@ -37,6 +37,34 @@
         display: flex;
         gap: 10px;
       }
+      .bg-primary{
+        background-color:#36afeb !important ;
+      }
+      .btn-outline-primary{
+        position: absolute;
+        top: 7.5%;
+        left: 10%;
+      }
+      .btn-primary,.btn-outline-primary{
+      background-color: #09234a;
+      border: none;
+      color: white;
+      }
+    .btn-primary:hover,.btn-outline-primary:hover{
+    transition: 2sec;
+    background-color: #36afeb;
+    }
+    @media  (max-width: 768px) {
+      .btn-outline-primary {
+        position: static;
+        margin-bottom: 10px;
+      }
+      .py-5{
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+      }
+      
+    }
     </style>
   </head>
   <body class="bg-light">
@@ -144,7 +172,7 @@
               >
             </div>
             <div class="col-12">
-              <button type="submit" class="btn btn-primary">
+              <button type="submit" class="btn btn-primary btn-color">
                 Créer la promotion
               </button>
               <button

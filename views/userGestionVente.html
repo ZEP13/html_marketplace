@@ -13,6 +13,31 @@
       rel="stylesheet"
     />
     <script src="../assets/script/userGestionVente.js"></script>
+    <style>
+      i{
+        color: #36afeb;
+      }
+      .btn-outline-primary{
+        position: absolute;
+        top: 7.5%;
+        left: 10%;
+      }
+      .btn-primary,.btn-outline-primary{
+      background-color: #09234a !important;
+      border: none;
+      color: white;
+      }
+    .btn-primary:hover,.btn-outline-primary:hover{
+    transition: 2sec;
+    background-color: #36afeb !important;
+    }
+    @media  (max-width: 768px) {
+      .btn-outline-primary {
+        position: static;
+        margin-bottom: 10px;
+      }
+      }
+    </style>
   </head>
   <body>
     <div class="container">
@@ -54,14 +79,14 @@
             </div>
           </div>
           <a href="./user_vente.html" class="btn-primary">
-            <i class="fas fa-arrow-right"></i>
+            <i class="fas fa-arrow-right" style="color: #ffffff;"></i>
             Accéder à mes ventes
           </a>
         </div>
 
         <div class="option-card">
           <div class="card-icon">
-            <i class="fas fa-tags"></i>
+            <i class="fas fa-tags" ></i>
           </div>
           <h2>Codes Promo</h2>
           <p>Créez et gérez vos promotions pour booster vos ventes</p>
@@ -76,7 +101,7 @@
             </div>
           </div>
           <a href="./user_promo.html" class="btn-primary">
-            <i class="fas fa-arrow-right"></i>
+            <i class="fas fa-arrow-right" style="color: #ffffff;"></i>
             Gérer mes promos
           </a>
         </div>
