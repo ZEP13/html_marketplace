@@ -1,16 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LIKE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   </head>
+  <style>
+    .like-section .card {
+    transition: transform 0.2s ease-in-out;
+    border: 1px solid rgba(0,0,0,0.125);
+}
+
+.like-section .card:hover {
+    transform: translateY(-5px);
+}
+
+.like-section .card-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.like-section .card-text {
+    font-size: 0.9rem;
+}
+
+.alert {
+    margin-bottom: 1rem;
+    transition: opacity 0.3s ease-in-out;
+}
+.like-section .card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.125);
+}
+
+.like-section .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.like-section .card-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.like-section .card-text {
+    font-size: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.like-section .price {
+    color: #2c3e50;
+    font-size: 1.2rem;
+}
+
+.like-section .card a:hover {
+    text-decoration: none;
+}
+
+.stop-propagation:hover {
+    z-index: 2;
+    position: relative;
+}
+
+.badge {
+    font-size: 0.8rem;
+}
+  </style>
   <body>
-    <h1>LIKE</h1>
-    <div id="alertContainerLike"></div>
-    <section class="like-section">
-      <div class="like-container"></div>
-    </section>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Mes Favoris</h1>
+        <div id="alertContainerLike"></div>
+        <section class="like-section">
+            <div class="row like-container g-4"></div>
+        </section>
+    </div>
 
     <script src="../assets/scipt/like.js"></script>
   </body>

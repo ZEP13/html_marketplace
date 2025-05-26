@@ -9,10 +9,11 @@
     transition: width 0.3s ease; /* Transition pour l'ouverture/fermeture */
     background-color: #09234a !important; /* Couleur de fond de la navbar */
   }
-  .like.liked i.fas.fa-heart {
-  color: red;
-  }
-
+  .like.liked i.fas.fa-heart,
+.like i.liked,
+.liked i.fas.fa-heart {
+  color: red !important;
+}
   
   #alertStock {
     padding: 0;

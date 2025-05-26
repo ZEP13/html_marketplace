@@ -1,6 +1,7 @@
 let currentPage = 1;
 const itemsPerPage = 15;
 let allProducts = [];
+let userLikes = [];
 
 document.addEventListener("DOMContentLoaded", function () {
   // Afficher le loader
@@ -111,6 +112,111 @@ document.addEventListener("DOMContentLoaded", function () {
         hideLoader();
       });
   }
+
+  // Récupérer les likes de l'utilisateur avant d'afficher les produits
+  fetch("../public/index.php?api=like&action=like")
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success && Array.isArray(data.likes)) {
+        userLikes = data.likes.map((like) => String(like.id_produit));
+      }
+    })
+    .finally(() => {
+      // Les appels fetch pour charger les produits restent inchangés
+      if (marqueQuery) {
+        // Utiliser la nouvelle route API pour les produits filtrés par marque
+        fetch(
+          `../public/index.php?api=produit&action=getByMarque&marque=${encodeURIComponent(
+            marqueQuery
+          )}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success && Array.isArray(data.products)) {
+              allProducts = data.products;
+              setupPagination(allProducts.length);
+              displayProducts(1, allProducts);
+            } else {
+              const container = document.querySelector(".card-container");
+              if (container) {
+                container.innerHTML = `
+                <div class="text-center my-5">
+                  <h3>Aucun produit trouvé pour la marque : "${marqueQuery}"</h3>
+                </div>`;
+              }
+            }
+          })
+          .finally(() => {
+            hideLoader();
+          });
+      } else if (categoryId) {
+        // Charger d'abord tous les produits
+        fetch(`../public/index.php?api=produit&action=getValidProducts`)
+          .then((response) => response.json())
+          .then((data) => {
+            allProducts = data.products || [];
+
+            // Attendre que les catégories soient chargées
+            waitForElement("#selectCategoryProduit")
+              .then(() => {
+                const selectCategory = document.getElementById(
+                  "selectCategoryProduit"
+                );
+                selectCategory.value = categoryId;
+
+                // Filtrer les produits par catégorie
+                const filteredProducts = allProducts.filter((product) => {
+                  // Convertir les deux valeurs en chaînes pour la comparaison
+                  return String(product.category) === String(categoryId);
+                });
+
+                console.log("Produits filtrés:", filteredProducts); // Debug
+                console.log("Catégorie recherchée:", categoryId); // Debug
+
+                // Mettre à jour l'affichage
+                setupPagination(filteredProducts.length);
+                displayProducts(1, filteredProducts);
+              })
+              .catch((error) =>
+                console.error("Erreur lors de l'application du filtre:", error)
+              );
+          })
+          .finally(() => {
+            hideLoader();
+          });
+      } else if (searchQuery) {
+        // Utiliser la nouvelle route API qui filtre les produits actifs et validés
+        fetch(`../public/index.php?api=produit&action=getValidProducts`)
+          .then((response) => response.json())
+          .then((data) => {
+            allProducts = data.products || [];
+            const filteredProducts = allProducts.filter(
+              (product) =>
+                product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                product.description
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase())
+            );
+            setupPagination(filteredProducts.length);
+            displayProducts(1, filteredProducts);
+          })
+          .finally(() => {
+            hideLoader();
+          });
+      } else {
+        // Utiliser la nouvelle route API pour le chargement normal
+        fetch(`../public/index.php?api=produit&action=getValidProducts`)
+          .then((response) => response.json())
+          .then((data) => {
+            allProducts = data.products || [];
+            setupPagination(allProducts.length);
+            displayProducts(1);
+          })
+          .finally(() => {
+            hideLoader();
+          });
+      }
+    });
 });
 
 function openDetailProduit(id) {
@@ -191,8 +297,10 @@ function displayProducts(page, products = allProducts) {
              <i class="fas fa-cart-plus"></i>
            </a>`;
 
-    const likeButton = `<a href="#" class="btn btn-primary like stop-propagation" data-product-id="${produit.id_produit}">
-      <i class="fas fa-heart"></i>
+    // Vérifier si le produit est liké
+    const isLiked = userLikes.includes(String(produit.id_produit));
+    const likeButton = `<a href="#" class="btn btn-primary like${isLiked ? " liked" : ""} stop-propagation" data-product-id="${produit.id_produit}">
+      <i class="fas fa-heart${isLiked ? " liked" : ""}"></i>
     </a>`;
 
     htmlContent += `
@@ -254,13 +362,20 @@ function displayProducts(page, products = allProducts) {
       if (!hasSession) return;
 
       const produitId = this.getAttribute("data-product-id");
-      fetch("../public/index.php?api=like&action=addLike", {
+      const heartIcon = this.querySelector("i");
+      const isCurrentlyLiked = this.classList.contains("liked");
+
+      // Déterminer l'action à effectuer
+      const action = isCurrentlyLiked ? "deleteLike" : "addLike";
+      const apiUrl = "../public/index.php?api=like&action=" + action;
+
+      fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          action: "addLike",
+          action: action,
           id_produit_like: produitId,
         }),
       })
@@ -269,15 +384,23 @@ function displayProducts(page, products = allProducts) {
           const alertContainer = document.getElementById(
             "alertContainerfilproduit"
           );
-          console.log("Réponse du serveur :", data); // Debug log
           if (data.success) {
+            // Toggle l'état visuel du bouton
+            this.classList.toggle("liked");
+            heartIcon.classList.toggle("liked");
+            // Mettre à jour userLikes localement
+            if (action === "addLike") {
+              userLikes.push(String(produitId));
+            } else {
+              userLikes = userLikes.filter((id) => id !== String(produitId));
+            }
             alertContainer.innerHTML = `<div class="alert alert-success">${data.message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
           } else {
             alertContainer.innerHTML = `<div class="alert alert-danger">${data.message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
           }
         })
         .catch((error) => {
-          console.error("Erreur lors de l'ajout au like :", error);
+          console.error("Erreur lors du toggle like :", error);
         });
     });
   });
