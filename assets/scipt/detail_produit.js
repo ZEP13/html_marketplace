@@ -6,6 +6,7 @@ function goBack() {
   if (
     previousPage.includes("commande.html") ||
     previousPage.includes("user_vente.html") ||
+    previousPage.includes("like.html") ||
     previousPage.includes("panier.html")
   ) {
     window.history.back();
