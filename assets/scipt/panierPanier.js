@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <div class="item-price">${produit.price} €</div>
         </div>
       </div>
-      <div class="d-flex align-items-center">
+      <div class="d-flex align-items-center phoneMedia">
         <input type="number" 
           max="${produit.quantite}" 
           class="form-control item-quantity" 

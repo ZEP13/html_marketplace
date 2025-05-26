@@ -131,7 +131,7 @@ body {
 }
 
 .remember-me label {
-    color: #555;
+    color: #d5d5d5;
     cursor: pointer;
     user-select: none;
 }
