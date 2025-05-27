@@ -4,6 +4,7 @@ class SearchManager {
     this.searchInput = null;
     this.searchDropdown = null;
     this.searchButton = null;
+    this.searchForm = null; // Ajout du formulaire de recherche
 
     // Pour gestion mobile
     this.isMobile = window.matchMedia("(max-width: 767px)").matches;
@@ -18,8 +19,9 @@ class SearchManager {
       this.searchInput = document.getElementById("searchInput");
       this.searchDropdown = document.getElementById("searchDropdown");
       this.searchButton = document.querySelector(".search-container button");
+      this.searchForm = document.getElementById("searchForm"); // Récupération du formulaire
 
-      if (!this.searchInput || !this.searchDropdown) {
+      if (!this.searchInput || !this.searchDropdown || !this.searchForm) {
         attempts++;
         if (attempts < maxAttempts) {
           setTimeout(tryInit, 100);
@@ -50,8 +52,11 @@ class SearchManager {
       }, 300)
     );
 
-    // Bouton recherche click
-    this.searchButton?.addEventListener("click", () => this.handleSearch());
+    // Gestion du submit du formulaire
+    this.searchForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      this.handleSearch();
+    });
 
     // Touche Entrée dans l'input
     this.searchInput.addEventListener("keypress", (e) => {
@@ -251,26 +256,24 @@ class SearchManager {
       return;
     }
 
-    if (!Array.isArray(this.products) || this.products.length === 0) {
-      await this.loadProducts();
-    }
-
+    // Stocker les résultats filtrés dans le localStorage
     const results = this.products.filter(
       (product) =>
         product.title?.toLowerCase().includes(query.toLowerCase()) ||
         product.description?.toLowerCase().includes(query.toLowerCase())
     );
+    localStorage.setItem("searchResults", JSON.stringify(results));
 
     window.location.href = `./file_produit.html?search=${encodeURIComponent(
       query
-    )}&hasResults=${results.length > 0}`;
+    )}`;
   }
 
+  // Simplification de checkUrlParams pour ne gérer que la marque
   checkUrlParams() {
     const urlParams = new URLSearchParams(window.location.search);
-    const searchQuery = urlParams.get("search");
     const marqueQuery = urlParams.get("marque");
-    const hasResults = urlParams.get("hasResults") === "true";
+    const searchQuery = urlParams.get("search");
 
     if (marqueQuery) {
       fetch(
@@ -302,30 +305,6 @@ class SearchManager {
         });
     } else if (searchQuery) {
       this.searchInput.value = searchQuery;
-
-      if (!hasResults) {
-        document
-          .querySelector(".pagination")
-          ?.style.setProperty("display", "none");
-        const mainContent =
-          document.querySelector(".product-container") ||
-          document.querySelector("main");
-        if (mainContent) {
-          mainContent.innerHTML = `
-            <div class="text-center my-5">
-              <h3>Pas de résultat pour la recherche : "${searchQuery}"</h3>
-            </div>`;
-        }
-      } else {
-        const filtered = this.products.filter(
-          (product) =>
-            product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.description
-              ?.toLowerCase()
-              .includes(searchQuery.toLowerCase())
-        );
-        this.displayProducts(filtered);
-      }
     }
   }
 

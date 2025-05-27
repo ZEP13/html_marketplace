@@ -321,4 +321,49 @@ WHERE products.user_id = :id_user;
             return false;
         }
     }
+    public function getValidProducts($filters = null)
+    {
+        try {
+            $sql = 'SELECT p.*, u.user_nom, u.user_prenom, c.category_name,
+                AVG(r.rating) as average_rating, COUNT(r.id) as review_count
+                FROM products p
+                LEFT JOIN users u ON p.user_id = u.id_user
+                LEFT JOIN categorie c ON p.category = c.id
+                LEFT JOIN reviews_produit r ON p.id_produit = r.id_produit
+                WHERE p.actif = 1 AND p.valide = 1 AND p.refuse = 0';
+
+            // Add filter conditions
+            if ($filters) {
+                if (!empty($filters['category'])) {
+                    $sql .= ' AND p.category = :category';
+                }
+                if (!empty($filters['maxPrice'])) {
+                    $sql .= ' AND p.price <= :maxPrice';
+                }
+                if (!empty($filters['inStock'])) {
+                    $sql .= ' AND p.quantite > 0';
+                }
+            }
+
+            $sql .= ' GROUP BY p.id_produit';
+
+            $stmt = $this->db->prepare($sql);
+
+            // Bind filter values
+            if ($filters) {
+                if (!empty($filters['category'])) {
+                    $stmt->bindValue(':category', $filters['category'], PDO::PARAM_INT);
+                }
+                if (!empty($filters['maxPrice'])) {
+                    $stmt->bindValue(':maxPrice', $filters['maxPrice'], PDO::PARAM_INT);
+                }
+            }
+
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erreur de récupération des produits : " . $e->getMessage());
+            return false;
+        }
+    }
 }

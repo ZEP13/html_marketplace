@@ -1,434 +1,529 @@
-//file pour filtre les produit sur la page fileproduit,  filtre et affiche les resulte de filtre sur la page produit.
-function isInStock(produit) {
-  return produit.stock > 0;
-}
+(function () {
+  // Variables locales au module
+  const itemsPerPage = 15;
+  let currentPage = 1;
+  let filteredProductsList = [];
+  let searchResults = []; // Nouvelle variable pour stocker les résultats de recherche
 
-function byMostSellItem() {
-  fetch("../public/index.php?api=commande&action=getComandeByMostSell", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((reponse) => reponse.json())
-    .then((data) => {
-      console.log(data);
-      return data.commande;
-    });
-}
-
-function byMostRatedItem() {
-  fetch(`../public/index.php?api=review&action=getAllReview`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  })
-    .then((reponse) => reponse.json())
-    .then((dataReview) => {
-      console.log(dataReview);
-      return dataReview.review;
-    })
-    .catch((error) => {
-      console.error("Erreur lors de la requête:", error);
-    });
-}
-
-function byLowerPrice(sortOrder = "asc") {
-  fetch(`../public/index.php?api=produit&action=getAllProduits`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      // Vérifier si data contient des produits dans le nouveau format
-      if (!data.success || !Array.isArray(data.products)) {
-        console.error("Les données ne sont pas dans le format attendu:", data);
-        return;
-      }
-
-      // Sort based on the 'price' field
-      const sortedProduits = [...data.products].sort((a, b) => {
-        if (sortOrder === "asc") {
-          return parseFloat(a.price) - parseFloat(b.price);
-        } else if (sortOrder === "desc") {
-          return parseFloat(b.price) - parseFloat(a.price);
-        }
-        return 0;
-      });
-
-      // Display sorted products using the existing displayProducts function
-      displayProducts(1, sortedProduits);
-    })
-    .catch((error) => {
-      console.error("Erreur lors de la requête:", error);
-    });
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  // Get filter elements
-  const priceRange = document.getElementById("priceRange");
-  const priceValueText = document.getElementById("priceValueText");
-  const selectCategory = document.getElementById("selectCategoryProduit");
-  const sortSelect = document.querySelector('select[name="like"]');
-  const stockCheckbox = document.getElementById("flexCheckDefault");
-  const mostSoldCheckbox = document.getElementById("flexCheckChecked");
-  const filterButton = document.querySelector(".btn-outline-primary");
-  const ratingSelect = document.querySelector('select[name="rating"]');
-
-  // Ajouter le gestionnaire pour le bouton reset
-  const resetButton = document.querySelector(
-    '.btn-outline-primary[data-action="reset"]'
-  );
-
-  resetButton.addEventListener("click", function (e) {
-    e.preventDefault();
-    resetFilters();
-  });
-
-  // Fonction pour initialiser et mettre à jour l'affichage du prix
-  function initializePriceRange() {
-    fetch(`../public/index.php?api=produit&action=getAllProduits`)
-      .then((response) => response.json())
-      .then((data) => {
-        const products = data.success && data.products ? data.products : [];
-        if (products.length > 0) {
-          const maxPrice = Math.ceil(
-            Math.max(...products.map((p) => parseFloat(p.price)))
-          );
-
-          // Mise à jour des attributs du range
-          priceRange.setAttribute("max", maxPrice);
-          priceRange.value = maxPrice;
-
-          // Mise à jour de l'affichage du prix
-          priceValueText.textContent = maxPrice + "€";
-
-          // Mise à jour du label avec le prix maximum
-          const priceLabel = document.querySelector('label[for="priceRange"]');
-          priceLabel.innerHTML = `Plage de prix (0€ - <span id="maxPriceLabel">${maxPrice}€</span>):`;
-
-          // Ajouter un événement pour mettre à jour l'affichage en temps réel
-          priceRange.addEventListener("input", function () {
-            priceValueText.textContent = this.value + "€";
-          });
-        }
-      })
-      .catch((error) =>
-        console.error("Erreur lors du chargement des prix:", error)
-      );
+  function isInStock(produit) {
+    return produit.stock > 0;
   }
 
-  // Initialiser le range de prix au chargement
-  initializePriceRange();
-
-  function resetFilters() {
-    // Récupérer les paramètres d'URL actuels
-    const urlParams = new URLSearchParams(window.location.search);
-    const searchQuery = urlParams.get("search");
-
-    // Réinitialiser les filtres
-    const maxPrice = priceRange.getAttribute("max");
-    priceRange.value = maxPrice;
-    priceValueText.textContent = maxPrice + "€";
-    selectCategory.value = "";
-    sortSelect.value = "";
-    stockCheckbox.checked = false;
-    mostSoldCheckbox.checked = false;
-
-    // Réinitialiser les notes
-    if (ratingSelect) {
-      ratingSelect.value = "0";
-    }
-
-    // Réinitialiser l'affichage des produits en préservant la recherche
-    fetch(`../public/index.php?api=produit&action=getValidProducts`)
-      .then((response) => response.json())
+  function byMostSellItem() {
+    return fetch(
+      "../public/index.php?api=commande&action=getComandeByMostSell",
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+      .then((reponse) => reponse.json())
       .then((data) => {
-        if (data.success && Array.isArray(data.products)) {
-          let filteredProducts = [...data.products];
+        console.log(data);
+        return data.commande;
+      });
+  }
 
-          // Appliquer le filtre de recherche si une recherche existe
-          if (searchQuery) {
-            filteredProducts = filteredProducts.filter(
-              (product) =>
-                product.title
-                  ?.toLowerCase()
-                  .includes(searchQuery.toLowerCase()) ||
-                product.description
-                  ?.toLowerCase()
-                  .includes(searchQuery.toLowerCase())
-            );
-          }
-
-          // Mettre à jour l'affichage
-          displayProducts(1, filteredProducts);
-          setupPagination(filteredProducts.length);
-
-          // Forcer le rafraîchissement de la pagination
-          document.querySelector(".pagination").style.display = "flex";
-
-          // Réinitialiser la classe active sur les boutons de filtre
-          document.querySelectorAll(".filter-btn").forEach((btn) => {
-            btn.classList.remove("active");
-          });
-
-          // Afficher le message de confirmation avec mention de la recherche active
-          const container = document.querySelector(".card-container");
-          if (container) {
-            const alertDiv = document.createElement("div");
-            alertDiv.className =
-              "alert alert-success alert-dismissible fade show";
-            alertDiv.innerHTML = `
-                        Filtres réinitialisés ${
-                          searchQuery
-                            ? `(recherche active : "${searchQuery}")`
-                            : ""
-                        }
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    `;
-            container.insertAdjacentElement("beforebegin", alertDiv);
-
-            // Auto-supprimer l'alerte après 3 secondes
-            setTimeout(() => {
-              alertDiv.remove();
-            }, 3000);
-          }
-        }
+  function byMostRatedItem() {
+    return fetch(`../public/index.php?api=review&action=getAllReview`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((reponse) => reponse.json())
+      .then((dataReview) => {
+        console.log(dataReview);
+        return dataReview.review;
       })
       .catch((error) => {
-        console.error("Erreur lors de la réinitialisation:", error);
-        const container = document.querySelector(".card-container");
-        if (container) {
-          container.insertAdjacentHTML(
-            "beforebegin",
-            `
-                    <div class="alert alert-danger alert-dismissible fade show">
-                        Erreur lors de la réinitialisation des filtres
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                `
-          );
-        }
+        console.error("Erreur lors de la requête:", error);
       });
   }
-  // Update price text when range changes
-  priceRange.addEventListener("input", function () {
-    priceValueText.textContent = this.value;
-  });
 
-  // Filter button click handler
-  filterButton.addEventListener("click", function (e) {
-    e.preventDefault();
-    applyFilters();
-  });
-
-  // Rendre la fonction accessible globalement
-  window.applyFilters = applyFilters;
-
-  function applyFilters() {
-    const selectCategory = document.getElementById("selectCategoryProduit");
-    if (!selectCategory) return; // Protection contre les appels trop précoces
-
-    const filters = {
-      maxPrice: parseFloat(document.getElementById("priceRange").value),
-      category: selectCategory.value,
-      sortBy: document.querySelector('select[name="like"]')?.value || "",
-      inStock: document.getElementById("flexCheckDefault")?.checked || false,
-      mostSold: document.getElementById("flexCheckChecked")?.checked || false,
-      rating:
-        parseInt(document.querySelector('select[name="rating"]')?.value) || 0,
-    };
-
-    fetch(`../public/index.php?api=produit&action=getValidProducts`)
-      .then((response) => {
-        if (!response.ok) throw new Error("Erreur réseau");
-        return response.json();
-      })
+  function byLowerPrice(sortOrder = "asc") {
+    fetch(`../public/index.php?api=produit&action=getAllProduits`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => response.json())
       .then((data) => {
+        // Vérifier si data contient des produits dans le nouveau format
         if (!data.success || !Array.isArray(data.products)) {
-          throw new Error("Format de données invalide");
-        }
-
-        let filteredProducts = [...data.products];
-
-        // Appliquer le filtre de catégorie en premier si présent
-        if (filters.category) {
-          filteredProducts = filteredProducts.filter(
-            (product) => product.category == filters.category
+          console.error(
+            "Les données ne sont pas dans le format attendu:",
+            data
           );
-        }
-
-        // Appliquer d'abord le filtre de recherche si une recherche existe
-        if (filters.search) {
-          filteredProducts = filteredProducts.filter(
-            (product) =>
-              product.title
-                ?.toLowerCase()
-                .includes(filters.search.toLowerCase()) ||
-              product.description
-                ?.toLowerCase()
-                .includes(filters.search.toLowerCase())
-          );
-        }
-
-        // Appliquer ensuite les autres filtres sur les résultats de recherche
-        if (filters.rating > 0) {
-          filteredProducts = filteredProducts.filter((product) => {
-            const rating = parseFloat(product.average_rating) || 0;
-            return rating >= filters.rating && rating < filters.rating + 1;
-          });
-        }
-
-        if (filters.inStock) {
-          filteredProducts = filteredProducts.filter(
-            (product) => parseInt(product.quantite) > 0
-          );
-        }
-
-        // Mettre à jour le max du range avec le prix le plus élevé
-        if (filteredProducts.length > 0) {
-          const newMaxPrice = Math.ceil(
-            Math.max(...filteredProducts.map((p) => parseFloat(p.price)))
-          );
-          priceRange.max = newMaxPrice;
-          const priceLabel = document.querySelector('label[for="priceRange"]');
-          priceLabel.textContent = `Plage de prix: (0€ - ${newMaxPrice}€)`;
-
-          if (parseFloat(priceRange.value) > newMaxPrice) {
-            priceRange.value = newMaxPrice;
-            priceValueText.textContent = `${newMaxPrice}€`;
-          }
-        }
-
-        if (filters.maxPrice > 0) {
-          filteredProducts = filteredProducts.filter(
-            (product) => parseFloat(product.price) <= filters.maxPrice
-          );
-        }
-
-        // Gérer l'affichage des résultats
-        if (filteredProducts.length === 0) {
-          const container = document.querySelector(".card-container");
-          container.innerHTML = `
-            <div class="col-12 text-center">
-              <div class="alert alert-info" role="alert">
-                ${
-                  filters.search
-                    ? `Aucun produit ne correspond à votre recherche "${filters.search}" avec les filtres sélectionnés.`
-                    : "Aucun produit ne correspond aux filtres sélectionnés."
-                }
-              </div>
-            </div>`;
-          document.querySelector(".pagination").style.display = "none";
           return;
         }
 
-        // Appliquer le tri
-        if (filters.sortBy) {
-          switch (filters.sortBy) {
-            case "1":
-              filteredProducts.sort(
-                (a, b) => parseFloat(b.price) - parseFloat(a.price)
-              );
-              break;
-            case "2":
-              filteredProducts.sort(
-                (a, b) => parseFloat(a.price) - parseFloat(b.price)
-              );
-              break;
-            case "3":
-              filteredProducts.sort(
-                (a, b) =>
-                  parseFloat(b.average_rating || 0) -
-                  parseFloat(a.average_rating || 0)
-              );
-              break;
+        // Sort based on the 'price' field
+        const sortedProduits = [...data.products].sort((a, b) => {
+          if (sortOrder === "asc") {
+            return parseFloat(a.price) - parseFloat(b.price);
+          } else if (sortOrder === "desc") {
+            return parseFloat(b.price) - parseFloat(a.price);
           }
-        }
+          return 0;
+        });
 
-        // Afficher les résultats filtrés
-        displayProducts(1, filteredProducts);
-        setupPagination(filteredProducts.length);
+        // Display sorted products using the existing displayProducts function
+        displayProducts(1, sortedProduits);
       })
       .catch((error) => {
-        console.error("Erreur lors du filtrage:", error);
-        const container = document.querySelector(".card-container");
-        if (container) {
-          container.innerHTML = `
-            <div class="col-12">
-              <div class="alert alert-danger text-center">
-                Une erreur est survenue lors du filtrage des produits
-              </div>
-            </div>`;
-        }
+        console.error("Erreur lors de la requête:", error);
       });
   }
 
-  function displayStarRating(rating) {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    let stars = "";
+  function displayProducts(page, products) {
+    const container = document.querySelector(".card-container");
+    if (!container) return;
 
-    // Ajouter les étoiles pleines
-    for (let i = 0; i < fullStars; i++) {
-      stars += '<i class="fas fa-star text-warning"></i>';
-    }
-
-    // Ajouter la demi-étoile si nécessaire
-    if (hasHalfStar) {
-      stars += '<i class="fas fa-star-half-alt text-warning"></i>';
-    }
-
-    // Ajouter les étoiles vides restantes
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    for (let i = 0; i < emptyStars; i++) {
-      stars += '<i class="far fa-star text-warning"></i>';
-    }
-
-    return stars;
-  }
-
-  // Modifier displayResults pour inclure les étoiles
-  function displayResults(products) {
-    if (products.length === 0) {
-      const container = document.querySelector(".card-container");
+    if (!Array.isArray(products) || products.length === 0) {
       container.innerHTML = `
-        <div class="col-12 text-center">
-          <div class="alert alert-info" role="alert">
-            Aucun produit ne correspond à vos critères de recherche.
-          </div>
-        </div>`;
-
-      // Cacher la pagination quand il n'y a pas de résultats
-      document.querySelector(".pagination").style.display = "none";
+      <div class="text-center my-5">
+        <h3>Pas de produit trouvé</h3>
+        <p class="mt-3">
+          <a href="./file_produit.html" class="btn btn-primary">
+            Voir tous les produits
+          </a>
+        </p>
+      </div>`;
+      document
+        .querySelector(".pagination")
+        ?.style.setProperty("display", "none");
       return;
     }
 
-    const container = document.querySelector(".card-container");
-    container.innerHTML = products
-      .map(
-        (product) => `
-      <div class="col-12 col-md-6 col-lg-4 mb-4">
-        <div class="card product-card">
-          <img src="${
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedItems = products.slice(startIndex, endIndex);
+
+    let htmlContent = "";
+    paginatedItems.forEach((product) => {
+      const reviewCount = parseInt(product.review_count) || 0;
+      const averageRating = Math.round(parseFloat(product.average_rating)) || 0;
+      const stockStatus =
+        product.quantite <= 0
+          ? "Rupture de stock"
+          : product.quantite < 5
+          ? `Plus que ${product.quantite} en stock`
+          : "";
+
+      htmlContent += `
+      <div class="col-12 col-md-4 pb-3" id="produitCard">
+        <div class="product-card card product-details" data-id="${
+          product.id_produit
+        }">
+          <p class="text-muted small" id="alertStock">${stockStatus}</p>
+          <img class="card-img-top" src="${
             product.image || "../img/imgProduct/default.jpg"
-          }" class="card-img-top" alt="${product.title}">
+          }" alt="${product.title}"/>
           <div class="card-body">
             <h5 class="card-title">${product.title}</h5>
-            <p class="card-text">${product.price}€</p>
-            <div class="rating">
-              ${displayStarRating(parseFloat(product.average_rating) || 0)}
-              <small class="text-muted">(${
-                product.review_count || 0
-              } avis)</small>
+            <div class="col">
+              <div class="col-md-12">
+                <p class="card-text"><strong>Prix: </strong>${
+                  product.price
+                } €</p>
+              </div>
+              <div class="col-md-12">
+                <div class="text-warning">
+                  ${"★".repeat(averageRating)}${"☆".repeat(5 - averageRating)}
+                  <span class="text-muted">(${reviewCount} avis)</span>
+                </div>
+              </div>
+              <div class="col-md-12">
+                <p class="card-text description">${product.description}</p>
+              </div>
             </div>
+          </div>
+          <div class="btn-container">
+            <a href="#" class="btn btn-primary stop-propagation">
+              <i class="fas fa-heart"></i>
+            </a>
+            ${
+              product.quantite <= 0
+                ? `<a href="#" class="btn btn-secondary panier stop-propagation disabled" title="Produit en rupture de stock">
+                   <i class="fas fa-cart-plus"></i>
+                 </a>`
+                : `<a href="#" class="btn btn-secondary panier stop-propagation" data-id="${product.id_produit}">
+                   <i class="fas fa-cart-plus"></i>
+                 </a>`
+            }
           </div>
         </div>
       </div>
-    `
-      )
-      .join("");
+    `;
+    });
 
-    document.querySelector(".pagination").style.display = "flex";
+    container.innerHTML = htmlContent;
     setupPagination(products.length);
   }
-});
+
+  // Add setupPagination at module level
+  function setupPagination(totalItems) {
+    const pagination = document.querySelector(".pagination");
+    if (!pagination) return;
+
+    const pageCount = Math.ceil(totalItems / itemsPerPage);
+    pagination.innerHTML = "";
+
+    // Bouton Previous
+    pagination.innerHTML += `
+      <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+        <a class="page-link" href="#" data-page="${
+          currentPage - 1
+        }">Previous</a>
+      </li>
+    `;
+
+    // Pages numérotées
+    for (let i = 1; i <= pageCount; i++) {
+      pagination.innerHTML += `
+        <li class="page-item ${currentPage === i ? "active" : ""}">
+          <a class="page-link" href="#" data-page="${i}">${i}</a>
+        </li>
+      `;
+    }
+
+    // Bouton Next
+    pagination.innerHTML += `
+      <li class="page-item ${currentPage === pageCount ? "disabled" : ""}">
+        <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+      </li>
+    `;
+
+    // Remove any existing listeners
+    pagination.removeEventListener("click", paginationClickHandler);
+    // Add click handler
+    pagination.addEventListener("click", paginationClickHandler);
+  }
+
+  // Separate handler function for pagination clicks
+  function paginationClickHandler(e) {
+    e.preventDefault();
+    if (e.target.tagName === "A" && e.target.dataset.page) {
+      const newPage = parseInt(e.target.dataset.page);
+      const totalPages = Math.ceil(filteredProductsList.length / itemsPerPage);
+
+      if (newPage >= 1 && newPage <= totalPages) {
+        currentPage = newPage;
+        displayProducts(currentPage, filteredProductsList);
+        setupPagination(filteredProductsList.length);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // Récupérer uniquement les éléments nécessaires
+    const filterButton = document.querySelector(
+      '.btn-outline-primary:not([data-action="reset"])'
+    );
+    const resetButton = document.querySelector('[data-action="reset"]');
+
+    const selectCategory = document.getElementById("selectCategoryProduit");
+    const priceRange = document.getElementById("priceRange");
+    const priceValueText = document.getElementById("priceValue");
+    const sortSelect = document.querySelector('select[name="like"]');
+    const stockCheckbox = document.getElementById("flexCheckDefault");
+    const ratingSelect = document.querySelector('select[name="rating"]');
+
+    // Garder uniquement les listeners pour les boutons de filtre
+    if (filterButton) {
+      filterButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        applyFilters();
+      });
+    }
+
+    if (resetButton) {
+      resetButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        resetFilters();
+      });
+    }
+
+    // Fonction displayProducts globale
+    window.displayProducts = function (page, products) {
+      const container = document.querySelector(".card-container");
+      if (!container) return;
+
+      if (!Array.isArray(products) || products.length === 0) {
+        container.innerHTML = `
+      <div class="text-center my-5">
+        <h3>Pas de produit trouvé</h3>
+        <p class="mt-3">
+          <a href="./file_produit.html" class="btn btn-primary">
+            Voir tous les produits
+          </a>
+        </p>
+      </div>`;
+        document
+          .querySelector(".pagination")
+          ?.style.setProperty("display", "none");
+        return;
+      }
+
+      const startIndex = (page - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedItems = products.slice(startIndex, endIndex);
+
+      // Générer le HTML des produits
+      let htmlContent = "";
+      paginatedItems.forEach((produit) => {
+        const reviewCount = parseInt(produit.review_count) || 0;
+        const averageRating =
+          Math.round(parseFloat(produit.average_rating)) || 0;
+        const stockStatus =
+          produit.quantite <= 0
+            ? "Rupture de stock"
+            : produit.quantite < 5
+            ? `Plus que ${produit.quantite} en stock`
+            : "";
+
+        htmlContent += `
+        <div class="col-12 col-md-4 pb-3" id="produitCard">
+          <div class="product-card card product-details" data-id="${
+            produit.id_produit
+          }">
+            <p class="text-muted small" id="alertStock">${stockStatus}</p>
+            <img class="card-img-top" src="${
+              produit.image || "../img/imgProduct/default.jpg"
+            }" alt="${produit.title}"/>
+            <div class="card-body">
+              <h5 class="card-title">${produit.title}</h5>
+              <div class="col">
+                <div class="col-md-12">
+                  <p class="card-text"><strong>Prix: </strong>${
+                    produit.price
+                  } €</p>
+                </div>
+                <div class="col-md-12">
+                  <div class="text-warning">
+                    ${"★".repeat(averageRating)}${"☆".repeat(5 - averageRating)}
+                    <span class="text-muted">(${reviewCount} avis)</span>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <p class="card-text description">${produit.description}</p>
+                </div>
+              </div>
+            </div>
+            <div class="btn-container">
+              <a href="#" class="btn btn-primary stop-propagation">
+                <i class="fas fa-heart"></i>
+              </a>
+              ${
+                produit.quantite <= 0
+                  ? `<a href="#" class="btn btn-secondary panier stop-propagation disabled" title="Produit en rupture de stock">
+                     <i class="fas fa-cart-plus"></i>
+                   </a>`
+                  : `<a href="#" class="btn btn-secondary panier stop-propagation" data-id="${produit.id_produit}">
+                     <i class="fas fa-cart-plus"></i>
+                   </a>`
+              }
+            </div>
+          </div>
+        </div>
+      `;
+      });
+
+      container.innerHTML = htmlContent;
+      setupPagination(products.length);
+    };
+
+    // Fonction pour initialiser et mettre à jour l'affichage du prix
+    function initializePriceRange() {
+      fetch(`../public/index.php?api=produit&action=getAllProduits`)
+        .then((response) => response.json())
+        .then((data) => {
+          const products = data.success && data.products ? data.products : [];
+          if (products.length > 0) {
+            const maxPrice = Math.ceil(
+              Math.max(...products.map((p) => parseFloat(p.price)))
+            );
+
+            // Mise à jour des attributs du range
+            priceRange.setAttribute("max", maxPrice);
+            priceRange.value = maxPrice;
+
+            // Mise à jour de l'affichage du prix
+            priceValueText.textContent = maxPrice + "€";
+
+            // Mise à jour du label avec le prix maximum
+            const priceLabel = document.querySelector(
+              'label[for="priceRange"]'
+            );
+            priceLabel.innerHTML = `Plage de prix (0€ - <span id="maxPriceLabel">${maxPrice}€</span>):`;
+
+            // Ajouter un événement pour mettre à jour l'affichage en temps réel
+            priceRange.addEventListener("input", function () {
+              priceValueText.textContent = this.value + "€";
+            });
+          }
+        })
+        .catch((error) =>
+          console.error("Erreur lors du chargement des prix:", error)
+        );
+    }
+
+    // Initialiser le range de prix au chargement
+    initializePriceRange();
+
+    function resetFilters() {
+      // Reset UI elements
+      if (selectCategory) selectCategory.value = "";
+      if (sortSelect) sortSelect.value = "";
+      if (stockCheckbox) stockCheckbox.checked = false;
+      if (ratingSelect) ratingSelect.value = "0";
+
+      if (priceRange && priceValueText) {
+        const maxPrice = priceRange.getAttribute("max");
+        priceRange.value = maxPrice;
+        priceValueText.textContent = maxPrice + "€";
+      }
+
+      // Restore search results if they exist
+      const storedResults = localStorage.getItem("searchResults");
+      if (storedResults) {
+        searchResults = JSON.parse(storedResults);
+        filteredProductsList = searchResults;
+        displayProducts(1, filteredProductsList);
+      } else {
+        // If no search results, load all valid products
+        fetch(`../public/index.php?api=produit&action=getValidProducts`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (!data.success || !Array.isArray(data.products)) {
+              throw new Error("Invalid data format");
+            }
+            filteredProductsList = data.products;
+            displayProducts(1, filteredProductsList);
+          })
+          .catch((error) => {
+            console.error("Reset error:", error);
+            showErrorAlert(
+              "Une erreur est survenue lors de la réinitialisation"
+            );
+          });
+      }
+      setupPagination(filteredProductsList.length);
+      showConfirmationAlert("Filtres réinitialisés");
+    }
+
+    priceRange.addEventListener("input", function () {
+      priceValueText.textContent = this.value;
+    });
+
+    filterButton.addEventListener("click", function (e) {
+      e.preventDefault();
+      applyFilters();
+    });
+
+    window.applyFilters = applyFilters;
+
+    function applyFilters() {
+      // Determine the base product list to filter from
+      const productsToFilter =
+        searchResults.length > 0
+          ? searchResults
+          : JSON.parse(localStorage.getItem("searchResults")) ||
+            filteredProductsList;
+
+      let filtered = [...productsToFilter];
+
+      // Apply filters
+      if (selectCategory.value) {
+        filtered = filtered.filter(
+          (p) => String(p.category) === String(selectCategory.value)
+        );
+      }
+
+      if (priceRange.value) {
+        filtered = filtered.filter(
+          (p) => parseFloat(p.price) <= parseFloat(priceRange.value)
+        );
+      }
+
+      if (stockCheckbox?.checked) {
+        filtered = filtered.filter((p) => parseInt(p.quantite) > 0);
+      }
+
+      if (ratingSelect?.value !== "0") {
+        filtered = filtered.filter(
+          (p) =>
+            Math.round(parseFloat(p.average_rating) || 0) >=
+            parseInt(ratingSelect.value)
+        );
+      }
+
+      // Apply sorting
+      if (sortSelect?.value) {
+        switch (sortSelect.value) {
+          case "1":
+            filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+            break;
+          case "2":
+            filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+            break;
+          case "3":
+            filtered.sort(
+              (a, b) =>
+                (parseFloat(b.average_rating) || 0) -
+                (parseFloat(a.average_rating) || 0)
+            );
+            break;
+        }
+      }
+
+      filteredProductsList = filtered;
+      currentPage = 1;
+      displayProducts(1, filteredProductsList);
+      setupPagination(filteredProductsList.length);
+    }
+
+    // Load search results on initial load if they exist
+    const storedResults = localStorage.getItem("searchResults");
+    if (storedResults) {
+      searchResults = JSON.parse(storedResults);
+      filteredProductsList = searchResults;
+      displayProducts(1, filteredProductsList);
+      setupPagination(filteredProductsList.length);
+    }
+
+    function showErrorAlert(message) {
+      const container = document.querySelector(".card-container");
+      if (container) {
+        container.insertAdjacentHTML(
+          "beforebegin",
+          `<div class="alert alert-danger alert-dismissible fade show">
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>`
+        );
+      }
+    }
+
+    function showConfirmationAlert(message) {
+      const container = document.querySelector(".card-container");
+      if (container) {
+        const alertDiv = document.createElement("div");
+        alertDiv.className = "alert alert-success alert-dismissible fade show";
+        alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+        container.insertAdjacentElement("beforebegin", alertDiv);
+
+        setTimeout(() => alertDiv.remove(), 3000);
+      }
+    }
+  });
+
+  window.byMostSellItem = byMostSellItem;
+  window.byMostRatedItem = byMostRatedItem;
+  window.isInStock = isInStock;
+  window.setupPagination = setupPagination;
+})();

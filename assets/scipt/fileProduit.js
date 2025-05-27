@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   // Lire params URL
   const urlParams = new URLSearchParams(window.location.search);
   const categoryId = urlParams.get("category");
-  const searchQuery = urlParams.get("search");
+  const searchQuery = urlParams.get("search") || ""; // <-- Ajoute une valeur par défaut vide
   const marqueQuery = urlParams.get("marque");
 
   // Fonction pour cacher loader
@@ -37,74 +37,78 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
-  // Charger produits selon filtre + appliquer pagination + afficher
+  // Chargement initial des produits
   async function loadProducts() {
+    // Vérifier si des résultats sont stockés
+    const storedResults = localStorage.getItem("searchResults");
+    if (searchQuery && storedResults) {
+      filteredProducts = JSON.parse(storedResults);
+      displayProducts(1, filteredProducts);
+      setupPagination(filteredProducts.length);
+      localStorage.removeItem("searchResults"); // Nettoyer après usage
+      hideLoader();
+      return;
+    }
+
     try {
-      if (marqueQuery) {
-        // Par marque
-        const resp = await fetch(
-          `../public/index.php?api=produit&action=getByMarque&marque=${encodeURIComponent(
-            marqueQuery
-          )}`
-        );
-        const data = await resp.json();
-        if (data.success && Array.isArray(data.products)) {
-          allProducts = data.products;
-          filteredProducts = allProducts; // pas de filtre supplémentaire
-        } else {
-          filteredProducts = [];
-          if (container) {
-            container.innerHTML = `
-              <div class="text-center my-5">
-                <h3>Aucun produit trouvé pour la marque : "${marqueQuery}"</h3>
-              </div>`;
+      const response = await fetch(
+        `../public/index.php?api=produit&action=getValidProducts`
+      );
+      const data = await response.json();
+
+      if (data.success && Array.isArray(data.products)) {
+        allProducts = data.products;
+        filteredProducts = [...allProducts];
+
+        // Applique le filtre de recherche si présent
+        if (searchQuery && searchQuery.trim() !== "") {
+          // <-- Ajoute ce test
+          filteredProducts = filteredProducts.filter(
+            (product) =>
+              (product.title &&
+                product.title
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase())) ||
+              (product.description &&
+                product.description
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase()))
+          );
+
+          if (filteredProducts.length === 0) {
+            if (container) {
+              container.innerHTML = `
+      <div class="text-center my-5">
+        <h3>Pas de produit trouvé pour : "${searchQuery}"</h3>
+        <p class="mt-3">
+          <a href="./file_produit.html" class="btn btn-primary">
+            Voir tous les produits
+          </a>
+        </p>
+      </div>`;
+            }
+            if (pagination) pagination.style.display = "none";
+            hideLoader();
+            return;
+          } else {
+            currentPage = 1;
+            displayProducts(currentPage, filteredProducts);
+            setupPagination(filteredProducts.length);
+            hideLoader();
+            return;
           }
-          return;
         }
-      } else {
-        // Par défaut, on récupère tous les produits validés
-        const resp = await fetch(
-          `../public/index.php?api=produit&action=getValidProducts`
-        );
-        const data = await resp.json();
-        allProducts = Array.isArray(data.products) ? data.products : [];
 
-        if (categoryId) {
-          // Attendre le select catégorie
-          await waitForElement("#selectCategoryProduit");
-          const selectCategory = document.getElementById(
-            "selectCategoryProduit"
-          );
-          if (selectCategory) selectCategory.value = categoryId;
-
-          filteredProducts = allProducts.filter(
-            (p) => String(p.category) === String(categoryId)
-          );
-        } else if (searchQuery) {
-          filteredProducts = allProducts.filter(
-            (p) =>
-              p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              p.description.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-        } else {
-          filteredProducts = allProducts;
-        }
-      }
-
-      if (container) {
-        if (filteredProducts.length === 0) {
-          container.innerHTML =
-            '<div class="col-12"><p>Aucun produit trouvé</p></div>';
-        } else {
-          setupPagination(filteredProducts.length);
-          displayProducts(1, filteredProducts);
-        }
+        displayProducts(1, filteredProducts);
+        setupPagination(filteredProducts.length);
       }
     } catch (error) {
-      console.error("Erreur chargement produits:", error);
+      console.error("Erreur lors du chargement des produits:", error);
       if (container) {
-        container.innerHTML =
-          '<div class="col-12"><p>Erreur lors du chargement des produits</p></div>';
+        container.innerHTML = `
+        <div class="alert alert-danger text-center">
+          Une erreur est survenue lors du chargement des produits
+        </div>`;
       }
     } finally {
       hideLoader();
@@ -158,30 +162,36 @@ document.addEventListener("DOMContentLoaded", async function () {
           '<option value="">Erreur lors de la récupération des catégories</option>';
     });
 
-  // Recharger produits si changement catégorie dans le select
-  const selectCategoryProduit = document.getElementById(
-    "selectCategoryProduit"
-  );
-  if (selectCategoryProduit) {
-    selectCategoryProduit.addEventListener("change", async function () {
-      const selectedCategory = this.value;
-      currentPage = 1;
+  // Fonction de filtrage - appliquée uniquement au clic du bouton
+  function applyFilters() {
+    let currentFiltered = [...allProducts]; // Partir des produits originaux
 
-      if (selectedCategory) {
-        filteredProducts = allProducts.filter(
-          (p) => String(p.category) === String(selectedCategory)
-        );
-      } else {
-        filteredProducts = allProducts;
-      }
-      if (filteredProducts.length === 0) {
-        if (container)
-          container.innerHTML =
-            '<div class="col-12"><p>Aucun produit trouvé</p></div>';
-      } else {
-        setupPagination(filteredProducts.length);
-        displayProducts(currentPage, filteredProducts);
-      }
+    // Appliquer tous les filtres en une fois
+    currentFiltered = currentFiltered.filter((product) => {
+      const selectedCategory = document.getElementById(
+        "selectCategoryProduit"
+      )?.value;
+      const matchesCategory =
+        !selectedCategory ||
+        String(product.category) === String(selectedCategory);
+
+      return matchesCategory;
+    });
+
+    filteredProducts = currentFiltered; // Mettre à jour les produits filtrés
+    currentPage = 1; // Réinitialiser à la première page
+    displayProducts(1, filteredProducts);
+    setupPagination(filteredProducts.length);
+  }
+
+  // Event listener unique pour le bouton de filtrage
+  const filterButton = document.querySelector(
+    '.btn-outline-primary:not([data-action="reset"])'
+  );
+  if (filterButton) {
+    filterButton.addEventListener("click", function (e) {
+      e.preventDefault();
+      applyFilters();
     });
   }
 
@@ -217,9 +227,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!container) return;
     container.innerHTML = "";
     if (!Array.isArray(products) || products.length === 0) {
-      container.innerHTML =
-        '<div class="col-12"><p>Aucun produit trouvé</p></div>';
-      return;
+      container.innerHTML = `
+      <div class="text-center my-5">
+        <h3>Pas de produit trouvé"</h3>
+        <p class="mt-3">
+          <a href="./file_produit.html" class="btn btn-primary">
+            Voir tous les produits
+          </a>
+        </p>
+      </div>`;
     }
 
     const startIndex = (page - 1) * itemsPerPage;
@@ -302,6 +318,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     container.innerHTML = htmlContent;
 
+    // Ajouter event click pour redirection vers détails produit
+    container.querySelectorAll(".product-card").forEach((card) => {
+      card.addEventListener("click", function (e) {
+        // Ne pas rediriger si on clique sur les boutons like ou panier
+        if (!e.target.closest(".stop-propagation")) {
+          const productId = this.getAttribute("data-id");
+          window.location.href = `detail_produit.html?id=${productId}`;
+        }
+      });
+    });
+
     // Ajouter event clic sur likes
     container.querySelectorAll(".like").forEach((button) => {
       button.addEventListener("click", async function (event) {
@@ -344,26 +371,41 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Ajouter event clic sur panier
     container.querySelectorAll(".panier:not(.disabled)").forEach((button) => {
-      button.addEventListener("click", function (e) {
-        e.stopPropagation();
-        e.preventDefault();
+      button.addEventListener("click", async function (event) {
+        event.stopPropagation();
+        event.preventDefault();
 
-        if (!button.classList.contains("stop-propagation")) {
-          // Juste au cas où
-          return;
-        }
+        const hasSession = await checkSession();
+        if (!hasSession) return;
 
-        const idProduit = button.getAttribute("data-id");
-        let panier = JSON.parse(localStorage.getItem("panier")) || [];
-        let produitExistant = panier.find((p) => p.id === idProduit);
+        const produitId = this.getAttribute("data-id");
 
-        if (produitExistant) {
-          produitExistant.quantite += 1;
-        } else {
-          panier.push({ id: idProduit, quantite: 1 });
-        }
-        localStorage.setItem("panier", JSON.stringify(panier));
-        // Optionnel : afficher une confirmation, un toast, etc.
+        fetch("../public/index.php?api=panier", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "addPanier",
+            id_produit: produitId,
+            quantite: 1,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              if (window.updatePanierContent) {
+                window.updatePanierContent();
+              }
+              if (window.updateCartBadge) {
+                window.updateCartBadge();
+              }
+              const offcanvasRight = new bootstrap.Offcanvas(
+                document.getElementById("offcanvasRight")
+              );
+              offcanvasRight.show();
+            }
+          });
       });
     });
   }
@@ -372,10 +414,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   async function checkSession() {
     try {
       const resp = await fetch(
-        "../public/index.php?api=auth&action=checkSession"
+        "../public/index.php?api=user&action=getSessionId"
       );
       const data = await resp.json();
-      if (!data.loggedIn) {
+      if (!data.success || !data.id) {
         alert("Vous devez être connecté pour aimer un produit.");
         return false;
       }
