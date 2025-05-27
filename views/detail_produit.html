@@ -224,6 +224,61 @@
         width: 100%;
         margin-top: 1rem;
       }
+@media screen and (max-width: 768px) {
+  /* Empile les éléments verticalement */
+  .card {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+  /* Conteneur de l'image produit passe à 100% */
+  .product-image-container,
+  .product-description-container {
+    width: 100% !important;
+    height: auto !important;
+    padding: 1rem 0.5rem;
+  }
+
+  /* Carousel prend toute la largeur */
+  #productCarousel {
+    max-width: 100% !important;
+  }
+
+  /* Masquer les miniatures pour gagner de la place */
+  .thumbnail-container {
+    display: none !important;
+  }
+
+  /* Description avec moins de marge/padding */
+  .product-description-content {
+    padding-right: 0;
+    padding-left: 0;
+    margin-top: 0.5rem;
+  }
+
+  /* Ajustement de la card droite (quantité / bouton achat) */
+  .col-md-3 {
+    width: 100% !important;
+    max-width: 100%;
+  }
+
+  /* Ajustement du padding pour mobile */
+  .card-body {
+    padding: 1rem;
+  }
+
+  /* Centrer les boutons */
+  #ajoutePanier,
+  #acheterMaintenant {
+    width: 100%;
+  }
+
+  /* Réduction des tailles de texte si nécessaire */
+  h3.card-title,
+  h5.card-text {
+    font-size: 1.1rem;
+  }
+}
+
     </style>
   </head>
   <body>
@@ -252,7 +307,7 @@
       <div class="row d-flex align-items-stretch mb-3">
         <!-- Card 1: Image, Description, Prix (75% de la largeur) -->
         <div class="col-12 col-md-9 mb-4 d-flex">
-          <div class="card mb-4 w-100 d-flex flex-row" style="height: 76vh">
+          <div class="card mb-4 w-100 d-flex" style="height: 76vh; flex-direction: row;">
             <!-- Image section (66%) -->
             <div class="product-image-container">
               <div id="productCarousel" class="carousel slide">
