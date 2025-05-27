@@ -179,7 +179,7 @@ class SearchManager {
   async loadProducts() {
     try {
       const response = await fetch(
-        "../public/index.php?api=produit&action=getAllProduits"
+        "../public/index.php?api=produit&action=getValidProducts"
       );
       const data = await response.json();
 

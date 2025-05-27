@@ -177,6 +177,19 @@ function setupPanierEventListeners() {
               cardPanier.innerHTML =
                 '<p class="text-center text-muted">Votre panier est vide</p>';
               document.getElementById("totalPanier").textContent = "0.00 €";
+            } else {
+              // Mettre à jour le total du panier après suppression
+              fetch("../public/index.php?api=panier")
+                .then((response) => response.json())
+                .then((cartData) => {
+                  if (cartData.success && Array.isArray(cartData.panier)) {
+                    const newTotal = cartData.panier.reduce((sum, product) => {
+                      return sum + product.price * product.quantite_panier;
+                    }, 0);
+                    document.getElementById("totalPanier").textContent =
+                      newTotal.toFixed(2) + " €";
+                  }
+                });
             }
 
             updateCartBadge();
