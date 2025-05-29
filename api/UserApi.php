@@ -28,6 +28,8 @@ class ApiUser
                 $this->getUserById($_GET['id']);
             } else if ($action === 'getSessionId') {
                 $this->handlegetSessionId();
+            } else if ($action === 'getSession') {
+                $this->handlegetSession();
             } else if ($action === 'getAllUsers') {
                 $this->getAllUsers();
             } else if ($action === 'getVentesUser') {
@@ -235,6 +237,20 @@ class ApiUser
         } else {
             $this->sendResponse(['success' => false, 'message' => 'Échec de la modification du mail'], 500);
         }
+    }
+    public function handlegetSession()
+    {
+        if (isset($_SESSION['user_id'])) {
+            $response = [
+                'success' => true,
+            ];
+        } else {
+            $response = [
+                'success' => false,
+                'message' => 'Utilisateur non connecté'
+            ];
+        }
+        $this->sendResponse($response);
     }
     public function handlegetSessionId()
     {

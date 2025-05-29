@@ -434,9 +434,29 @@ document.addEventListener("DOMContentLoaded", async function () {
     pagination.innerHTML = "";
 
     const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if (totalPages <= 1) return;
 
-    if (totalPages <= 1) return; // pas de pagination si 1 ou 0 page
+    // Ajouter le bouton Previous
+    const prevLi = document.createElement("li");
+    prevLi.classList.add("page-item");
+    if (currentPage === 1) prevLi.classList.add("disabled");
+    const prevLink = document.createElement("a");
+    prevLink.classList.add("page-link");
+    prevLink.href = "#";
+    prevLink.textContent = "Previous";
+    prevLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (currentPage > 1) {
+        currentPage--;
+        displayProducts(currentPage, filteredProducts);
+        setupPagination(totalItems);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+    prevLi.appendChild(prevLink);
+    pagination.appendChild(prevLi);
 
+    // Pages numériques
     for (let i = 1; i <= totalPages; i++) {
       const li = document.createElement("li");
       li.classList.add("page-item");
@@ -451,6 +471,26 @@ document.addEventListener("DOMContentLoaded", async function () {
       li.appendChild(a);
       pagination.appendChild(li);
     }
+
+    // Ajouter le bouton Next
+    const nextLi = document.createElement("li");
+    nextLi.classList.add("page-item");
+    if (currentPage === totalPages) nextLi.classList.add("disabled");
+    const nextLink = document.createElement("a");
+    nextLink.classList.add("page-link");
+    nextLink.href = "#";
+    nextLink.textContent = "Next";
+    nextLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (currentPage < totalPages) {
+        currentPage++;
+        displayProducts(currentPage, filteredProducts);
+        setupPagination(totalItems);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+    nextLi.appendChild(nextLink);
+    pagination.appendChild(nextLi);
   }
 
   // Event delegation pagination (à mettre une seule fois)
