@@ -5,10 +5,10 @@
   let filteredProductsList = [];
   let searchResults = []; // Nouvelle variable pour stocker les résultats de recherche
   let allProducts = [];
-  console.log('Module filtres initialisé');
+  console.log("Module filtres initialisé");
 
   function isInStock(produit) {
-    return produit.stock > 0;
+    return produit.quantite > 0;
   }
 
   function byMostSellItem() {
@@ -219,12 +219,14 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    console.log('DOM chargé, initialisation des filtres');
-    
+    console.log("DOM chargé, initialisation des filtres");
+
     // Charger les produits immédiatement
     loadInitialProducts();
 
-    const filterButton = document.querySelector('.btn-outline-primary:not([data-action="reset"])');
+    const filterButton = document.querySelector(
+      '.btn-outline-primary:not([data-action="reset"])'
+    );
     const resetButton = document.querySelector('[data-action="reset"]');
 
     const selectCategory = document.getElementById("selectCategoryProduit");
@@ -233,11 +235,11 @@
     const sortSelect = document.querySelector('select[name="like"]');
     const stockCheckbox = document.getElementById("flexCheckDefault");
     const ratingSelect = document.querySelector('select[name="rating"]');
-
+    const byMostSellCheckbox = document.getElementById("flexCheckChecked");
     // Garder uniquement les listeners pour les boutons de filtre
     if (filterButton) {
       filterButton.addEventListener("click", function (e) {
-        console.log('Clic sur le bouton filtrer');
+        console.log("Clic sur le bouton filtrer");
         e.preventDefault();
         applyFilters();
       });
@@ -403,19 +405,19 @@
           }
           allProducts = data.products;
           filteredProductsList = [...allProducts];
-          
+
           // Mettre à jour les filtres avec tous les produits
           updateFiltersFromResults(allProducts);
-          
+
           // Afficher tous les produits
           currentPage = 1;
           displayProducts(1, filteredProductsList);
           setupPagination(filteredProductsList.length);
-          
+
           // Rafraîchir l'URL sans paramètres de recherche
           const newUrl = window.location.pathname;
-          window.history.pushState({}, '', newUrl);
-          
+          window.history.pushState({}, "", newUrl);
+
           showConfirmationAlert("Filtres réinitialisés");
         })
         .catch((error) => {
@@ -439,40 +441,46 @@
       // Partir des produits de recherche ou de tous les produits
       let currentFiltered = [...allProducts];
 
-      const selectedCategory = document.getElementById("selectCategoryProduit")?.value;
+      const selectedCategory = document.getElementById(
+        "selectCategoryProduit"
+      )?.value;
       const priceValue = document.getElementById("priceRange")?.value;
       const stockChecked = document.getElementById("flexCheckDefault")?.checked;
-      const ratingValue = document.querySelector('select[name="rating"]')?.value;
+      const ratingValue = document.querySelector(
+        'select[name="rating"]'
+      )?.value;
       const sortValue = document.querySelector('select[name="like"]')?.value;
 
       // Appliquer les filtres
       if (selectedCategory) {
-        currentFiltered = currentFiltered.filter(product => 
-          String(product.category) === String(selectedCategory)
+        currentFiltered = currentFiltered.filter(
+          (product) => String(product.category) === String(selectedCategory)
         );
       }
 
       if (priceValue) {
-        currentFiltered = currentFiltered.filter(product => 
-          Number(product.price) <= Number(priceValue)
+        currentFiltered = currentFiltered.filter(
+          (product) => Number(product.price) <= Number(priceValue)
         );
       }
 
       if (stockChecked) {
-        currentFiltered = currentFiltered.filter(product => 
-          Number(product.quantite) > 0
+        currentFiltered = currentFiltered.filter(
+          (product) => Number(product.quantite) > 0
         );
       }
 
       if (ratingValue && ratingValue !== "0") {
-        currentFiltered = currentFiltered.filter(product => 
-          Math.round(Number(product.average_rating) || 0) >= Number(ratingValue)
+        currentFiltered = currentFiltered.filter(
+          (product) =>
+            Math.round(Number(product.average_rating) || 0) >=
+            Number(ratingValue)
         );
       }
 
       // Appliquer le tri
       if (sortValue) {
-        switch(sortValue) {
+        switch (sortValue) {
           case "1": // Prix décroissant
             currentFiltered.sort((a, b) => Number(b.price) - Number(a.price));
             break;
@@ -480,8 +488,10 @@
             currentFiltered.sort((a, b) => Number(a.price) - Number(b.price));
             break;
           case "3": // Meilleures notes
-            currentFiltered.sort((a, b) => 
-              (Number(b.average_rating) || 0) - (Number(a.average_rating) || 0)
+            currentFiltered.sort(
+              (a, b) =>
+                (Number(b.average_rating) || 0) -
+                (Number(a.average_rating) || 0)
             );
             break;
         }
@@ -541,26 +551,26 @@
 
   // Ajouter cette fonction de chargement initial
   function loadInitialProducts() {
-    console.log('Chargement initial des produits...');
+    console.log("Chargement initial des produits...");
     // Vérifier d'abord s'il y a des résultats de recherche stockés
     const storedResults = localStorage.getItem("searchResults");
     if (storedResults) {
       const searchResults = JSON.parse(storedResults);
       allProducts = searchResults;
       filteredProducts = [...searchResults];
-      
+
       // Mettre à jour les filtres basés sur les résultats de recherche
       updateFiltersFromResults(searchResults);
-      
+
       displayProducts(1, filteredProducts);
       setupPagination(filteredProducts.length);
       return;
     }
 
     // Si pas de résultats de recherche, charger tous les produits
-    return fetch('../public/index.php?api=produit&action=getValidProducts')
-      .then(response => response.json())
-      .then(data => {
+    return fetch("../public/index.php?api=produit&action=getValidProducts")
+      .then((response) => response.json())
+      .then((data) => {
         if (data.success && Array.isArray(data.products)) {
           allProducts = data.products;
           filteredProducts = [...allProducts];
@@ -569,12 +579,12 @@
           setupPagination(filteredProducts.length);
         }
       })
-      .catch(error => console.error('Erreur chargement:', error));
+      .catch((error) => console.error("Erreur chargement:", error));
   }
 
   function updateFiltersFromResults(products) {
     // Mise à jour du filtre de prix
-    const maxPrice = Math.max(...products.map(p => parseFloat(p.price)));
+    const maxPrice = Math.max(...products.map((p) => parseFloat(p.price)));
     const priceRange = document.getElementById("priceRange");
     const priceValueText = document.getElementById("priceValue");
     if (priceRange && priceValueText) {
@@ -584,17 +594,18 @@
     }
 
     // Mise à jour des catégories disponibles
-    const availableCategories = [...new Set(products.map(p => p.category))];
+    const availableCategories = [...new Set(products.map((p) => p.category))];
     const selectCategory = document.getElementById("selectCategoryProduit");
     if (selectCategory) {
       fetch("../public/index.php?api=category&action=getAllCategories")
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => response.json())
+        .then((data) => {
           if (data.success && Array.isArray(data.categories)) {
-            selectCategory.innerHTML = '<option value="">-- Choisir une catégorie --</option>';
+            selectCategory.innerHTML =
+              '<option value="">-- Choisir une catégorie --</option>';
             data.categories
-              .filter(cat => availableCategories.includes(String(cat.id)))
-              .forEach(cat => {
+              .filter((cat) => availableCategories.includes(String(cat.id)))
+              .forEach((cat) => {
                 const option = document.createElement("option");
                 option.value = cat.id;
                 option.textContent = cat.category_name;

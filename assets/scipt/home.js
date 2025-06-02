@@ -48,12 +48,16 @@ function loadCategories() {
           "#categoriesContainer"
         );
         let html = "";
-
-        data.categories.slice(0, 3).forEach((category) => {
+        const categoriesImg = [
+          "../img/categorieImg/CategorieEnfant.jpg",
+          "../img/categorieImg/CategorieGaming.jpg",
+          "../img/categorieImg/CategorieSport.jpg",
+        ];
+        data.categories.slice(0, 3).forEach((category, index) => {
           html += `
             <div class="col-md-4">
                 <div class="category-card" onclick="redirectToProducts(${category.id}, '${category.category_name}')" style="cursor: pointer;">
-                    <img src="../img/categories/${category.id}.jpg" 
+                    <img src="${categoriesImg[index]}" 
                          alt="${category.category_name}"
                          onerror="this.src='../img/imgProduct/default.jpg'">
                     <div class="category-overlay">
