@@ -14,12 +14,15 @@
     />
     <style>
       .hero-section {
-        background: linear-gradient(135deg, #09234a, #36afeb);
+        background: repeating-conic-gradient(from 223deg, #1d1d1e, #265369 23.53%, #2d7fa8 39.92%, #36afeb 73.95%);
         color: white;
         padding: 100px 0;
         margin-bottom: 50px;
+        height: 100vh;
       }
-
+      .title_home{
+        font-size: 70px !important;
+      }
       .feature-card {
         border: none;
         border-radius: 15px;
@@ -38,7 +41,13 @@
         padding: 50px 0;
         margin: 50px 0;
       }
-
+      .blur_style{
+        backdrop-filter: blur(20px) !important;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 30px;
+        border-radius: 10px;
+        color: white;
+      }
       .stats-card {
         text-align: center;
         padding: 30px;
@@ -74,6 +83,14 @@
         padding: 20px;
         color: white;
       }
+      @media (max-width:768px){
+        .title_home{
+          font-size: 40px !important;
+        }
+        .hero-section{
+          height: auto;
+        }
+      }
     </style>
   </head>
   <body>
@@ -81,23 +98,24 @@
 
     <!-- Hero Section -->
     <section class="hero-section">
-      <div class="container text-center">
-        <h1 class="display-4 mb-4">Bienvenue sur AMAZOUZ</h1>
+      <div class="container text-center mb-3">
+        <h1 class="display-4 mb-4 title_home">Bienvenue sur AMAZOUZ</h1>
         <p class="lead mb-4">
           La marketplace qui connecte acheteurs et vendeurs passionnés
         </p>
-        <a href="./file_produit.html" class="btn btn-light btn-lg"
+        <a href="./file_produit.html" class="btn btn-light btn-sm m-2"
           >Découvrir nos produits</a
         >
+        <a href="./login.html" class="btn btn-light btn-sm m-2"
+        >Créer un compte</a>
       </div>
-    </section>
-
-    <!-- Features Section -->
+      <div class="mt-5">
+            <!-- Features Section -->
     <section class="m-4">
       <div class="row g-4">
         <div class="col-md-4">
-          <div class="feature-card card h-100">
-            <div class="card-body text-center">
+          <div class="h-100 blur_style">
+            <div class="text-center">
               <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
               <h3>Achats Sécurisés</h3>
               <p>Paiements sécurisés et protection des données garantie</p>
@@ -105,8 +123,8 @@
           </div>
         </div>
         <div class="col-md-4">
-          <div class="feature-card card h-100">
-            <div class="card-body text-center">
+          <div class="h-100 blur_style">
+            <div class="text-center">
               <i class="fas fa-truck fa-3x text-primary mb-3"></i>
               <h3>Livraison Rapide</h3>
               <p>Livraison gratuite dès 80€ d'achats</p>
@@ -114,8 +132,8 @@
           </div>
         </div>
         <div class="col-md-4">
-          <div class="feature-card card h-100">
-            <div class="card-body text-center">
+          <div class="h-100 blur_style">
+            <div class="text-center">
               <i class="fas fa-undo fa-3x text-primary mb-3"></i>
               <h3>Retours Faciles</h3>
               <p>30 jours pour changer d'avis</p>
@@ -123,6 +141,8 @@
           </div>
         </div>
       </div>
+    </section>
+    </div>
     </section>
 
     <!-- Categories Section -->
