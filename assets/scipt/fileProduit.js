@@ -39,52 +39,48 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // Chargement initial des produits
   async function loadProducts() {
-    // Vérifier si des résultats sont stockés
+    // Vérifier si des résultats sont stockés ET si on a une recherche
     const storedResults = localStorage.getItem("searchResults");
-    if (searchQuery && storedResults) {
+    const storedQuery = localStorage.getItem("searchQuery");
+    
+    if (searchQuery && storedResults && storedQuery === searchQuery) {
       filteredProducts = JSON.parse(storedResults);
       displayProducts(1, filteredProducts);
       setupPagination(filteredProducts.length);
-      localStorage.removeItem("searchResults"); // Nettoyer après usage
+      
+      // Clean up storage after use
+      localStorage.removeItem("searchResults");
+      localStorage.removeItem("searchQuery");
       hideLoader();
       return;
     }
 
     try {
-      const response = await fetch(
-        `../public/index.php?api=produit&action=getValidProducts`
-      );
+      const response = await fetch(`../public/index.php?api=produit&action=getValidProducts`);
       const data = await response.json();
 
       if (data.success && Array.isArray(data.products)) {
         allProducts = data.products;
         filteredProducts = [...allProducts];
 
-        // Applique le filtre de recherche si présent
+        // Apply search filter if present
         if (searchQuery && searchQuery.trim() !== "") {
-          filteredProducts = filteredProducts.filter(
-            (product) =>
-              (product.title &&
-                product.title
-                  .toLowerCase()
-                  .includes(searchQuery.toLowerCase())) ||
-              (product.description &&
-                product.description
-                  .toLowerCase()
-                  .includes(searchQuery.toLowerCase()))
+          filteredProducts = filteredProducts.filter(product =>
+            product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.description?.toLowerCase().includes(searchQuery.toLowerCase())
           );
 
           if (filteredProducts.length === 0) {
             if (container) {
               container.innerHTML = `
-            <div class="text-center my-5">
-              <h3>Pas de produit trouvé pour : "${searchQuery}"</h3>
-              <p class="mt-3">
-                <a href="./file_produit.html" class="btn btn-primary">
-                  Voir tous les produits
-                </a>
-              </p>
-            </div>`;
+                <div class="text-center my-5">
+                  <h3>Pas de produit trouvé pour : "${searchQuery}"</h3>
+                  <p class="mt-3">
+                    <a href="./file_produit.html" class="btn btn-primary">
+                      Voir tous les produits
+                    </a>
+                  </p>
+                </div>`;
             }
             if (pagination) pagination.style.display = "none";
             hideLoader();

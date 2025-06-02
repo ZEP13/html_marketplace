@@ -256,17 +256,17 @@ class SearchManager {
       return;
     }
 
-    // Stocker les résultats filtrés dans le localStorage
+    // Store both the search query and results
     const results = this.products.filter(
       (product) =>
         product.title?.toLowerCase().includes(query.toLowerCase()) ||
         product.description?.toLowerCase().includes(query.toLowerCase())
     );
+    
+    localStorage.setItem("searchQuery", query);
     localStorage.setItem("searchResults", JSON.stringify(results));
 
-    window.location.href = `./file_produit.html?search=${encodeURIComponent(
-      query
-    )}`;
+    window.location.href = `./file_produit.html?search=${encodeURIComponent(query)}`;
   }
 
   // Simplification de checkUrlParams pour ne gérer que la marque
