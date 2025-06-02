@@ -4,6 +4,8 @@
   let currentPage = 1;
   let filteredProductsList = [];
   let searchResults = []; // Nouvelle variable pour stocker les résultats de recherche
+  let allProducts = [];
+  console.log('Module filtres initialisé');
 
   function isInStock(produit) {
     return produit.stock > 0;
@@ -217,10 +219,12 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    // Récupérer uniquement les éléments nécessaires
-    const filterButton = document.querySelector(
-      '.btn-outline-primary:not([data-action="reset"])'
-    );
+    console.log('DOM chargé, initialisation des filtres');
+    
+    // Charger les produits immédiatement
+    loadInitialProducts();
+
+    const filterButton = document.querySelector('.btn-outline-primary:not([data-action="reset"])');
     const resetButton = document.querySelector('[data-action="reset"]');
 
     const selectCategory = document.getElementById("selectCategoryProduit");
@@ -233,6 +237,7 @@
     // Garder uniquement les listeners pour les boutons de filtre
     if (filterButton) {
       filterButton.addEventListener("click", function (e) {
+        console.log('Clic sur le bouton filtrer');
         e.preventDefault();
         applyFilters();
       });
@@ -425,64 +430,67 @@
     window.applyFilters = applyFilters;
 
     function applyFilters() {
-      // Determine the base product list to filter from
-      const productsToFilter =
-        searchResults.length > 0
-          ? searchResults
-          : JSON.parse(localStorage.getItem("searchResults")) ||
-            filteredProductsList;
+      // Partir de tous les produits disponibles
+      let filtered = [...allProducts];
 
-      let filtered = [...productsToFilter];
+      // Récupérer toutes les valeurs des filtres
+      const categoryValue = document.getElementById("selectCategoryProduit")?.value;
+      const priceValue = document.getElementById("priceRange")?.value;
+      const stockChecked = document.getElementById("flexCheckDefault")?.checked;
+      const ratingValue = document.querySelector('select[name="rating"]')?.value;
+      const sortValue = document.querySelector('select[name="like"]')?.value;
 
-      // Apply filters
-      if (selectCategory.value) {
-        filtered = filtered.filter(
-          (p) => String(p.category) === String(selectCategory.value)
+      // Appliquer les filtres
+      if (categoryValue) {
+        filtered = filtered.filter(product => 
+          String(product.category) === String(categoryValue)
         );
       }
 
-      if (priceRange.value) {
-        filtered = filtered.filter(
-          (p) => parseFloat(p.price) <= parseFloat(priceRange.value)
+      if (priceValue) {
+        filtered = filtered.filter(product => 
+          Number(product.price) <= Number(priceValue)
         );
       }
 
-      if (stockCheckbox?.checked) {
-        filtered = filtered.filter((p) => parseInt(p.quantite) > 0);
-      }
-
-      if (ratingSelect?.value !== "0") {
-        filtered = filtered.filter(
-          (p) =>
-            Math.round(parseFloat(p.average_rating) || 0) >=
-            parseInt(ratingSelect.value)
+      if (stockChecked) {
+        filtered = filtered.filter(product => 
+          Number(product.quantite) > 0
         );
       }
 
-      // Apply sorting
-      if (sortSelect?.value) {
-        switch (sortSelect.value) {
-          case "1":
-            filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+      if (ratingValue && ratingValue !== "0") {
+        filtered = filtered.filter(product => 
+          Math.round(Number(product.average_rating) || 0) >= Number(ratingValue)
+        );
+      }
+
+      // Appliquer le tri
+      if (sortValue) {
+        switch(sortValue) {
+          case "1": // Prix décroissant
+            filtered.sort((a, b) => Number(b.price) - Number(a.price));
             break;
-          case "2":
-            filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+          case "2": // Prix croissant
+            filtered.sort((a, b) => Number(a.price) - Number(b.price));
             break;
-          case "3":
-            filtered.sort(
-              (a, b) =>
-                (parseFloat(b.average_rating) || 0) -
-                (parseFloat(a.average_rating) || 0)
+          case "3": // Meilleures notes
+            filtered.sort((a, b) => 
+              (Number(b.average_rating) || 0) - (Number(a.average_rating) || 0)
             );
             break;
         }
       }
 
+      // Mettre à jour l'affichage
       filteredProductsList = filtered;
       currentPage = 1;
-      displayProducts(1, filteredProductsList);
-      setupPagination(filteredProductsList.length);
+      displayProducts(1, filtered);
+      setupPagination(filtered.length);
     }
+
+    // Charger les produits au démarrage
+    loadInitialProducts();
 
     // Load search results on initial load if they exist
     const storedResults = localStorage.getItem("searchResults");
@@ -526,4 +534,23 @@
   window.byMostRatedItem = byMostRatedItem;
   window.isInStock = isInStock;
   window.setupPagination = setupPagination;
+
+  // Ajouter cette fonction de chargement initial
+  function loadInitialProducts() {
+    console.log('Chargement initial des produits...');
+    return fetch('../public/index.php?api=produit&action=getValidProducts')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Réponse API:', data);
+        if (data.success && Array.isArray(data.products)) {
+          allProducts = data.products;
+          filteredProductsList = [...allProducts];
+          console.log('Nombre de produits chargés:', allProducts.length);
+          console.log('Premier produit:', allProducts[0]);
+          displayProducts(1, filteredProductsList);
+          setupPagination(filteredProductsList.length);
+        }
+      })
+      .catch(error => console.error('Erreur chargement:', error));
+  }
 })();
