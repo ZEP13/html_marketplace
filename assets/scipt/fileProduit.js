@@ -62,6 +62,56 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         // Applique le filtre de recherche si présent
         if (searchQuery && searchQuery.trim() !== "") {
+          filteredProducts = filteredProducts.filter(
+            (product) =>
+              (product.title &&
+                product.title
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase())) ||
+              (product.description &&
+                product.description
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase()))
+          );
+
+          if (filteredProducts.length === 0) {
+            if (container) {
+              container.innerHTML = `
+            <div class="text-center my-5">
+              <h3>Pas de produit trouvé pour : "${searchQuery}"</h3>
+              <p class="mt-3">
+                <a href="./file_produit.html" class="btn btn-primary">
+                  Voir tous les produits
+                </a>
+              </p>
+            </div>`;
+            }
+            if (pagination) pagination.style.display = "none";
+            hideLoader();
+            return;
+          }
+        }
+
+        // Applique le filtre de catégorie si présent dans l'URL
+        if (categoryId) {
+          filteredProducts = filteredProducts.filter(
+            (product) => String(product.category) === String(categoryId)
+          );
+
+          // Pré-sélectionner la catégorie dans le select une fois chargé
+          waitForElement("#selectCategoryProduit").then(() => {
+            const selectCategory = document.getElementById(
+              "selectCategoryProduit"
+            );
+            if (selectCategory) selectCategory.value = categoryId;
+          });
+        }
+
+        displayProducts(1, filteredProducts);
+        setupPagination(filteredProducts.length);
+      } else {
+        // Applique le filtre de recherche si présent
+        if (searchQuery && searchQuery.trim() !== "") {
           // <-- Ajoute ce test
           filteredProducts = filteredProducts.filter(
             (product) =>

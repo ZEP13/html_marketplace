@@ -99,7 +99,8 @@ class ApiUser
                 'role' => $user->role, // S'assurer que le rôle est envoyé
                 'nom' => $user->nom,
                 'prenom' => $user->prenom,
-                'mail' => $user->mail
+                'mail' => $user->mail,
+                'imgProfil' => $user->img,
             ]);
         } else {
             $this->sendResponse(['error' => 'Utilisateur non trouvé'], 404);
@@ -270,7 +271,7 @@ class ApiUser
     private function handleAddImgProfilRequest($data)
     {
         // Chemin du dossier où les images sont stockées
-        $uploadDir = '../img/imgUserProfil/defaultPP.png';
+        $uploadDir = '../img/imgUserProfil/';
 
         // Vérifier si le dossier existe et le créer si nécessaire
         if (!file_exists($uploadDir)) {

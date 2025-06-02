@@ -26,7 +26,9 @@ function loadAllCommandes() {
 
 function updateStats(commandes) {
   const enCours = commandes.filter((c) => c.statut === "En attente").length;
+  const commandeValide = commandes.filter((c) => c.statut === "Envoye").length;
   document.querySelector(".stat-card:nth-child(1) h2").textContent = enCours;
+  document.querySelector(".cardvalide").textContent = commandeValide;
 }
 
 function displayCommandes(commandes) {
