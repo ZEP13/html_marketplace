@@ -378,6 +378,10 @@
     initializePriceRange();
 
     function resetFilters() {
+      // Vider le localStorage des résultats de recherche
+      localStorage.removeItem("searchResults");
+      localStorage.removeItem("searchQuery");
+
       // Reset UI elements
       if (selectCategory) selectCategory.value = "";
       if (sortSelect) sortSelect.value = "";
@@ -390,32 +394,34 @@
         priceValueText.textContent = maxPrice + "€";
       }
 
-      // Restore search results if they exist
-      const storedResults = localStorage.getItem("searchResults");
-      if (storedResults) {
-        searchResults = JSON.parse(storedResults);
-        filteredProductsList = searchResults;
-        displayProducts(1, filteredProductsList);
-      } else {
-        // If no search results, load all valid products
-        fetch(`../public/index.php?api=produit&action=getValidProducts`)
-          .then((response) => response.json())
-          .then((data) => {
-            if (!data.success || !Array.isArray(data.products)) {
-              throw new Error("Invalid data format");
-            }
-            filteredProductsList = data.products;
-            displayProducts(1, filteredProductsList);
-          })
-          .catch((error) => {
-            console.error("Reset error:", error);
-            showErrorAlert(
-              "Une erreur est survenue lors de la réinitialisation"
-            );
-          });
-      }
-      setupPagination(filteredProductsList.length);
-      showConfirmationAlert("Filtres réinitialisés");
+      // Recharger tous les produits
+      fetch(`../public/index.php?api=produit&action=getValidProducts`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (!data.success || !Array.isArray(data.products)) {
+            throw new Error("Invalid data format");
+          }
+          allProducts = data.products;
+          filteredProductsList = [...allProducts];
+          
+          // Mettre à jour les filtres avec tous les produits
+          updateFiltersFromResults(allProducts);
+          
+          // Afficher tous les produits
+          currentPage = 1;
+          displayProducts(1, filteredProductsList);
+          setupPagination(filteredProductsList.length);
+          
+          // Rafraîchir l'URL sans paramètres de recherche
+          const newUrl = window.location.pathname;
+          window.history.pushState({}, '', newUrl);
+          
+          showConfirmationAlert("Filtres réinitialisés");
+        })
+        .catch((error) => {
+          console.error("Reset error:", error);
+          showErrorAlert("Une erreur est survenue lors de la réinitialisation");
+        });
     }
 
     priceRange.addEventListener("input", function () {
@@ -430,37 +436,36 @@
     window.applyFilters = applyFilters;
 
     function applyFilters() {
-      // Partir de tous les produits disponibles
-      let filtered = [...allProducts];
+      // Partir des produits de recherche ou de tous les produits
+      let currentFiltered = [...allProducts];
 
-      // Récupérer toutes les valeurs des filtres
-      const categoryValue = document.getElementById("selectCategoryProduit")?.value;
+      const selectedCategory = document.getElementById("selectCategoryProduit")?.value;
       const priceValue = document.getElementById("priceRange")?.value;
       const stockChecked = document.getElementById("flexCheckDefault")?.checked;
       const ratingValue = document.querySelector('select[name="rating"]')?.value;
       const sortValue = document.querySelector('select[name="like"]')?.value;
 
       // Appliquer les filtres
-      if (categoryValue) {
-        filtered = filtered.filter(product => 
-          String(product.category) === String(categoryValue)
+      if (selectedCategory) {
+        currentFiltered = currentFiltered.filter(product => 
+          String(product.category) === String(selectedCategory)
         );
       }
 
       if (priceValue) {
-        filtered = filtered.filter(product => 
+        currentFiltered = currentFiltered.filter(product => 
           Number(product.price) <= Number(priceValue)
         );
       }
 
       if (stockChecked) {
-        filtered = filtered.filter(product => 
+        currentFiltered = currentFiltered.filter(product => 
           Number(product.quantite) > 0
         );
       }
 
       if (ratingValue && ratingValue !== "0") {
-        filtered = filtered.filter(product => 
+        currentFiltered = currentFiltered.filter(product => 
           Math.round(Number(product.average_rating) || 0) >= Number(ratingValue)
         );
       }
@@ -469,24 +474,23 @@
       if (sortValue) {
         switch(sortValue) {
           case "1": // Prix décroissant
-            filtered.sort((a, b) => Number(b.price) - Number(a.price));
+            currentFiltered.sort((a, b) => Number(b.price) - Number(a.price));
             break;
           case "2": // Prix croissant
-            filtered.sort((a, b) => Number(a.price) - Number(b.price));
+            currentFiltered.sort((a, b) => Number(a.price) - Number(b.price));
             break;
           case "3": // Meilleures notes
-            filtered.sort((a, b) => 
+            currentFiltered.sort((a, b) => 
               (Number(b.average_rating) || 0) - (Number(a.average_rating) || 0)
             );
             break;
         }
       }
 
-      // Mettre à jour l'affichage
-      filteredProductsList = filtered;
+      filteredProductsList = currentFiltered;
       currentPage = 1;
-      displayProducts(1, filtered);
-      setupPagination(filtered.length);
+      displayProducts(1, filteredProductsList);
+      setupPagination(filteredProductsList.length);
     }
 
     // Charger les produits au démarrage
@@ -538,19 +542,66 @@
   // Ajouter cette fonction de chargement initial
   function loadInitialProducts() {
     console.log('Chargement initial des produits...');
+    // Vérifier d'abord s'il y a des résultats de recherche stockés
+    const storedResults = localStorage.getItem("searchResults");
+    if (storedResults) {
+      const searchResults = JSON.parse(storedResults);
+      allProducts = searchResults;
+      filteredProducts = [...searchResults];
+      
+      // Mettre à jour les filtres basés sur les résultats de recherche
+      updateFiltersFromResults(searchResults);
+      
+      displayProducts(1, filteredProducts);
+      setupPagination(filteredProducts.length);
+      return;
+    }
+
+    // Si pas de résultats de recherche, charger tous les produits
     return fetch('../public/index.php?api=produit&action=getValidProducts')
       .then(response => response.json())
       .then(data => {
-        console.log('Réponse API:', data);
         if (data.success && Array.isArray(data.products)) {
           allProducts = data.products;
-          filteredProductsList = [...allProducts];
-          console.log('Nombre de produits chargés:', allProducts.length);
-          console.log('Premier produit:', allProducts[0]);
-          displayProducts(1, filteredProductsList);
-          setupPagination(filteredProductsList.length);
+          filteredProducts = [...allProducts];
+          updateFiltersFromResults(allProducts);
+          displayProducts(1, filteredProducts);
+          setupPagination(filteredProducts.length);
         }
       })
       .catch(error => console.error('Erreur chargement:', error));
+  }
+
+  function updateFiltersFromResults(products) {
+    // Mise à jour du filtre de prix
+    const maxPrice = Math.max(...products.map(p => parseFloat(p.price)));
+    const priceRange = document.getElementById("priceRange");
+    const priceValueText = document.getElementById("priceValue");
+    if (priceRange && priceValueText) {
+      priceRange.max = maxPrice;
+      priceRange.value = maxPrice;
+      priceValueText.textContent = maxPrice + "€";
+    }
+
+    // Mise à jour des catégories disponibles
+    const availableCategories = [...new Set(products.map(p => p.category))];
+    const selectCategory = document.getElementById("selectCategoryProduit");
+    if (selectCategory) {
+      fetch("../public/index.php?api=category&action=getAllCategories")
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && Array.isArray(data.categories)) {
+            selectCategory.innerHTML = '<option value="">-- Choisir une catégorie --</option>';
+            data.categories
+              .filter(cat => availableCategories.includes(String(cat.id)))
+              .forEach(cat => {
+                const option = document.createElement("option");
+                option.value = cat.id;
+                option.textContent = cat.category_name;
+                selectCategory.appendChild(option);
+              });
+          }
+        });
+    }
   }
 })();
